@@ -14,7 +14,7 @@ const dbConnection = require('./config/db');
 //Routes
 const userRoute = require('./routes/userRoute');
 const authRoute = require('./routes/authRoute');
-const categoryRoute = require('./routes/categoryRoutes');
+//const categoryRoute = require('./routes/categoryRoutes');
 
 // connect db
 dbConnection();
