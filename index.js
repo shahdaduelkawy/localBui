@@ -13,7 +13,6 @@ const dbConnection = require('./config/db');
 
 //Routes
 const authRoute = require('./routes/authRoute');
-//const categoryRoute = require('./routes/categoryRoutes');
 
 // connect db
 dbConnection();
