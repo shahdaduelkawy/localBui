@@ -12,9 +12,7 @@ const globalError = require('./middleware/errorMiddleware');
 const dbConnection = require('./config/db');
 
 //Routes
-const userRoute = require('./routes/userRoute');
 const authRoute = require('./routes/authRoute');
-//const categoryRoute = require('./routes/categoryRoutes');
 
 // connect db
 dbConnection();
@@ -32,8 +30,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Mount Routes
-app.use('/api/v1/categories', categoryRoute);
-app.use('/users', userRoute);
+
 app.use('/auth', authRoute);
 
 app.all('*', (req, res, next) => {

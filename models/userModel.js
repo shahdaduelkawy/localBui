@@ -32,13 +32,17 @@ const userSchema = new mongoose.Schema(
     passwordResetVerified: Boolean,
     role: {
       type: String,
-      enum: ['user', 'manager', 'admin'],
-      default: 'user',
+      enum: ['customer', 'businessOwner', 'admin'],
+      required: [true, 'role required'],
     },
-    active: {
-      type: Boolean,
-      default: true,
+    gender: {
+      type: String,
+      enum: ['female','male'],
     },
+    birthday: {
+      type: Date,
+      required: [true, 'birthday required'],
+    }
   },
   { timestamps: true }
 );
