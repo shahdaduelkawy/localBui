@@ -19,6 +19,10 @@ exports.signup = asyncHandler(async (req, res, next) => {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
+    birthday: req.body.birthday,
+    role: req.body.role,
+    gender: req.body.gender,
+    phone: req.body.phone,
   });
 
   // 2- Generate token
@@ -104,7 +108,6 @@ exports.protect = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    Authorization (User Permissions)
-// ["admin", "manager"]
 exports.allowedTo = (...roles) =>
   asyncHandler(async (req, res, next) => {
     // 1) access roles
