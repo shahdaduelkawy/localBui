@@ -13,6 +13,7 @@ const dbConnection = require('./config/db');
 
 //Routes
 const authRoute = require('./routes/authRoute');
+const userRoute = require('./routes/adminRoute');
 
 // connect db
 dbConnection();
@@ -31,6 +32,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // Mount Routes
 
+app.use('/admin', userRoute);
 app.use('/auth', authRoute);
 
 app.all('*', (req, res, next) => {

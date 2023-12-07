@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema(
     passwordResetVerified: Boolean,
     role: {
       type: String,
-      enum: ['customer', 'businessOwner', 'admin', 'subAdmin'],
+      enum: ['customer', 'businessOwner', 'admin', 'subAdmin'], 
       required: [true, 'role required'],
     },
     gender: {
@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema(
     },
     birthday: {
       type: Date,
-      required: [true, 'birthday required'],
+     
     }
   },
   { timestamps: true }
