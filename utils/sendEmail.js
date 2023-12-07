@@ -2,12 +2,12 @@ const nodemailer = require('nodemailer');
 const sendEmail = async (options) => {
 // Create a transporter with your SMTP server settings
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com', // Replace with your SMTP host
-  port: 587, // Replace with your SMTP port
-  secure: false, // For TLS or SSL support (true for 465 port, false for other ports)
+  host: 'smtp.gmail.com', 
+  port: 587, 
+  secure: false, 
   auth: {
-    user: 'localbusiness318@gmail.com', // Replace with your email address
-    pass: 'shahd123', // Replace with your email password or app password
+    user: 'localbusiness318@gmail.com', 
+    pass: 'shahd123', 
   },
  
 });
