@@ -1,28 +1,32 @@
 const nodemailer = require('nodemailer');
-
-// Nodemailer
 const sendEmail = async (options) => {
-  // 1) Create transporter ( service that will send email like "gmail","Mailgun", "mialtrap", sendGrid)
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT, // if secure false port = 587, if true port= 465
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
+// Create a transporter with your SMTP server settings
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com', // Replace with your SMTP host
+  port: 587, // Replace with your SMTP port
+  secure: false, // For TLS or SSL support (true for 465 port, false for other ports)
+  auth: {
+    user: 'localbusiness318@gmail.com', // Replace with your email address
+    pass: 'shahd123', // Replace with your email password or app password
+  },
+ 
+});
 
-  // 2) Define email options (like from, to, subject, email content)
-  const mailOpts = {
-    from: 'E-shop App <progahmedelsayed@gmail.com>',
-    to: options.email,
-    subject: options.subject,
-    text: options.message,
-  };
-
-  // 3) Send email
-  await transporter.sendMail(mailOpts);
+// Email content/options
+const mailOptions = {
+  from: 'local App <localbusiness318@gmail.com>',
+  to: options.email,
+  subject: options.subject,
+  text: options.message,
 };
 
+// Send email
+transporter.sendMail(mailOptions, (error, info) => {
+  if (error) {
+    console.error('Error occurred:', error);
+  } else {
+    console.log('Email sent successfully!');
+  }
+});
+};
 module.exports = sendEmail;
