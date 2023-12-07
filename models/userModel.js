@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, 'password required'],
-      minlength: [6, 'Too short password'],
+      minlength: [4, 'Too short password'],
     },
     passwordChangedAt: Date,
     passwordResetCode: String,
@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema(
     passwordResetVerified: Boolean,
     role: {
       type: String,
-      enum: ['customer', 'businessOwner', 'admin'],
+      enum: ['customer', 'businessOwner', 'admin', 'subAdmin'], 
       required: [true, 'role required'],
     },
     gender: {
@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema(
     },
     birthday: {
       type: Date,
-      required: [true, 'birthday required'],
+     
     }
   },
   { timestamps: true }
