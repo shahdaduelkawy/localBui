@@ -29,7 +29,7 @@ exports.signupValidator = [
   check('password')
     .notEmpty()
     .withMessage('Password required')
-    .isLength({ min: 6 })
+    .isLength({ min: 4 })
     .withMessage('Password must be at least 6 characters')
     .custom((password, { req }) => {
       if (password !== req.body.passwordConfirm) {
@@ -57,7 +57,7 @@ exports.loginValidator = [
   check('password')
     .notEmpty()
     .withMessage('Password required')
-    .isLength({ min: 6 })
+    .isLength({ min: 4 })
     .withMessage('Password must be at least 6 characters'),
 
   validatorMiddleware,
