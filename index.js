@@ -50,6 +50,7 @@ app.listen(PORT, () => {
 // Handle rejection outside express
 process.on('unhandledRejection', (err) => {
   console.error(`UnhandledRejection Errors: ${err.name} | ${err.message}`);
+  // eslint-disable-next-line no-undef
   index.close(() => {
     console.error(`Shutting down....`);
     process.exit(1);
