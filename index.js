@@ -13,8 +13,8 @@ const dbConnection = require('./config/db');
 
 //Routes
 const authRoute = require('./routes/authRoute');
-const userRoute = require('./routes/adminRoute');
-//const ownerRoute = require('./routes/ownerRoute');
+const adminRoute = require('./routes/adminRoute');
+const businessOwnerRoute = require('./routes/businessOwnerRoute');
 
 // connect db
 dbConnection();
@@ -32,10 +32,9 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Mount Routes
-
-app.use('/admin', userRoute);
+app.use('/businessOwner', businessOwnerRoute);
+app.use('/admin', adminRoute);
 app.use('/auth', authRoute);
-//app.use('/owner', ownerRoute);
 
 
 app.all('*', (req, res, next) => {
