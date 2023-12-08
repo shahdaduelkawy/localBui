@@ -14,6 +14,7 @@ const dbConnection = require('./config/db');
 //Routes
 const authRoute = require('./routes/authRoute');
 const userRoute = require('./routes/adminRoute');
+//const ownerRoute = require('./routes/ownerRoute');
 
 // connect db
 dbConnection();
@@ -34,6 +35,8 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use('/admin', userRoute);
 app.use('/auth', authRoute);
+//app.use('/owner', ownerRoute);
+
 
 app.all('*', (req, res, next) => {
   next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
@@ -50,6 +53,7 @@ app.listen(PORT, () => {
 // Handle rejection outside express
 process.on('unhandledRejection', (err) => {
   console.error(`UnhandledRejection Errors: ${err.name} | ${err.message}`);
+  // eslint-disable-next-line no-undef
   index.close(() => {
     console.error(`Shutting down....`);
     process.exit(1);
