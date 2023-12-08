@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const ownerSchema = new mongoose.Schema(
+const businessOwnerSchema = new mongoose.Schema(
   {
     businessName: {
       type: String,
@@ -19,7 +19,7 @@ const ownerSchema = new mongoose.Schema(
         },
         coordinates: {
           type: [Number],
-          required: [true, 'Location coordinates are required'],
+          //required: [true, 'Location coordinates are required'],
         },
       },
     Country: {
@@ -47,22 +47,22 @@ const ownerSchema = new mongoose.Schema(
       attachment: {
         type: String,
         required: [true, 'attachment required'],
-      },
-      status: {
-        type: Boolean,
-        default: true,
-      },
-
+      },   
       status: {
         type: String,
         enum: ['pending', 'rejected', 'accepted'],
-        default: pending ,
+        default: 'pending' ,
+      },
+      userId: {
+        type:mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: [true, 'businessOwner must be belong to parent user'],
       },
   },
   { timestamps: true }
 );
 
 
-const Owner = mongoose.model('Owner', ownerSchema);
+const businessOwnerModel = mongoose.model('businessOwner', businessOwnerSchema);
 
-module.exports = Owner;
+module.exports = businessOwnerModel;
