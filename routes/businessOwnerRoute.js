@@ -1,54 +1,57 @@
 const express = require("express");
 const router = express.Router();
-// const {
-
-//   createbusinessValidator,
-
-// } = require('../utils/validators/businessOwnerValidator');
+const upload = require("../middleware/fileUpload.middleware")
 
 const BusinessOwnerService = require("../services/businessOwnerService");
 
-// const authService = require('../services/authService');
+router.get("/getMyBusiness/:ownerID", async(req, res) => {
+    const ownerID = req.params.ownerID;
 
-//   router.use(authService.protect, authService.allowedTo('businessOwner'));
-//   router.post(
-//     '/',
-//     setuserIdToBody,
-//     createbusinessValidator,
-//     createbusiness
-//   );
+    try {
+        const businessData = await BusinessOwnerService.getUserBusiness(ownerID);
 
-router.get("/getMyBusiness/:ownerID", async (req, res) => {
-  const ownerID = req.params.ownerID;
-
-  try {
-    const businessData = await BusinessOwnerService.getUserBusiness(ownerID);
-
-    if (businessData) {
-      res.status(200).json({ success: true, data: businessData });
-    } else {
-      res.status(404).json({ success: false, message: "Business not found" });
+        if (businessData) {
+            res.status(200).json({ success: true, data: businessData });
+        } else {
+            res.status(404).json({ success: false, message: "Business not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal Server Error" });
-  }
 });
 
-router.put("/updateMyBusinessInfo/:ownerID", async (req, res) => {
-  const ownerID = req.params.ownerID;
-  const data = req.body
+router.put("/updateMyBusinessInfo/:ownerID", async(req, res) => {
+    const ownerID = req.params.ownerID;
+    const data = req.body
 
-  try {
-    const updatedData = await BusinessOwnerService.updateUserBusiness(ownerID,data);
+    try {
+        const updatedData = await BusinessOwnerService.updateUserBusiness(ownerID, data);
 
-    if (updatedData) {
-      res.status(200).json({ success: true, data: updatedData });
-    } else {
-      res.status(404).json({ success: false, message: "Business not found" });
+        if (updatedData) {
+            res.status(200).json({ success: true, data: updatedData });
+        } else {
+            res.status(404).json({ success: false, message: "Business not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal Server Error" });
-  }
+});
+
+router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async(req, res) => {
+    const file = req.file;
+    const ownerID = req.params.ownerID;
+
+    try {
+        const uploadedImage = await BusinessOwnerService.uploadImage(ownerID, file);
+
+        if (uploadedImage) {
+            res.status(200).json({ success: true, data: uploadedImage });
+        } else {
+            res.status(404).json({ success: false, message: "Image Cant Be Uploaded" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
 });
 
 module.exports = router;
