@@ -1,26 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/fileUpload.middleware")
-const {
-    loginValidator,
-} = require('../utils/validators/authValidator');
-// const {
-
-//   createbusinessValidator,
-
-// } = require('../utils/validators/businessOwnerValidator');
 
 const BusinessOwnerService = require("../services/businessOwnerService");
-
-// const authService = require('../services/authService');
-
-//   router.use(authService.protect, authService.allowedTo('businessOwner'));
-//   router.post(
-//     '/',
-//     setuserIdToBody,
-//     createbusinessValidator,
-//     createbusiness
-//   );
 
 router.get("/getMyBusiness/:ownerID", async(req, res) => {
     const ownerID = req.params.ownerID;
@@ -55,9 +37,9 @@ router.put("/updateMyBusinessInfo/:ownerID", async(req, res) => {
     }
 });
 
-router.patch("/updateMyBusinessAttachment/:ownerID", loginValidator, upload.single("img"), async(req, res) => {
+router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async(req, res) => {
     const file = req.file;
-    const ownerID = req.body.ownerID;
+    const ownerID = req.params.ownerID;
 
     try {
         const uploadedImage = await BusinessOwnerService.uploadImage(ownerID, file);

@@ -5,7 +5,7 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const ext = file.originalname.split(".").pop()
-        const newName = `${Date.now()  }testApp.${  ext}`
+        const newName = `${Date.now()}testApp.${ext}`
         cb(null, newName)
     }
 })
