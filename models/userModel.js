@@ -53,6 +53,30 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+// userSchema.virtual("myBusiness", {
+//   ref: "businessOwnerModel",
+//   localField: "_id",
+//   foreignField: "userId",
+// });
+
+userSchema.post("save", async function (doc, next) {
+  if (doc.role === "businessOwner") {
+    try {
+      const BusinessOwner = require("./businessOwnerModel");
+      await BusinessOwner.create({
+        businessName: "My Business",
+        userId: doc._id,
+        attachment: "null", //this is default values
+        Country: "Egypt",
+        category: "Other",
+      });
+    } catch (err) {
+      console.error("Error creating business owner:", err);
+    }
+  }
+  next();
+});
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;

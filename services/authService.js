@@ -26,11 +26,16 @@ exports.signup = asyncHandler(async (req, res, next) => {
   });
 
   // 2- Generate token
-  const token = jwt.sign({userId: user._id}, process.env.JWT_SECRET_KEY, {
+  const token = jwt.sign({
+    userId: user._id
+  }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRE_TIME,
   });
 
-  res.status(201).json({ data: user, token });
+  res.status(201).json({
+    data: user,
+    token
+  });
 });
 
 // @desc    Login
@@ -39,7 +44,9 @@ exports.signup = asyncHandler(async (req, res, next) => {
 exports.login = asyncHandler(async (req, res, next) => {
   // 1) check if password and email in the body (validation)
   // 2) check if user exist & check if password is correct
-  const user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({
+    email: req.body.email
+  });
 
   if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
     return next(new ApiError('Incorrect email or password', 401));
@@ -50,7 +57,10 @@ exports.login = asyncHandler(async (req, res, next) => {
   // Delete password from response
   delete user._doc.password;
   // 4) send response to client side
-  res.status(200).json({ data: user, token });
+  res.status(200).json({
+    data: user,
+    token
+  });
 });
 
 // @desc   make sure the user is logged in
@@ -125,7 +135,9 @@ exports.allowedTo = (...roles) =>
 // @access  Public
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
   // 1) Get user by email
-  const user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({
+    email: req.body.email
+  });
   if (!user) {
     return next(
       new ApiError(`There is no user with that email ${req.body.email}`, 404)
@@ -147,25 +159,37 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   await user.save();
 
   // 3) Send the reset code via email
-  const message = `Hi ${user.name},\n We received a request to reset the password on your E-shop Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n The E-shop Team`;
+  const message = `Hi ${user.name},\n We received a request to reset the password on your localBusiness Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n The localBusiness Team`;
   try {
-    await sendEmail({
+    const result = await sendEmail({
       email: user.email,
       subject: 'Your password reset code (valid for 10 min)',
       message,
     });
+
+    res
+      .status(200)
+      .json({
+        status: 'Success',
+        message: result
+      });
   } catch (err) {
     user.passwordResetCode = undefined;
     user.passwordResetExpires = undefined;
     user.passwordResetVerified = undefined;
-
+    console.log(err);
     await user.save();
+    res
+      .status(500)
+      .json({
+        status: 'Failed',
+        message: 'There is an error in sending email'
+      });
     return next(new ApiError('There is an error in sending email', 500));
+
   }
 
-  res
-    .status(200)
-    .json({ status: 'Success', message: 'Reset code sent to email' });
+
 });
 
 // @desc    Verify password reset code
@@ -180,7 +204,9 @@ exports.verifyPassResetCode = asyncHandler(async (req, res, next) => {
 
   const user = await User.findOne({
     passwordResetCode: hashedResetCode,
-    passwordResetExpires: { $gt: Date.now() },
+    passwordResetExpires: {
+      $gt: Date.now()
+    },
   });
   if (!user) {
     return next(new ApiError('Reset code invalid or expired'));
@@ -200,7 +226,9 @@ exports.verifyPassResetCode = asyncHandler(async (req, res, next) => {
 // @access  Public
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   // 1) Get user based on email
-  const user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({
+    email: req.body.email
+  });
   if (!user) {
     return next(
       new ApiError(`There is no user with email ${req.body.email}`, 404)
@@ -221,5 +249,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 
   // 3) if everything is ok, generate token
   const token = createToken(user._id);
-  res.status(200).json({ token });
+  res.status(200).json({
+    token
+  });
 });
