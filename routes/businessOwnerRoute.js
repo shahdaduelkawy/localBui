@@ -37,35 +37,39 @@ router.put("/updateMyBusinessInfo/:ownerID", async(req, res) => {
     }
 });
 
-
 router.post("/profileSetup", async (req, res) => {
-    const { ownerId, businessId, description, location, attachments, address } = req.body;
+  try {
+    const {
+      ownerId,
+      businessId,
+      description,
+      location,
+      attachments,
+      address,
+    } = req.body;
 
-    try {
-        // Validate the presence of required attributes
-        if (!ownerId || !businessId || !description || !location || !attachments || !address) {
-            return res.status(400).json({ success: false, error: "Missing required attributes" });
-        }
-
-        // Update the owner's profile in the database
-        const updatedOwner = await BusinessOwnerService.updateUserBusiness(ownerId, {
-            businessId: businessId,
-            description: description,
-            location: location,
-            attachments: attachments,
-            address: address,
-        });
-
-        // Check if the owner with the specified ID exists
-        if (!updatedOwner) {
-            return res.status(404).json({ success: false, message: "Owner not found" });
-        }
-
-        res.status(200).json({ success: true, message: "Profile updated successfully", owner: updatedOwner });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+    // Validate the presence of required attributes
+    if (
+      !ownerId ||
+      !businessId ||
+      !description ||
+      !location ||
+      !attachments ||
+      !address
+    ) {
+      return res.status(400).json({ error: "Missing required attributes" });
     }
+
+    // Call the profileSetup function from the service
+    const result = await BusinessOwnerService.profileSetup(req.body);
+
+    // The profileSetup function should handle the logic internally,
+    // and if successful, it will return the appropriate response.
+    res.status(result.success ? 200 : 500).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
 });
 
 router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async (req, res) => {
