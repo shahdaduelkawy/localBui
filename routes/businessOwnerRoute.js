@@ -60,11 +60,7 @@ router.post("/profileSetup", async (req, res) => {
       return res.status(400).json({ error: "Missing required attributes" });
     }
 
-    // Call the profileSetup function from the service
     const result = await BusinessOwnerService.profileSetup(req.body);
-
-    // The profileSetup function should handle the logic internally,
-    // and if successful, it will return the appropriate response.
     res.status(result.success ? 200 : 500).json(result);
   } catch (error) {
     console.error(error);
