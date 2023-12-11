@@ -1,55 +1,38 @@
-const path = require('path');
-require('dotenv').config({ path: './config.env' });
-
-
 const express = require("express");
-const dotenv = require('dotenv');
-const morgan = require('morgan');
+const mongoose = require("mongoose");
+const customerRoutes = require("./routes/customerRouter");
+const dotenv = require("dotenv");
+dotenv.config({ path: "./.env" });
 
-dotenv.config({ path: 'config.env' });
-const ApiError = require('./utils/apiError');
-const globalError = require('./middleware/errorMiddleware');
-const dbConnection = require('./config/db');
-
-//Routes
-const authRoute = require('./routes/authRoute');
-
-// connect db
-dbConnection();
-
-// express app
 const app = express();
 
-// Middlewares
+// Connect to MongoDB
+const DB = process.env.DATABASE_URI.replace(
+  "DATABASE_PASSWORD",
+  process.env.DATABASE_PASSWORD
+);
+mongoose.connect(DB, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+// Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'uploads')));
+app.use(express.urlencoded({ extended: true }));
 
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-  console.log(`mode: ${process.env.NODE_ENV}`);
-}
+// Customer Routes
+app.use(customerRoutes);
 
-// Mount Routes
-
-app.use('/auth', authRoute);
-
-app.all('*', (req, res, next) => {
-  next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
-});
-
-// Global error handling middleware for express
-app.use(globalError);
-
-const PORT =  process.env.PORT || 3011;
+// Start the server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port num ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
 
-// Handle rejection outside express
-process.on('unhandledRejection', (err) => {
-  console.error(`UnhandledRejection Errors: ${err.name} | ${err.message}`);
-  index.close(() => {
-    console.error(`Shutting down....`);
-    process.exit(1);
+// Close MongoDB connection on application termination
+process.on("SIGINT", () => {
+  mongoose.connection.close(() => {
+    console.log("MongoDB connection closed");
+    process.exit(0);
   });
 });
