@@ -1,7 +1,9 @@
+const path = require("path");
+require("dotenv").config({ path: "./config.env" });
+
 const express = require("express");
-const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const customerRoutes = require("./routes/customerRouter");
+const morgan = require("morgan");
 
 dotenv.config({ path: "config.env" });
 const ApiError = require("./utils/apiError");
@@ -19,22 +21,17 @@ dbConnection();
 // express app
 const app = express();
 
-// Connect to MongoDB
-const DB = process.env.DATABASE_URI.replace(
-  "DATABASE_PASSWORD",
-  process.env.DATABASE_PASSWORD
-);
-mongoose.connect(DB, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-// Middleware
+// Middlewares
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "uploads")));
 
 // Customer Routes
 app.use(customerRoutes);
+
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+  console.log(`mode: ${process.env.NODE_ENV}`);
+}
 
 // Mount Routes
 app.use("/businessOwner", businessOwnerRoute);
@@ -50,7 +47,7 @@ app.use(globalError);
 
 const PORT = process.env.PORT || 3011;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port num ${PORT}`);
 });
 
 // Handle rejection outside express
