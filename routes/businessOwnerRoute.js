@@ -37,7 +37,38 @@ router.put("/updateMyBusinessInfo/:ownerID", async(req, res) => {
     }
 });
 
-router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async(req, res) => {
+
+router.post("/profileSetup", async (req, res) => {
+    const { ownerId, businessId, description, location, attachments, address } = req.body;
+
+    try {
+        // Validate the presence of required attributes
+        if (!ownerId || !businessId || !description || !location || !attachments || !address) {
+            return res.status(400).json({ success: false, error: "Missing required attributes" });
+        }
+
+        // Update the owner's profile in the database
+        const updatedOwner = await BusinessOwnerService.updateUserBusiness(ownerId, {
+            businessId: businessId,
+            description: description,
+            location: location,
+            attachments: attachments,
+            address: address,
+        });
+
+        // Check if the owner with the specified ID exists
+        if (!updatedOwner) {
+            return res.status(404).json({ success: false, message: "Owner not found" });
+        }
+
+        res.status(200).json({ success: true, message: "Profile updated successfully", owner: updatedOwner });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
+
+router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async (req, res) => {
     const file = req.file;
     const ownerID = req.params.ownerID;
 
@@ -47,12 +78,12 @@ router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async
         if (uploadedImage) {
             res.status(200).json({ success: true, data: uploadedImage });
         } else {
-            res.status(404).json({ success: false, message: "Image Cant Be Uploaded" });
+            res.status(404).json({ success: false, message: "Image Can't Be Uploaded" });
         }
     } catch (error) {
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 });
-router.post("/profileSetup", BusinessOwnerService.profileSetup);
+
 
 module.exports = router;
