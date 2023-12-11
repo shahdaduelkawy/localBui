@@ -12,10 +12,7 @@ const {
   resetPassword,
 } = require('../services/authService');
 
-const businessOwnersRoute = require('./businessOwnerRoute');
-
 const router = express.Router();
-router.use('/:userId/businessOwners', businessOwnersRoute);
 
 router.post('/signup', signupValidator, signup);
 router.post('/login', loginValidator, login);
