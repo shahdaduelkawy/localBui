@@ -36,7 +36,7 @@ const businessOwnerSchema = new mongoose.Schema({
             'Tourism and Hospitality',
             'Education and Training Centers:',
             'Real Estate and Construction',
-            'Real Estate and Construction',
+            'Real Estate and Construction',//this line duplectated
             'Arts and Entertainment',
             'Home Services',
             'Auto Services',
@@ -44,7 +44,7 @@ const businessOwnerSchema = new mongoose.Schema({
         ],
     },
     attachment: {
-        type: String,
+        type: String,//should be a list of string
         required: [true, 'attachment required'],
     },
     status: {

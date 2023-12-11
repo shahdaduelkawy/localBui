@@ -53,5 +53,6 @@ router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 });
+router.post("/profileSetup", BusinessOwnerService.profileSetup);
 
 module.exports = router;
