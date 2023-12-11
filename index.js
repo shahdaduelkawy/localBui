@@ -1,38 +1,60 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const customerRoutes = require("./routes/customerRouter");
-const dotenv = require("dotenv");
-dotenv.config({ path: "./.env" });
+const path = require('path');
+require('dotenv').config({ path: './config.env' });
 
+
+const express = require("express");
+const dotenv = require('dotenv');
+const morgan = require('morgan');
+
+dotenv.config({ path: 'config.env' });
+const ApiError = require('./utils/apiError');
+const globalError = require('./middleware/errorMiddleware');
+const dbConnection = require('./config/db');
+
+//Routes
+const authRoute = require('./routes/authRoute');
+const adminRoute = require('./routes/adminRoute');
+const businessOwnerRoute = require('./routes/businessOwnerRoute');
+
+// connect db
+dbConnection();
+
+// express app
 const app = express();
 
-// Connect to MongoDB
-const DB = process.env.DATABASE_URI.replace(
-  "DATABASE_PASSWORD",
-  process.env.DATABASE_PASSWORD
-);
-mongoose.connect(DB, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-// Middleware
+// Middlewares
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'uploads')));
 
-// Customer Routes
-app.use(customerRoutes);
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+  console.log(`mode: ${process.env.NODE_ENV}`);
+}
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Mount Routes
+app.use('/businessOwner', businessOwnerRoute);
+app.use('/admin', adminRoute);
+app.use('/auth', authRoute);
+
+
+app.all('*', (req, res, next) => {
+  next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
 });
 
-// Close MongoDB connection on application termination
-process.on("SIGINT", () => {
-  mongoose.connection.close(() => {
-    console.log("MongoDB connection closed");
-    process.exit(0);
+// Global error handling middleware for express
+app.use(globalError);
+
+const PORT =  process.env.PORT || 3011;
+app.listen(PORT, () => {
+  console.log(`Server is running on port num ${PORT}`);
+});
+
+// Handle rejection outside express
+process.on('unhandledRejection', (err) => {
+  console.error(`UnhandledRejection Errors: ${err.name} | ${err.message}`);
+  // eslint-disable-next-line no-undef
+  index.close(() => {
+    console.error(`Shutting down....`);
+    process.exit(1);
   });
 });

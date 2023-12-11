@@ -1,11 +1,13 @@
 const slugify = require('slugify');
-const { check } = require('express-validator');
+const bcrypt = require('bcryptjs');
+const { check, body } = require('express-validator');
 const validatorMiddleware = require('../../middleware/validatorMiddleware');
 const User = require('../../models/userModel');
-exports.signupValidator = [
+
+exports.createAdminValidator = [
   check('name')
     .notEmpty()
-    .withMessage('User required')
+    .withMessage('Admin name required')
     .isLength({ min: 3 })
     .withMessage('Too short User name')
     .custom((val, { req }) => {
@@ -29,7 +31,7 @@ exports.signupValidator = [
   check('password')
     .notEmpty()
     .withMessage('Password required')
-    .isLength({ min: 4 })
+    .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters')
     .custom((password, { req }) => {
       if (password !== req.body.passwordConfirm) {
@@ -38,27 +40,19 @@ exports.signupValidator = [
       return true;
     }),
 
-
-
   check('passwordConfirm')
     .notEmpty()
     .withMessage('Password confirmation required'),
 
-  validatorMiddleware,
-];
   
-exports.loginValidator = [
-  check('email')
-    .notEmpty()
-    .withMessage('Email required')
-    .isEmail()
-    .withMessage('Invalid email address'),
-
-  check('password')
-    .notEmpty()
-    .withMessage('Password required')
-    .isLength({ min: 4 })
-    .withMessage('Password must be at least 6 characters'),
+  check('role').optional(),
 
   validatorMiddleware,
 ];
+
+exports.deleteAdminValidator = [
+  check('id').isMongoId().withMessage('Invalid Admin id format'),
+
+  validatorMiddleware,
+];
+
