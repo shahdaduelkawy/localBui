@@ -1,4 +1,4 @@
-const BusinessOwner = require("../models/businessOwnerModel");
+const BusinessOwner = require("../models/BusinessOwnerModel");
 
 const BusinessOwnerService = {
   async getUserBusiness(ownerID) {

@@ -37,7 +37,7 @@ router.put("/updateMyBusinessInfo/:ownerID", async(req, res) => {
     }
 });
 
-router.post("/profileSetup", async (req, res) => {
+router.post("/profileSetup/:ownerID", async (req, res) => {
   try {
     const {
       ownerId,
@@ -47,18 +47,6 @@ router.post("/profileSetup", async (req, res) => {
       attachments,
       address,
     } = req.body;
-
-    // Validate the presence of required attributes
-    if (
-      !ownerId ||
-      !businessId ||
-      !description ||
-      !location ||
-      !attachments ||
-      !address
-    ) {
-      return res.status(400).json({ error: "Missing required attributes" });
-    }
 
     const result = await BusinessOwnerService.profileSetup(req.body);
     res.status(result.success ? 200 : 500).json(result);
