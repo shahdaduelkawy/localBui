@@ -21,7 +21,7 @@ router.use(authService.protect);
 
 
 // Admin
-router.use(authService.allowedTo('subAdmin'));
+router.use(authService.allowedTo('admin'));
 router
   .route('/')
   .post(createAdminValidator, createAdmin);
