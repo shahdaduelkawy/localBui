@@ -37,7 +37,18 @@ router.put("/updateMyBusinessInfo/:ownerID", async(req, res) => {
     }
 });
 
-router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async(req, res) => {
+router.post("/profileSetup/:ownerID", async (req, res) => {
+    try {
+        const result = await BusinessOwnerService.profileSetup(req, res);
+        res.status(result.success ? 200 : 500).json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
+
+
+router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async (req, res) => {
     const file = req.file;
     const ownerID = req.params.ownerID;
 
@@ -47,11 +58,12 @@ router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async
         if (uploadedImage) {
             res.status(200).json({ success: true, data: uploadedImage });
         } else {
-            res.status(404).json({ success: false, message: "Image Cant Be Uploaded" });
+            res.status(404).json({ success: false, message: "Image Can't Be Uploaded" });
         }
     } catch (error) {
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 });
+
 
 module.exports = router;

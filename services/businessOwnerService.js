@@ -1,4 +1,4 @@
-const BusinessOwner = require("../models/businessOwnerModel");
+const BusinessOwner = require("../models/BusinessOwnerModel");
 
 const BusinessOwnerService = {
   async getUserBusiness(ownerID) {
@@ -54,21 +54,21 @@ const BusinessOwnerService = {
         businessId,
         description,
         location,
-        attachments,
+        attachment,
         address,
       } = req.body;
 
       // Validate the presence of required attributes
-      if (
+      /*if (
         !ownerId ||
         !businessId ||
         !description ||
         !location ||
-        !attachments ||
+        !attachment ||
         !address
       ) {
         return res.status(400).json({ error: "Missing required attributes" });
-      }
+      }*/
 
       // Update the owner's profile in the database
       const updatedOwner = await BusinessOwnerService.updateUserBusiness(
@@ -77,7 +77,7 @@ const BusinessOwnerService = {
           businessId: businessId,
           description: description,
           location: location,
-          attachments: attachments,
+          attachment: attachment,
           address: address,
         }
       );
