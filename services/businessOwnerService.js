@@ -1,4 +1,4 @@
-const BusinessOwner = require("../models/BusinessOwnerModel");
+const BusinessOwner = require("../models/businessOwnerModel");
 
 const BusinessOwnerService = {
   async getUserBusiness(ownerID) {
@@ -13,7 +13,36 @@ const BusinessOwnerService = {
       return null;
     }
   },
-
+  async uploadImage(ownerID, file) {
+    try {
+      const updateResult = await BusinessOwner.updateOne(
+        {
+          userId: ownerID,
+        },
+        {
+          attachment: file.path,
+        }
+      );
+      return updateResult;
+    } catch (error) {
+      return error.message;
+    }
+  },
+  async uploadImage(ownerID, file) {
+    try {
+      const updateResult = await BusinessOwner.updateOne(
+        {
+          userId: ownerID,
+        },
+        {
+          media: file.path,
+        }
+      );
+      return updateResult;
+    } catch (error) {
+      return error.message;
+    }
+  },
   async updateUserBusiness(ownerID, updateCriteria) {
     try {
       const updatedOwner = await BusinessOwner.findOneAndUpdate(
@@ -31,71 +60,60 @@ const BusinessOwnerService = {
     }
   },
 
-  async uploadImage(ownerID, file) {
+  async profileSetup(ownerID, updateCriteria) {
     try {
-      const updateResult = await BusinessOwner.updateOne(
+      const profileSetup = await BusinessOwner.findOneAndUpdate(
         {
           userId: ownerID,
         },
-        {
-          attachment: file.path,
-        }
+        updateCriteria,
+        { new: true, upsert: true } // Create a new document if not found
       );
-      return updateResult;
+
+      return profileSetup;
     } catch (error) {
-      return error.message;
+      console.error("Error updating user business:", error);
+      return null;
     }
   },
 
-  async profileSetup(req, res) {
-    try {
-      const {
-        ownerId,
-        businessId,
-        description,
-        location,
-        attachment,
-        address,
-      } = req.body;
 
-      // Validate the presence of required attributes
-      /*if (
-        !ownerId ||
-        !businessId ||
-        !description ||
-        !location ||
-        !attachment ||
-        !address
-      ) {
-        return res.status(400).json({ error: "Missing required attributes" });
-      }*/
+  // async profileSetup(req, res) {
+  //   try {
+  //     const {
+      
+  //       description,
+  //       location,
+  //       attachment,
+  //       address,
+  //     } = req.body;
 
-      // Update the owner's profile in the database
-      const updatedOwner = await BusinessOwnerService.updateUserBusiness(
-        ownerId,
-        {
-          businessId: businessId,
-          description: description,
-          location: location,
-          attachment: attachment,
-          address: address,
-        }
-      );
+  //     // Update the owner's profile in the database
+  //     const updatedOwner = await BusinessOwnerService.updateUserBusiness(
+  //       businessId,
+  //       {
+         
+  //         description: description,
+  //         location: location,
+  //         attachment: attachment,
+  //         address: address,
+  //       }
+  //     );
 
-      // Check if the owner with the specified ID exists
-      if (!updatedOwner) {
-        return res.status(404).json({ message: "Owner not found" });
-      }
+  //     // Check if the owner with the specified ID exists
+  //     if (!updatedOwner) {
+  //       return res.status(404).json({ message: "Owner not found" });
+  //     }
 
-      // Send a success response
-      return res
-        .status(200)
-        .json({ message: "Profile updated successfully", owner: updatedOwner });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-  },
+  //     // Send a success response
+  //     return res
+  //       .status(200)
+  //       .json({ message: "Profile updated successfully", owner: updatedOwner });
+  //   } catch (err) {
+  //     console.error(err);
+  //     return res.status(500).json({ error: "Internal Server Error" });
+  //   }
+  // },
 };
 
 module.exports = BusinessOwnerService;
