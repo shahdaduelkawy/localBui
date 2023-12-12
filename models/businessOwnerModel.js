@@ -124,16 +124,14 @@ const businessOwnerSchema = new mongoose.Schema(
       required: [true, "businessOwner must belong to parent user"],
     },
     media: {
-        type: String,
+        type: [String],
         required: [true, "attachment required"],
       },
     description: {
       type: String,
-     
     },
     address: {
       type: String,
-
     },
   },
   { timestamps: true }

@@ -90,19 +90,19 @@ router.patch(
 
 router.patch(
     "/updateMyBusinessMedia/:ownerID",
-    upload.single("img"),
+    upload.single("media"),
     async (req, res) => {
       const file = req.file;
       const ownerID = req.params.ownerID;
   
       try {
-        const uploadedImage = await BusinessOwnerService.uploadImage(
+        const uploadedmedia = await BusinessOwnerService.uploadedmedia(
           ownerID,
           file
         );
   
-        if (uploadedImage) {
-          res.status(200).json({ success: true, data: uploadedImage });
+        if (uploadedmedia) {
+          res.status(200).json({ success: true, data: uploadedmedia });
         } else {
           res
             .status(404)

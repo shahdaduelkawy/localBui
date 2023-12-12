@@ -28,9 +28,9 @@ const BusinessOwnerService = {
       return error.message;
     }
   },
-  async uploadImage(ownerID, file) {
+  async uploadedmedia(ownerID, file) {
     try {
-      const updateResult = await BusinessOwner.updateOne(
+      const updateResultm = await BusinessOwner.updateOne(
         {
           userId: ownerID,
         },
@@ -38,7 +38,7 @@ const BusinessOwnerService = {
           media: file.path,
         }
       );
-      return updateResult;
+      return updateResultm;
     } catch (error) {
       return error.message;
     }
