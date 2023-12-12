@@ -38,23 +38,15 @@ router.put("/updateMyBusinessInfo/:ownerID", async(req, res) => {
 });
 
 router.post("/profileSetup/:ownerID", async (req, res) => {
-  try {
-    const {
-      ownerId,
-      businessId,
-      description,
-      location,
-      attachments,
-      address,
-    } = req.body;
-
-    const result = await BusinessOwnerService.profileSetup(req.body);
-    res.status(result.success ? 200 : 500).json(result);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
-  }
+    try {
+        const result = await BusinessOwnerService.profileSetup(req, res);
+        res.status(result.success ? 200 : 500).json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
 });
+
 
 router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async (req, res) => {
     const file = req.file;
