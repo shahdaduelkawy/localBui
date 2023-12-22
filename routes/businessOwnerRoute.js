@@ -60,8 +60,7 @@ router.put("/profileSetup/:ownerID", async (req, res) => {
   }
 });
 
-router.patch(
-  "/updateMyBusinessAttachment/:ownerID",
+router.patch("/updateMyBusinessAttachment/:ownerID",
   upload.single("img"),
   async (req, res) => {
     const file = req.file;
@@ -88,17 +87,16 @@ router.patch(
   }
 );
 
-router.patch(
-    "/updateMyBusinessMedia/:ownerID",
-    upload.single("media"),
+router.patch("/updateMyBusinessMedia/:ownerID",
+upload.array("media", 10),
     async (req, res) => {
-      const file = req.file;
+      const files = req.files;
       const ownerID = req.params.ownerID;
   
       try {
         const uploadedmedia = await BusinessOwnerService.uploadedmedia(
           ownerID,
-          file
+          files
         );
   
         if (uploadedmedia) {

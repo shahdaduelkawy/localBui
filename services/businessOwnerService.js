@@ -28,17 +28,19 @@ const BusinessOwnerService = {
       return error.message;
     }
   },
-  async uploadedmedia(ownerID, file) {
+  async uploadedmedia(ownerID, files) {
     try {
-      const updateResultm = await BusinessOwner.updateOne(
-        {
-          userId: ownerID,
-        },
-        {
-          media: file.path,
-        }
+      const updateResults = await Promise.all(
+        files.map(async (file) => {
+          const updateResult = await BusinessOwner.updateOne(
+            { userId: ownerID },
+            { $push: { media: file.path } } // Assuming 'media' is an array in the BusinessOwner schema
+          );
+          return updateResult;
+        })
       );
-      return updateResultm;
+
+      return updateResults;
     } catch (error) {
       return error.message;
     }
@@ -76,44 +78,6 @@ const BusinessOwnerService = {
       return null;
     }
   },
-
-
-  // async profileSetup(req, res) {
-  //   try {
-  //     const {
-      
-  //       description,
-  //       location,
-  //       attachment,
-  //       address,
-  //     } = req.body;
-
-  //     // Update the owner's profile in the database
-  //     const updatedOwner = await BusinessOwnerService.updateUserBusiness(
-  //       businessId,
-  //       {
-         
-  //         description: description,
-  //         location: location,
-  //         attachment: attachment,
-  //         address: address,
-  //       }
-  //     );
-
-  //     // Check if the owner with the specified ID exists
-  //     if (!updatedOwner) {
-  //       return res.status(404).json({ message: "Owner not found" });
-  //     }
-
-  //     // Send a success response
-  //     return res
-  //       .status(200)
-  //       .json({ message: "Profile updated successfully", owner: updatedOwner });
-  //   } catch (err) {
-  //     console.error(err);
-  //     return res.status(500).json({ error: "Internal Server Error" });
-  //   }
-  // },
 };
 
 module.exports = BusinessOwnerService;
