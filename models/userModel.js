@@ -68,7 +68,7 @@ userSchema.post("save", async function (doc, next) {
         userId: doc._id,
         attachment: "null", //this is default values
         Country: "Egypt",
-        category: "Other"
+        category: "Other",
       });
     } catch (err) {
       console.error("Error creating business owner:", err);

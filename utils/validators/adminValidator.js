@@ -55,4 +55,7 @@ exports.deleteAdminValidator = [
 
   validatorMiddleware,
 ];
-
+exports.getSearchValidator = [
+  check('id').isMongoId().withMessage('Invalid Search id format'),
+  validatorMiddleware,
+];
