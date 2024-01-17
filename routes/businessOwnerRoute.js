@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../middleware/fileUpload.middleware");
-
+const {upload} = require("../middleware/fileUpload.middleware");
 const BusinessOwnerService = require("../services/businessOwnerService");
 
 router.get("/getMyBusiness/:ownerID", async (req, res) => {

@@ -7,15 +7,13 @@ const customerSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    /* favourite: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // Reference to the userModel
-      },
-    ], */ // Is favourite an attribute or function?
+    profileImg: {
+      type: String, 
+    },
   },
   { timestamps: true }
 );
-const customerModel = mongoose.model("customer", customerSchema);
 
-module.exports = Customer;
+const customerModel = mongoose.model("Customer", customerSchema);
+
+module.exports = customerModel;
