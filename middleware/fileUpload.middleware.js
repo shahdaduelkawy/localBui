@@ -28,7 +28,7 @@ const profilePicStorage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const ext = file.originalname.split(".").pop();
-        const newName = `profile_${req.params.customerID}+${Date.now()}.${ext}`;
+        const newName = `profile_${req.params.customerId}+${Date.now()}.${ext}`;
         cb(null, newName);
     }
 })

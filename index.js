@@ -1,7 +1,5 @@
 const path = require('path');
 require('dotenv').config({ path: './config.env' });
-
-
 const express = require("express");
 const dotenv = require('dotenv');
 const morgan = require('morgan');
@@ -15,6 +13,8 @@ const dbConnection = require('./config/db');
 const authRoute = require('./routes/authRoute');
 const adminRoute = require('./routes/adminRoute');
 const businessOwnerRoute = require('./routes/businessOwnerRoute');
+const customerRoute = require('./routes/customerRoute');
+const activityLogRoute = require('./routes/activityLogRoute');
 
 // connect db
 dbConnection();
@@ -35,6 +35,8 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/businessOwner', businessOwnerRoute);
 app.use('/admin', adminRoute);
 app.use('/auth', authRoute);
+app.use('/customer', customerRoute);
+app.use('/log',activityLogRoute);
 
 
 app.all('*', (req, res, next) => {
