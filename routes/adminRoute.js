@@ -12,7 +12,7 @@ const {
   createAdmin,
   deleteAdmin,
   getSearch,
- 
+  getRequests,
 } = require('../services/adminService');
 
 const authService = require('../services/authService');
@@ -23,9 +23,10 @@ router.use(authService.protect);
 
 
 // Admin
-router.use(authService.allowedTo('admin'));
+router.use(authService.allowedTo('admin','subAdmin'));
 router
   .route('/')
+  .get(getRequests)
   .post(createAdminValidator, createAdmin);
 router
   .route('/Search/:id')
