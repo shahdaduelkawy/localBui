@@ -45,22 +45,6 @@ const BusinessOwnerService = {
       return error.message;
     }
   },
-  async updateUserBusiness(ownerID, updateCriteria) {
-    try {
-      const updatedOwner = await BusinessOwner.findOneAndUpdate(
-        {
-          userId: ownerID,
-        },
-        updateCriteria,
-        { new: true, upsert: true } // Create a new document if not found
-      );
-
-      return updatedOwner;
-    } catch (error) {
-      console.error("Error updating user business:", error);
-      return null;
-    }
-  },
   async profileSetup(ownerID, updateCriteria) {
     try {
       const profileSetup = await BusinessOwner.findOneAndUpdate(
@@ -100,8 +84,87 @@ const BusinessOwnerService = {
       );
     }
   },
-};
 
+  async updateUserBusiness(ownerID, updateCriteria) {
+    try {
+      // Check if a business for the given userId already exists
+      const existingBusiness = await BusinessOwner.findOne({ userId: ownerID });
+  
+      if (existingBusiness) {
+        // If a business exists, update the existing document
+        const updatedOwner = await BusinessOwner.findOneAndUpdate(
+          { userId: ownerID },
+          updateCriteria,
+          { new: true, upsert: true } // Update the existing document
+        );
+  
+        return updatedOwner;
+      } else {
+        // If no business exists, create a new document
+        const newBusiness = await BusinessOwner.create({
+          userId: ownerID,
+          ...updateCriteria,
+        });
+  
+        return newBusiness;
+      }
+    } catch (error) {
+      console.error("Error updating user business:", error);
+      return null;
+    }
+  },
+  
+  async addMultipleBusinesses(ownerID, businessesData) {
+    try {
+      // If it's not an array, convert it to an array with a single element
+      const businessesArray = Array.isArray(businessesData) ? businessesData : [businessesData];
+  
+      // Create an array to store the created businesses
+      const createdBusinesses = [];
+  
+      // Iterate over the array of businesses and create each one
+      for (const businessData of businessesArray) {
+        const newBusiness = await BusinessOwner.create({
+          userId: ownerID,
+          ...businessData,
+        });
+  
+        createdBusinesses.push(newBusiness);
+      }
+  
+      return createdBusinesses;
+    } catch (error) {
+      console.error("Error adding businesses:", error);
+      return null;
+    }
+  },
+  // Inside BusinessOwnerService
+
+// Inside BusinessOwnerService
+
+async getAllUserBusinesses(ownerID) {
+  try {
+    const businesses = await BusinessOwner.find({ userId: ownerID });
+    const count = await BusinessOwner.countDocuments({ userId: ownerID });
+
+    return { count, businesses };
+  } catch (error) {
+    console.error("Error retrieving user businesses:", error);
+    return null;
+  }const result = await BusinessOwnerService.getAllUserBusinesses(ownerID);
+
+  if (result) {
+    const { count, businesses } = result;
+    console.log(`Number of results: ${count}`);
+    console.log(`Businesses:`, businesses);
+  } else {
+    console.error("Error retrieving user businesses.");
+  }
+  
+},
+
+  
+};
 module.exports = BusinessOwnerService;
 
 
