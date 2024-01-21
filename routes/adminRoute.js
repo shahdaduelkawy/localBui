@@ -8,7 +8,6 @@ const {
 } = require('../utils/validators/adminValidator');
 
 const {
-  getRequests,
   createAdmin,
   deleteAdmin,
   getSearch,
