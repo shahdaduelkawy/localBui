@@ -11,3 +11,5 @@ const User = require("../models/userModel");
 exports.createAdmin = factory.createOne(User);
 
 exports.deleteAdmin = factory.deleteOne(User);
+ 
+exports.getSearch = factory.getOne(User);

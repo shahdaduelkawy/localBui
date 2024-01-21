@@ -21,9 +21,9 @@ router.get("/getMyBusiness/:ownerID", async (req, res) => {
   }
 });
 
-router.put("/updateMyBusinessInfo/:ownerID", async (req, res) => {
-  const ownerID = req.params.ownerID;
-  const data = req.body;
+router.put("/updateMyBusinessInfo/:ownerID", async(req, res) => {
+    const ownerID = req.params.ownerID;
+    const data = req.body
 
   try {
     const updatedData = await BusinessOwnerService.updateUserBusiness(
@@ -41,10 +41,7 @@ router.put("/updateMyBusinessInfo/:ownerID", async (req, res) => {
   }
 });
 
-router.patch(
-  "/updateMyBusinessAttachment/:ownerID",
-  upload.single("img"),
-  async (req, res) => {
+router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async(req, res) => {
     const file = req.file;
     const ownerID = req.params.ownerID;
 
@@ -54,43 +51,14 @@ router.patch(
         file
       );
 
-      if (uploadedImage) {
-        res.status(200).json({ success: true, data: uploadedImage });
-      } else {
-        res
-          .status(404)
-          .json({ success: false, message: "Image Cant Be Uploaded" });
-      }
+        if (uploadedImage) {
+            res.status(200).json({ success: true, data: uploadedImage });
+        } else {
+            res.status(404).json({ success: false, message: "Image Cant Be Uploaded" });
+        }
     } catch (error) {
-      res
-        .status(500)
-        .json({ success: false, message: "Internal Server Error" });
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-  }
-);
-
-// Add new route for pinning business on the map
-router.patch(
-  "/pinMyBusinessOnMap/:ownerID",
-  express.json(), // Middleware for parsing JSON in the request body
-  async (req, res) => {
-    const ownerID = req.params.ownerID;
-    const coordinates = req.body.coordinates;
-
-    try {
-      await BusinessOwnerService.pinBusinessOnMap(ownerID, coordinates);
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Business location pinned successfully",
-        });
-    } catch (error) {
-      res
-        .status(500)
-        .json({ success: false, message: "Internal Server Error" });
-    }
-  }
-);
+});
 
 module.exports = router;

@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const businessOwnerSchema = new mongoose.Schema(
   {
@@ -38,26 +38,25 @@ const businessOwnerSchema = new mongoose.Schema(
     },
 
     category: {
-      type: String,
-      required: [true, "category required"],
-      enum: [
-        "Restaurants and Cafés",
-        "Retail Stores",
-        "Health and Beauty Services",
-        "Medical and Healthcare Services",
-        "Tourism and Hospitality",
-        "Education and Training Centers:",
-        "Real Estate and Construction",
-        "Real Estate and Construction",
-        "Arts and Entertainment",
-        "Home Services",
-        "Auto Services",
-        "Other",
-      ],
+        type: String,
+        required: [true, 'category required'],
+        enum: ['Restaurants and Cafés',
+            'Retail Stores',
+            'Health and Beauty Services',
+            'Medical and Healthcare Services',
+            'Tourism and Hospitality',
+            'Education and Training Centers:',
+            'Real Estate and Construction',
+            'Real Estate and Construction',
+            'Arts and Entertainment',
+            'Home Services',
+            'Auto Services',
+            'Other',
+        ],
     },
     attachment: {
-      type: String,
-      required: [true, "attachment required"],
+        type: String,
+        required: [true, 'attachment required'],
     },
     status: {
       type: String,
@@ -73,6 +72,7 @@ const businessOwnerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const businessOwnerModel = mongoose.model("businessOwner", businessOwnerSchema);
+
+const businessOwnerModel = mongoose.model('businessOwner', businessOwnerSchema);
 
 module.exports = businessOwnerModel;
