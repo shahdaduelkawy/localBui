@@ -145,22 +145,13 @@ const BusinessOwnerService = {
 async getAllUserBusinesses(ownerID) {
   try {
     const businesses = await BusinessOwner.find({ userId: ownerID });
-    const count = await BusinessOwner.countDocuments({ userId: ownerID });
+    const numberOfBusinesses = await BusinessOwner.countDocuments({ userId: ownerID });
 
-    return { count, businesses };
+    return { numberOfBusinesses, businesses };
   } catch (error) {
     console.error("Error retrieving user businesses:", error);
     return null;
-  }const result = await BusinessOwnerService.getAllUserBusinesses(ownerID);
-
-  if (result) {
-    const { count, businesses } = result;
-    console.log(`Number of results: ${count}`);
-    console.log(`Businesses:`, businesses);
-  } else {
-    console.error("Error retrieving user businesses.");
   }
-  
 },
 
   
