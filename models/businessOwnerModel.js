@@ -37,6 +37,7 @@ const businessOwnerSchema = new mongoose.Schema(
         "Tourism and Hospitality",
         "Education and Training Centers:",
         "Real Estate and Construction",
+        "Real Estate and Construction",
         "Arts and Entertainment",
         "Home Services",
         "Auto Services",
