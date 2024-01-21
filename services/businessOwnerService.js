@@ -61,7 +61,6 @@ const BusinessOwnerService = {
       return null;
     }
   },
-
   async profileSetup(ownerID, updateCriteria) {
     try {
       const profileSetup = await BusinessOwner.findOneAndUpdate(
@@ -76,6 +75,29 @@ const BusinessOwnerService = {
     } catch (error) {
       console.error("Error updating user business:", error);
       return null;
+    }
+  },
+
+  async pinBusinessOnMap(ownerID, coordinates) {
+    try {
+      const businessOwner = await BusinessOwner.findOne({ userId: ownerID });
+
+      if (!businessOwner) {
+        throw new Error("Business owner not found");
+      }
+
+      businessOwner.business = {
+        type: "Point",
+        coordinates: coordinates,
+      };
+
+      await businessOwner.save();
+
+      console.log("Business location pinned successfully");
+    } catch (error) {
+      console.error(
+        `Error pinning business on map for owner ${ownerID}: ${error.message}`
+      );
     }
   },
 };

@@ -23,13 +23,15 @@ router.use(authService.protect);
 
 
 // Admin
-router.use(authService.allowedTo('admin'));
+router.use(authService.allowedTo('admin','subAdmin'));
 router
   .route('/')
   .post(createAdminValidator, createAdmin);
 router
-  .route('/Search/:id')
-  .delete(deleteAdminValidator, deleteAdmin)
-  .get(getSearchValidator, getSearch);
+.route('/delete/:id')
+.delete(deleteAdminValidator, deleteAdmin);
+router
+.route('/Search/:id')
+.get(getSearchValidator, getSearch);
 
 module.exports = router;
