@@ -103,5 +103,3 @@ const BusinessOwnerService = {
 };
 
 module.exports = BusinessOwnerService;
-
-

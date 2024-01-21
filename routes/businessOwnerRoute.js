@@ -1,4 +1,5 @@
 const express = require("express");
+
 const router = express.Router();
 const upload = require("../middleware/fileUpload.middleware");
 
@@ -20,9 +21,9 @@ router.get("/getMyBusiness/:ownerID", async (req, res) => {
   }
 });
 
-router.put("/updateMyBusinessInfo/:ownerID", async (req, res) => {
-  const ownerID = req.params.ownerID;
-  const data = req.body;
+router.put("/updateMyBusinessInfo/:ownerID", async(req, res) => {
+    const ownerID = req.params.ownerID;
+    const data = req.body
 
   try {
     const updatedData = await BusinessOwnerService.updateUserBusiness(
@@ -40,29 +41,7 @@ router.put("/updateMyBusinessInfo/:ownerID", async (req, res) => {
   }
 });
 
-router.put("/profileSetup/:ownerID", async (req, res) => {
-  const ownerID = req.params.ownerID;
-  const data = req.body;
-
-  try {
-    const updatedData = await BusinessOwnerService.updateUserBusiness(
-      ownerID,
-      data
-    );
-
-    if (updatedData) {
-      res.status(200).json({ success: true, data: updatedData });
-    } else {
-      res.status(404).json({ success: false, message: "Business not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal Server Error" });
-  }
-});
-
-router.patch("/updateMyBusinessAttachment/:ownerID",
-  upload.single("img"),
-  async (req, res) => {
+router.patch("/updateMyBusinessAttachment/:ownerID", upload.single("img"), async(req, res) => {
     const file = req.file;
     const ownerID = req.params.ownerID;
 
@@ -72,47 +51,15 @@ router.patch("/updateMyBusinessAttachment/:ownerID",
         file
       );
 
-      if (uploadedImage) {
-        res.status(200).json({ success: true, data: uploadedImage });
-      } else {
-        res
-          .status(404)
-          .json({ success: false, message: "Image Can't Be Uploaded" });
-      }
-    } catch (error) {
-      res
-        .status(500)
-        .json({ success: false, message: "Internal Server Error" });
-    }
-  }
-);
-
-router.patch("/updateMyBusinessMedia/:ownerID",
-upload.array("media", 10),
-    async (req, res) => {
-      const files = req.files;
-      const ownerID = req.params.ownerID;
-  
-      try {
-        const uploadedmedia = await BusinessOwnerService.uploadedmedia(
-          ownerID,
-          files
-        );
-  
-        if (uploadedmedia) {
-          res.status(200).json({ success: true, data: uploadedmedia });
+        if (uploadedImage) {
+            res.status(200).json({ success: true, data: uploadedImage });
         } else {
-          res
-            .status(404)
-            .json({ success: false, message: "Image Can't Be Uploaded" });
+            res.status(404).json({ success: false, message: "Image Cant Be Uploaded" });
         }
-      } catch (error) {
-        res
-          .status(500)
-          .json({ success: false, message: "Internal Server Error" });
-      }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-  );
+});
 
 // Add new route for pinning business on the map
 router.patch("/pinMyBusinessOnMap/:ownerID",

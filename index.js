@@ -1,15 +1,14 @@
-const path = require('path');
-require('dotenv').config({ path: './config.env' });
-
+const path = require("path");
+require("dotenv").config({ path: "./config.env" });
 
 const express = require("express");
-const dotenv = require('dotenv');
-const morgan = require('morgan');
+const dotenv = require("dotenv");
+const morgan = require("morgan");
 
-dotenv.config({ path: 'config.env' });
-const ApiError = require('./utils/apiError');
-const globalError = require('./middleware/errorMiddleware');
-const dbConnection = require('./config/db');
+dotenv.config({ path: "config.env" });
+const ApiError = require("./utils/apiError");
+const globalError = require("./middleware/errorMiddleware");
+const dbConnection = require("./config/db");
 
 //Routes
 const authRoute = require('./routes/authRoute');
@@ -26,10 +25,10 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(path.join(__dirname, "uploads")));
 
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
   console.log(`mode: ${process.env.NODE_ENV}`);
 }
 
@@ -54,7 +53,7 @@ app.listen(PORT, () => {
 });
 
 // Handle rejection outside express
-process.on('unhandledRejection', (err) => {
+process.on("unhandledRejection", (err) => {
   console.error(`UnhandledRejection Errors: ${err.name} | ${err.message}`);
   // eslint-disable-next-line no-undef
   index.close(() => {
