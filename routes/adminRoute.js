@@ -8,7 +8,7 @@ const {
 } = require('../utils/validators/adminValidator');
 
 const {
-
+  getRequests,
   createAdmin,
   deleteAdmin,
   getSearch,
@@ -29,8 +29,10 @@ router
   .get(getRequests)
   .post(createAdminValidator, createAdmin);
 router
-  .route('/Search/:id')
-  .delete(deleteAdminValidator, deleteAdmin)
-  .get(getSearchValidator, getSearch);
+.route('/delete/:id')
+.delete(deleteAdminValidator, deleteAdmin);
+router
+.route('/Search/:id')
+.get(getSearchValidator, getSearch);
 
 module.exports = router;
