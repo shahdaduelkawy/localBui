@@ -46,7 +46,7 @@ const businessOwnerSchema = new mongoose.Schema(
     },
     attachment: {
       type: String,
-      required: [true, "attachment required"],
+      required: false,
     },
     status: {
       type: String,
