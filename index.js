@@ -16,6 +16,7 @@ const businessOwnerRoute = require('./routes/businessOwnerRoute');
 const customerRoute = require('./routes/customerRoute');
 const activityLogRoute = require('./routes/activityLogRoute');
 
+
 // connect db
 dbConnection();
 
@@ -37,6 +38,8 @@ app.use('/admin', adminRoute);
 app.use('/auth', authRoute);
 app.use('/customer', customerRoute);
 app.use('/log',activityLogRoute);
+
+
 
 
 app.all('*', (req, res, next) => {
