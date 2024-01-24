@@ -9,7 +9,6 @@ const uploadCustomerImage = async (customerId, file) => {
       return { status: 400, message: "No file uploaded" };
     }
 
-    console.log("Uploading");
     const profileImage = file.path;
     
     const customer = await Customer.findByIdAndUpdate(

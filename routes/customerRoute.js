@@ -5,12 +5,9 @@ const customerService = require("../services/customerService");
 
 router.patch(
   "/updateCustomerProfileImage/:customerId",
-  uploadProfilePic.single("profileImage"),
-
+  uploadProfilePic.single("profileImg"),  // Change "profileImage" to "profileImg"
   async (req, res) => {
     try {
-      
-
       const customerId = req.params.customerId;
       const file = req.file;
 
@@ -20,7 +17,6 @@ router.patch(
         return res.status(400).json({ status: 400, error: "File not found" });
       }
 
-      
       console.log("Uploading");
       const result = await customerService.uploadCustomerImage(
         customerId,

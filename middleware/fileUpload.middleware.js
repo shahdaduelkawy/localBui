@@ -31,7 +31,7 @@ const profilePicStorage = multer.diskStorage({
         const newName = `profile_${req.params.customerId}+${Date.now()}.${ext}`;
         cb(null, newName);
     }
-})
+});
 
 const uploadProfilePic = multer({
     storage: profilePicStorage,
@@ -48,7 +48,7 @@ const uploadProfilePic = multer({
             return cb(new Error("Only .png, .jpg and .jpeg format allowed!"));
         }
     }
-})
+});
 module.exports = {
     upload,
     uploadProfilePic
