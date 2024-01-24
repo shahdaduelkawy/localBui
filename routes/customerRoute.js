@@ -16,11 +16,12 @@ router.patch(
 
       if (!file) {
         console.error("File not found in the request.");
+        console.log("no file");
         return res.status(400).json({ status: 400, error: "File not found" });
       }
 
       
-
+      console.log("Uploading");
       const result = await customerService.uploadCustomerImage(
         customerId,
         file

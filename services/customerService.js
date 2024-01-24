@@ -1,5 +1,7 @@
 const Customer = require("../models/customerModel");
 const BusinessOwner = require("../models/businessOwnerModel");
+const { logActivity } = require("./activityLogService");
+
 
 const uploadCustomerImage = async (customerId, file) => {
   try {
@@ -7,8 +9,9 @@ const uploadCustomerImage = async (customerId, file) => {
       return { status: 400, message: "No file uploaded" };
     }
 
+    console.log("Uploading");
     const profileImage = file.path;
-
+    
     const customer = await Customer.findByIdAndUpdate(
       customerId,
       { profileImg: profileImage },
@@ -18,12 +21,14 @@ const uploadCustomerImage = async (customerId, file) => {
     if (!customer) {
       return { status: 404, message: "Customer not found" };
     }
+    await logActivity(customerId, "uploadCustomerImage", "Profile image uploaded successfully");
 
     return {
       status: 200,
       message: "Profile image uploaded successfully",
       customer,
     };
+
   } catch (error) {
     console.error(error);
     return { status: 500, error: "Internal Server Error" };

@@ -1,9 +1,8 @@
 const Activity = require("../models/activityModel");
-
-async function logActivity(userId, activityType, details) {
+async function logActivity(userID, activityType, details) {
   try {
     const activity = new Activity({
-      userId,
+      userID: userID, // Update the field name to match the schema
       activityType,
       details,
     });
@@ -15,9 +14,10 @@ async function logActivity(userId, activityType, details) {
   }
 }
 
-async function getActivities(userId) {
+
+async function getActivities(userID) {
   try {
-    const activities = await Activity.find({ userId }).sort({ timestamp: -1 });
+    const activities = await Activity.find({ userID }).sort({ timeStamp: -1 });
     return activities;
   } catch (error) {
     console.error("Error retrieving activities:", error);

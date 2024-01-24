@@ -1,4 +1,6 @@
 const BusinessOwner = require("../models/businessOwnerModel");
+const { logActivity } = require("./activityLogService");
+
 
 const BusinessOwnerService = {
   async getUserBusiness(ownerID) {
@@ -6,6 +8,7 @@ const BusinessOwnerService = {
       const businessData = await BusinessOwner.findOne({
         userId: ownerID,
       });
+      await logActivity(ownerID, "getUserBusiness", "User business retrieved successfully");
 
       return businessData;
     } catch (error) {
@@ -23,6 +26,8 @@ const BusinessOwnerService = {
           attachment: file.path,
         }
       );
+      await logActivity(ownerID, "uploadImage", "Image uploaded successfully");
+
       return updateResult;
     } catch (error) {
       return error.message;
@@ -39,6 +44,7 @@ const BusinessOwnerService = {
           return updateResult;
         })
       );
+      await logActivity(ownerID, "uploadedmedia", "Media uploaded successfully");
 
       return updateResults;
     } catch (error) {
@@ -54,8 +60,10 @@ const BusinessOwnerService = {
         updateCriteria,
         { new: true, upsert: true } // Create a new document if not found
       );
+      await logActivity(ownerID, "profileSetup", "Profile setup completed successfully");
 
       return profileSetup;
+      
     } catch (error) {
       console.error("Error updating user business:", error);
       return null;
@@ -76,6 +84,7 @@ const BusinessOwnerService = {
       };
 
       await businessOwner.save();
+      await logActivity(ownerID, "pinBusinessOnMap", "Business location pinned successfully");
 
       console.log("Business location pinned successfully");
     } catch (error) {
@@ -97,7 +106,7 @@ const BusinessOwnerService = {
           updateCriteria,
           { new: true, upsert: true } // Update the existing document
         );
-  
+        await logActivity(ownerID, "updateUserBusiness", "New user business created successfully");
         return updatedOwner;
       } else {
         // If no business exists, create a new document
@@ -105,7 +114,9 @@ const BusinessOwnerService = {
           userId: ownerID,
           ...updateCriteria,
         });
-  
+
+        await logActivity(ownerID, "updateUserBusiness", "New user business created successfully");
+
         return newBusiness;
       }
     } catch (error) {
@@ -131,7 +142,8 @@ const BusinessOwnerService = {
   
         createdBusinesses.push(newBusiness);
       }
-  
+      await logActivity(ownerID, "addMultipleBusinesses", "Multiple businesses added successfully");
+
       return createdBusinesses;
     } catch (error) {
       console.error("Error adding businesses:", error);
@@ -146,6 +158,7 @@ async getAllUserBusinesses(ownerID) {
   try {
     const businesses = await BusinessOwner.find({ userId: ownerID });
     const numberOfBusinesses = await BusinessOwner.countDocuments({ userId: ownerID });
+    await logActivity(ownerID, "getAllUserBusinesses", "All user businesses retrieved successfully");
 
     return { numberOfBusinesses, businesses };
   } catch (error) {
