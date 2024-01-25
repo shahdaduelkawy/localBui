@@ -13,7 +13,7 @@ const dbConnection = require('./config/db');
 const authRoute = require('./routes/authRoute');
 const adminRoute = require('./routes/adminRoute');
 const businessOwnerRoute = require('./routes/businessOwnerRoute');
-const customerRoute = require('./routes/customerRoute');
+const customerRouter = require('./routes/customerRouter');
 const activityLogRoute = require('./routes/activityLogRoute');
 
 
@@ -36,7 +36,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/businessOwner', businessOwnerRoute);
 app.use('/admin', adminRoute);
 app.use('/auth', authRoute);
-app.use('/customer', customerRoute);
+app.use('/customer', customerRouter);
 app.use('/log',activityLogRoute);
 
 
