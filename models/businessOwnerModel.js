@@ -2,16 +2,17 @@ const mongoose = require('mongoose');
 
 const businessOwnerSchema = new mongoose.Schema(
   {
-    business: {
-      type: {
-        type: String,
-        required: true,
-      },
-      coordinates: {
-        type: [Number],
-      },
-    },
+    // business: {
+    //   type: {
+    //     type: String,
+    //     required: false,
+    //   },
+    //   coordinates: {
+    //     type: [Number],
+    //     required: false,
 
+    //   },
+    // },
     businessName: {
       type: String,
       trim: true,
@@ -56,8 +57,8 @@ const businessOwnerSchema = new mongoose.Schema(
     },
     attachment: {
         type: String,
-        required: [true, 'attachment required'],
-    },
+        required: false,
+      },
     status: {
       type: String,
       enum: ["pending", "rejected", "accepted"],
@@ -68,6 +69,19 @@ const businessOwnerSchema = new mongoose.Schema(
       ref: "User",
       required: [true, "businessOwner must be belong to parent user"],
     },
+    media: {
+      type: [String],
+      required: false,
+    },
+  description: {
+    type: String,
+    required: false,
+  },
+  address: {
+    type: String,
+    required: false,
+
+  },
   },
   { timestamps: true }
 );

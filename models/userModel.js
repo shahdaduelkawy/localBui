@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const BusinessOwner = require("./businessOwnerModel");
 
 const userSchema = new mongoose.Schema(
   {
@@ -59,10 +60,9 @@ userSchema.pre("save", async function (next) {
 //   foreignField: "userId",
 // });
 
-userSchema.post("save", async function (doc, next) {
+userSchema.post("save", async (doc, next) => {
   if (doc.role === "businessOwner") {
     try {
-      const BusinessOwner = require("./businessOwnerModel");
       await BusinessOwner.create({
         businessName: "My Business",
         userId: doc._id,
