@@ -15,7 +15,7 @@ const dbConnection = require('./config/db');
 const authRoute = require('./routes/authRoute');
 const adminRoute = require('./routes/adminRoute');
 const businessOwnerRoute = require('./routes/businessOwnerRoute');
-const customerRouter = require('./routes/customerRouter');
+const customerRoute = require('./routes/customerRoute');
 
 
 // connect db
@@ -37,6 +37,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/businessOwner', businessOwnerRoute);
 app.use('/admin', adminRoute);
 app.use('/auth', authRoute);
+app.use('/customer', customerRoute);
 
 // Move the wildcard route to the end
 app.all('*', (req, res, next) => {
