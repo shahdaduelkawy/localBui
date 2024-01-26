@@ -47,7 +47,6 @@ app.all('*', (req, res, next) => {
 // Global error handling middleware for express
 app.use(globalError);
 
-// ... (other code)
 
 const PORT = process.env.PORT || 3011;
 app.listen(PORT, () => {
@@ -57,8 +56,8 @@ app.listen(PORT, () => {
 // Handle rejection outside express
 process.on('unhandledRejection', (err) => {
   console.error(`UnhandledRejection Errors: ${err.name} | ${err.message}`);
-  // eslint-disable-next-line no-undef
-  index.close(() => {
+  // Assuming you want to close the app when there's an unhandled rejection
+  app.close(() => {
     console.error(`Shutting down....`);
     process.exit(1);
   });
