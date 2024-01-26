@@ -72,6 +72,6 @@ const businessOwnerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const businessOwnerModel = mongoose.model("businessOwner", businessOwnerSchema);
+const businessOwnerModel = mongoose.model("BusinessOwner", businessOwnerSchema);
 
 module.exports = businessOwnerModel;

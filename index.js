@@ -37,10 +37,8 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/businessOwner', businessOwnerRoute);
 app.use('/admin', adminRoute);
 app.use('/auth', authRoute);
-app.use('/customer', customerRouter);
 
-
-
+// Move the wildcard route to the end
 app.all('*', (req, res, next) => {
   next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
 });
@@ -48,7 +46,9 @@ app.all('*', (req, res, next) => {
 // Global error handling middleware for express
 app.use(globalError);
 
-const PORT =  process.env.PORT || 3011;
+// ... (other code)
+
+const PORT = process.env.PORT || 3011;
 app.listen(PORT, () => {
   console.log(`Server is running on port num ${PORT}`);
 });
