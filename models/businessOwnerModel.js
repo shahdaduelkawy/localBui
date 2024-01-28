@@ -2,17 +2,14 @@ const mongoose = require('mongoose');
 
 const businessOwnerSchema = new mongoose.Schema(
   {
-    // business: {
-    //   type: {
-    //     type: String,
-    //     required: false,
-    //   },
-    //   coordinates: {
-    //     type: [Number],
-    //     required: false,
-
-    //   },
-    // },
+    station: {
+      type: {
+        type: String,
+      },
+      coordinates: {
+        type: [Number],
+      },
+    },
     businessName: {
       type: String,
       trim: true,
@@ -22,17 +19,6 @@ const businessOwnerSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
     },
-    /*  location: {
-        type: {
-            type: String,
-            enum: ['Point'],
-            default: 'Point',
-        },
-      
-    },*/
-    // coordinates : {
-    //     type : [Number]
-    // },
     Country: {
       type: String,
       required: [true, "Country required"],
@@ -75,11 +61,9 @@ const businessOwnerSchema = new mongoose.Schema(
     },
   description: {
     type: String,
-    required: false,
   },
   address: {
     type: String,
-    required: false,
 
   },
   },
