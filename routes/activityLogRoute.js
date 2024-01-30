@@ -4,7 +4,7 @@ const router = express.Router();
 const { getActivities } = require('../services/activityLogService');
 
 router.get('/activities/:userId', async (req, res) => {
-  const userId = req.params.userId;
+  const {userId} = req.params;
 
   try {
     const activities = await getActivities(userId);

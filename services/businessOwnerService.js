@@ -67,28 +67,6 @@ const BusinessOwnerService =
 
       return profileSetup;
       
-      // Check if a business for the given userId already exists
-      const existingBusiness = await BusinessOwner.findOne({ userId: ownerID });
-  
-      if (existingBusiness) {
-        // If a business exists, update the existing document
-        const profileSetup = await BusinessOwner.findOneAndUpdate(
-          { userId: ownerID },
-          { ...updateCriteria, address: updateCriteria.address, description: updateCriteria.description },
-          { new: true, upsert: true } // Update the existing document
-        );
-  
-        return profileSetup;
-      } 
-        // If no business exists, create a new document
-        const newBusiness = await BusinessOwner.create({
-          userId: ownerID,
-          address: updateCriteria.address,
-          description: updateCriteria.description,
-          ...updateCriteria,
-        });
-  
-        return newBusiness;
       
     } catch (error) {
       console.error("Error updating user business:", error);
