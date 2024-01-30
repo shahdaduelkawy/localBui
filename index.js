@@ -37,11 +37,8 @@ app.use('/businessOwner', businessOwnerRoute);
 app.use('/admin', adminRoute);
 app.use('/auth', authRoute);
 app.use('/customer', customerRouter);
-app.use('/log',activityLogRoute);
 
-
-
-
+// Move the wildcard route to the end
 app.all('*', (req, res, next) => {
   next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
 });
@@ -49,16 +46,15 @@ app.all('*', (req, res, next) => {
 // Global error handling middleware for express
 app.use(globalError);
 
-const PORT =  process.env.PORT || 3011;
-app.listen(PORT, () => {
-  console.log(`Server is running on port num ${PORT}`);
+const PORT = process.env.PORT || 8000;
+const server = app.listen(PORT, () => {
+  console.log(`App running running on port ${PORT}`);
 });
 
 // Handle rejection outside express
 process.on('unhandledRejection', (err) => {
   console.error(`UnhandledRejection Errors: ${err.name} | ${err.message}`);
-  // eslint-disable-next-line no-undef
-  index.close(() => {
+  server.close(() => {
     console.error(`Shutting down....`);
     process.exit(1);
   });
