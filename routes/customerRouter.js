@@ -1,36 +1,37 @@
 const express = require("express");
-const customer = require("../services/customerService");
+const {upload} = require("../middleware/fileUpload.middleware");
 
 const router = express.Router();
-const { uploadProfilePic } = require("../middleware/fileUpload.middleware");
-const customerService = require("../services/customerService");
+const CustomerService = require("../services/customerService");
 
-router.get("/searchBusinesses/:customerId/:businessName", customer.searchBusinessesByName);
-router.patch(
-    "/updateCustomerProfileImage/:customerId",
-    uploadProfilePic.single("profileImg"),  // Change "profileImage" to "profileImg"
-    async (req, res) => {
-      try {
-        const customerId = req.params.customerId;
-        const file = req.file;
-  
-        if (!file) {
-          console.error("File not found in the request.");
-          console.log("no file");
-          return res.status(400).json({ status: 400, error: "File not found" });
-        }
-  
-        console.log("Uploading");
-        const result = await customerService.uploadCustomerImage(
-          customerId,
-          file
-        );
-  
-        res.status(result.status).json(result);
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ status: 500, error: "Internal Server Error" });
+//router.get("/searchBusinesses/:customerId/:businessName", customer.searchBusinessesByName);
+router.patch("/updateCustomerProfileImage/:customerId",
+  upload.single("profileImg"),
+  async (req, res) => {
+    const { file } = req;
+    const { customerId } = req.params;
+
+    try {
+      const uploadedImage = await CustomerService.uploadCustomerImage(
+        customerId,
+        file
+      );
+
+      if (uploadedImage) {
+        res.status(200).json({ success: true, data: uploadedImage });
+      } else {
+        res
+          .status(404)
+          .json({ success: false, message: "Image Can't Be Uploaded" });
       }
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
     }
-  );
+  }
+);
+
+
 module.exports = router;

@@ -108,7 +108,7 @@ const BusinessOwnerService = {
         );
         await logActivity(ownerID, "updateUserBusiness", "New user business created successfully");
         return updatedOwner;
-      } else {
+      } 
         // If no business exists, create a new document
         const newBusiness = await BusinessOwner.create({
           userId: ownerID,
@@ -118,7 +118,7 @@ const BusinessOwnerService = {
         await logActivity(ownerID, "updateUserBusiness", "New user business created successfully");
 
         return newBusiness;
-      }
+      
     } catch (error) {
       console.error("Error updating user business:", error);
       return null;
@@ -134,7 +134,9 @@ const BusinessOwnerService = {
       const createdBusinesses = [];
   
       // Iterate over the array of businesses and create each one
+      // eslint-disable-next-line no-restricted-syntax
       for (const businessData of businessesArray) {
+        // eslint-disable-next-line no-await-in-loop
         const newBusiness = await BusinessOwner.create({
           userId: ownerID,
           ...businessData,
@@ -170,5 +172,4 @@ async getAllUserBusinesses(ownerID) {
   
 };
 module.exports = BusinessOwnerService;
-
 

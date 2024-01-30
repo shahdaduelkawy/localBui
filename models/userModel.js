@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
@@ -42,6 +43,7 @@ const userSchema = new mongoose.Schema(
     birthday: {
       type: Date,
     },
+    
   },
   { timestamps: true }
 );
@@ -59,7 +61,7 @@ userSchema.pre("save", async function (next) {
 //   foreignField: "userId",
 // });
 
-userSchema.post("save", async function (doc, next) {
+userSchema.post("save", async (doc, next) => {
   if (doc.role === "businessOwner") {
     try {
       const BusinessOwner = require("./businessOwnerModel");
@@ -69,6 +71,22 @@ userSchema.post("save", async function (doc, next) {
         attachment: "null", //this is default values
         Country: "Egypt",
         category: "Other",
+      });
+    } catch (err) {
+      console.error("Error creating business owner:", err);
+    }
+  }
+  next();
+});
+
+userSchema.post("save", async (doc, next) => {
+  if (doc.role === "customer") {
+    try {
+      const Customer = require("./customerModel");
+      await Customer.create({
+        profileImg: "Null",
+        userId: doc._id,
+        
       });
     } catch (err) {
       console.error("Error creating business owner:", err);

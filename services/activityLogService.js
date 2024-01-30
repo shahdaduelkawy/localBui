@@ -1,4 +1,5 @@
 const Activity = require("../models/activityModel");
+
 async function logActivity(userID, activityType, details) {
   try {
     const activity = new Activity({

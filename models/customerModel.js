@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const customerSchema = new mongoose.Schema(
   {
-    customerId: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -14,6 +14,6 @@ const customerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const customerModel = mongoose.model("customermodels", customerSchema);
+const customerModel = mongoose.model("Customer", customerSchema);
 
 module.exports = customerModel;
