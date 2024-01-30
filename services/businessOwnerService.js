@@ -1,8 +1,11 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 const BusinessOwner = require("../models/businessOwnerModel");
 const { logActivity } = require("./activityLogService");
 
 
-const BusinessOwnerService = {
+const BusinessOwnerService = 
+{
   async getUserBusiness(ownerID) {
     try {
       const businessData = await BusinessOwner.findOne({
@@ -64,12 +67,34 @@ const BusinessOwnerService = {
 
       return profileSetup;
       
+      // Check if a business for the given userId already exists
+      const existingBusiness = await BusinessOwner.findOne({ userId: ownerID });
+  
+      if (existingBusiness) {
+        // If a business exists, update the existing document
+        const profileSetup = await BusinessOwner.findOneAndUpdate(
+          { userId: ownerID },
+          { ...updateCriteria, address: updateCriteria.address, description: updateCriteria.description },
+          { new: true, upsert: true } // Update the existing document
+        );
+  
+        return profileSetup;
+      } 
+        // If no business exists, create a new document
+        const newBusiness = await BusinessOwner.create({
+          userId: ownerID,
+          address: updateCriteria.address,
+          description: updateCriteria.description,
+          ...updateCriteria,
+        });
+  
+        return newBusiness;
+      
     } catch (error) {
       console.error("Error updating user business:", error);
       return null;
     }
   },
-
   async pinBusinessOnMap(ownerID, coordinates) {
     try {
       const businessOwner = await BusinessOwner.findOne({ userId: ownerID });
@@ -93,7 +118,6 @@ const BusinessOwnerService = {
       );
     }
   },
-
   async updateUserBusiness(ownerID, updateCriteria) {
     try {
       // Check if a business for the given userId already exists
@@ -124,7 +148,6 @@ const BusinessOwnerService = {
       return null;
     }
   },
-  
   async addMultipleBusinesses(ownerID, businessesData) {
     try {
       // If it's not an array, convert it to an array with a single element
@@ -152,10 +175,6 @@ const BusinessOwnerService = {
       return null;
     }
   },
-  // Inside BusinessOwnerService
-
-// Inside BusinessOwnerService
-
 async getAllUserBusinesses(ownerID) {
   try {
     const businesses = await BusinessOwner.find({ userId: ownerID });
@@ -167,9 +186,30 @@ async getAllUserBusinesses(ownerID) {
     console.error("Error retrieving user businesses:", error);
     return null;
   }
-},
+  }, 
+async addLogo(ownerID, logoFile) {
+    try {
+      const updateResult = await BusinessOwner.updateOne(
+        { userId: ownerID },
+        { logo: logoFile.path } // Assuming 'logo' is a field in the BusinessOwner schema
+      );
 
-  
+      return updateResult;
+    } catch (error) {
+      console.error("Error adding logo to business:", error);
+      return null;
+    }
+  },
+  async deleteBusinessById(businessId) {
+    try {
+      const deletionResult = await BusinessOwner.deleteOne({ _id: businessId });
+
+      return deletionResult;
+    } catch (error) {
+      console.error("Error deleting business:", error);
+      return null;
+    }
+  },
 };
 module.exports = BusinessOwnerService;
 

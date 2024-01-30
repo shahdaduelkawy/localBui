@@ -1,14 +1,16 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const businessOwnerSchema = new mongoose.Schema(
   {
-    business: {
+    station: {
       type: {
         type: String,
-        required: true,
+        enum: ["Point"], // Specify the GeoJSON type
+        default: "Point",
       },
       coordinates: {
         type: [Number],
+        default: [0, 0], // Default coordinates [longitude, latitude]
       },
     },
 
@@ -38,25 +40,26 @@ const businessOwnerSchema = new mongoose.Schema(
     },
 
     category: {
-        type: String,
-        required: [true, 'category required'],
-        enum: ['Restaurants and Cafés',
-            'Retail Stores',
-            'Health and Beauty Services',
-            'Medical and Healthcare Services',
-            'Tourism and Hospitality',
-            'Education and Training Centers:',
-            'Real Estate and Construction',
-            'Real Estate and Construction',
-            'Arts and Entertainment',
-            'Home Services',
-            'Auto Services',
-            'Other',
-        ],
+      type: String,
+      required: [true, "category required"],
+      enum: [
+        "Restaurants and Cafés",
+        "Retail Stores",
+        "Health and Beauty Services",
+        "Medical and Healthcare Services",
+        "Tourism and Hospitality",
+        "Education and Training Centers:",
+        "Real Estate and Construction",
+        "Real Estate and Construction",
+        "Arts and Entertainment",
+        "Home Services",
+        "Auto Services",
+        "Other",
+      ],
     },
     attachment: {
-        type: String,
-        required: [true, 'attachment required'],
+      type: String,
+      required: false,
     },
     status: {
       type: String,
@@ -68,6 +71,33 @@ const businessOwnerSchema = new mongoose.Schema(
       ref: "User",
       required: [true, "businessOwner must be belong to parent user"],
     },
+    media: {
+      type: [String],
+      required: false,
+    },
+    description: {
+      type: String,
+      required: false,
+    },
+    address: {
+      type: String,
+      required: false,
+    },
+    logo: {
+      type: Buffer, 
+      required: false,
+    },
+    workTime: {
+      startTime: {
+        type: String,
+        required: false,
+      },
+      endTime: {
+        type: String,
+        required: false,
+      },
+    },
+
   },
   { timestamps: true }
 );

@@ -12,7 +12,6 @@ const {
   createAdmin,
   deleteAdmin,
   getSearch,
- 
 } = require('../services/adminService');
 
 const authService = require('../services/authService');

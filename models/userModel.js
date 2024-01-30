@@ -1,6 +1,7 @@
 /* eslint-disable global-require */
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const BusinessOwner = require("./businessOwnerModel");
 
 const userSchema = new mongoose.Schema(
   {
@@ -64,7 +65,6 @@ userSchema.pre("save", async function (next) {
 userSchema.post("save", async (doc, next) => {
   if (doc.role === "businessOwner") {
     try {
-      const BusinessOwner = require("./businessOwnerModel");
       await BusinessOwner.create({
         businessName: "My Business",
         userId: doc._id,
