@@ -83,6 +83,21 @@ const businessOwnerSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    logo: {
+      type: Buffer, 
+      required: false,
+    },
+    workTime: {
+      startTime: {
+        type: String,
+        required: false,
+      },
+      endTime: {
+        type: String,
+        required: false,
+      },
+    },
+
   },
   { timestamps: true }
 );

@@ -64,8 +64,7 @@ router.put("/profileSetup/:ownerID", async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
-router.patch(
-  "/updateMyBusinessAttachment/:ownerID",
+router.patch("/updateMyBusinessAttachment/:ownerID",
   upload.single("img"),
   async (req, res) => {
     const { file } = req;
@@ -91,8 +90,7 @@ router.patch(
     }
   }
 );
-router.patch(
-  "/updateMyBusinessMedia/:ownerID",
+router.patch( "/updateMyBusinessMedia/:ownerID",
   upload.array("media", 10),
   async (req, res) => {
     const { files } = req;
@@ -118,9 +116,7 @@ router.patch(
     }
   }
 );
-// Add new route for pinning business on the map
-router.patch(
-  "/pinMyBusinessOnMap/:ownerID",
+router.patch("/pinMyBusinessOnMap/:ownerID",
   express.json(), // Middleware for parsing JSON in the request body
   async (req, res) => {
     const { ownerID } = req.params;
@@ -171,5 +167,43 @@ router.post("/addMultipleBusinesses/:ownerID", async (req, res) => {
     });
   }
 });
+router.patch( "/addLogoToBusiness/:ownerID",
+  upload.single("logo"), 
+  async (req, res) => {
+    const { file } = req;
+    const { ownerID } = req.params;
 
+    try {
+      const addedLogo = await BusinessOwnerService.addLogo(ownerID, file);
+
+      if (addedLogo) {
+        res.status(200).json({ success: true, data: addedLogo });
+      } else {
+        res
+          .status(404)
+          .json({ success: false, message: "Logo can't be added to business" });
+      }
+    } catch (error) {
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  }
+);
+router.delete("/deleteBusiness/:businessId", async (req, res) => {
+  const { businessId } = req.params;
+
+  try {
+    const deletionResult = await BusinessOwnerService.deleteBusinessById(businessId);
+
+    if (deletionResult && deletionResult.deletedCount > 0) {
+      res.status(200).json({ success: true, message: "Business deleted successfully" });
+    } else {
+      res.status(404).json({ success: false, message: "Business not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting business:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
 module.exports = router;

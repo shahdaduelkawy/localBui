@@ -1,17 +1,14 @@
 const crypto = require('crypto');
-
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-
 const asyncHandler = require('express-async-handler');
 const ApiError = require('../utils/apiError');
 const sendEmail = require('../utils/sendEmail');
 const createToken = require('../utils/createToken');
-
 const User = require('../models/userModel');
 
 // @desc    Signup
-// @route   GET /api/v1/auth/signup
+// @route   POST /api/v1/auth/signup
 // @access  Public
 exports.signup = asyncHandler(async (req, res, next) => {
   // 1- Create user
@@ -39,11 +36,11 @@ exports.signup = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    Login
-// @route   GET /api/v1/auth/login
+// @route   POST /api/v1/auth/login
 // @access  Public
 exports.login = asyncHandler(async (req, res, next) => {
   // 1) check if password and email in the body (validation)
-  // 2) check if user exist & check if password is correct
+  // 2) check if user exists & check if password is correct
   const user = await User.findOne({
     email: req.body.email
   });
@@ -56,12 +53,13 @@ exports.login = asyncHandler(async (req, res, next) => {
 
   // Delete password from response
   delete user._doc.password;
-  // 4) send response to client side
+  // 4) send response to the client side
   res.status(200).json({
     data: user,
     token
   });
 });
+
 
 // @desc   make sure the user is logged in
 exports.protect = asyncHandler(async (req, res, next) => {
@@ -252,4 +250,27 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     token
   });
+});
+exports.updateUserData = asyncHandler(async (userId, updateCriteria) => {
+  try {
+    // Check if a user for the given userId already exists
+    const existingUser = await User.findById(userId);
+
+    if (existingUser) {
+      // If a user exists, update the existing document
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        updateCriteria,
+        { new: true } // Return the modified document
+      );
+
+      return updatedUser;
+    } 
+      // If no user exists, return null or handle as needed
+      return null;
+    
+  } catch (error) {
+    console.error('Error updating user data:', error);
+    return null;
+  }
 });

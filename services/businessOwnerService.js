@@ -162,6 +162,29 @@ async getAllUserBusinesses(ownerID) {
     console.error("Error retrieving user businesses:", error);
     return null;
   }
+  }, 
+async addLogo(ownerID, logoFile) {
+    try {
+      const updateResult = await BusinessOwner.updateOne(
+        { userId: ownerID },
+        { logo: logoFile.path } // Assuming 'logo' is a field in the BusinessOwner schema
+      );
+
+      return updateResult;
+    } catch (error) {
+      console.error("Error adding logo to business:", error);
+      return null;
+    }
+  },
+  async deleteBusinessById(businessId) {
+    try {
+      const deletionResult = await BusinessOwner.deleteOne({ _id: businessId });
+
+      return deletionResult;
+    } catch (error) {
+      console.error("Error deleting business:", error);
+      return null;
+    }
   },
 };
 module.exports = BusinessOwnerService;
