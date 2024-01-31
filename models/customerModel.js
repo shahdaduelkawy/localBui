@@ -9,6 +9,10 @@ const customerSchema = new mongoose.Schema(
     },
     profileImg: {
       type: String, 
+      default: "Null",
+      required: true,
+
+
     },
   },
   { timestamps: true }

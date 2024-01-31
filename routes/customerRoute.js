@@ -1,12 +1,15 @@
 const express = require("express");
-const {upload} = require("../middleware/fileUpload.middleware");
-
+const { upload } = require("../middleware/fileUpload.middleware");
 
 const router = express.Router();
-const CustomerService = require("../services/customerService");
+const {
+  CustomerService,
+  searchBusinessesByName,
+} = require("../services/customerService");
 
-//router.get("/searchBusinesses/:customerId/:businessName", Customer.searchBusinessesByName);
-router.patch("/updateCustomerProfileImage/:customerId",
+router.get("/searchBusinesses/:businessName", searchBusinessesByName);
+router.patch(
+  "/updateCustomerProfileImage/:customerId",
   upload.single("profileImg"),
   async (req, res) => {
     const { file } = req;
@@ -33,6 +36,5 @@ router.patch("/updateCustomerProfileImage/:customerId",
     }
   }
 );
-
 
 module.exports = router;
