@@ -21,23 +21,17 @@ exports.signup = asyncHandler(async (req, res, next) => {
     gender: req.body.gender,
     phone: req.body.phone,
   });
-
   // 2- Generate token
   const token = jwt.sign({
     userId: user._id
   }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRE_TIME,
   });
-
   res.status(201).json({
     data: user,
     token
   });
 });
-
-// @desc    Login
-// @route   POST /api/v1/auth/login
-// @access  Public
 exports.login = asyncHandler(async (req, res, next) => {
   // 1) check if password and email in the body (validation)
   // 2) check if user exists & check if password is correct
@@ -59,9 +53,6 @@ exports.login = asyncHandler(async (req, res, next) => {
     token
   });
 });
-
-
-// @desc   make sure the user is logged in
 exports.protect = asyncHandler(async (req, res, next) => {
   // 1) Check if token exist, if exist get
   let token;
@@ -114,8 +105,6 @@ exports.protect = asyncHandler(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
-
-// @desc    Authorization (User Permissions)
 exports.allowedTo = (...roles) =>
   asyncHandler(async (req, res, next) => {
     // 1) access roles
@@ -127,10 +116,6 @@ exports.allowedTo = (...roles) =>
     }
     next();
   });
-
-// @desc    Forgot password
-// @route   POST /api/v1/auth/forgotPassword
-// @access  Public
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
   // 1) Get user by email
   const user = await User.findOne({
@@ -189,10 +174,6 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
 
 });
-
-// @desc    Verify password reset code
-// @route   POST /api/v1/auth/verifyResetCode
-// @access  Public
 exports.verifyPassResetCode = asyncHandler(async (req, res, next) => {
   // 1) Get user based on reset code
   const hashedResetCode = crypto
@@ -218,10 +199,6 @@ exports.verifyPassResetCode = asyncHandler(async (req, res, next) => {
     status: 'Success',
   });
 });
-
-// @desc    Reset password
-// @route   POST /api/v1/auth/resetPassword
-// @access  Public
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   // 1) Get user based on email
   const user = await User.findOne({
@@ -274,3 +251,5 @@ exports.updateUserData = asyncHandler(async (userId, updateCriteria) => {
     return null;
   }
 });
+
+

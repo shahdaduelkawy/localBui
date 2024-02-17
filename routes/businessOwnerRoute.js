@@ -6,28 +6,7 @@ const router = express.Router();
 const {upload} = require("../middleware/fileUpload.middleware");
 const BusinessOwnerService = require("../services/businessOwnerService");
 
-router.get("/getAllUserBusinesses/:ownerID", async (req, res) => {
-  const { ownerID } = req.params;
 
-  try {
-    const businesses = await BusinessOwnerService.getAllUserBusinesses(ownerID);
-
-    if (businesses !== null) {
-      res.status(200).json({ success: true, data: businesses });
-    } else {
-      res.status(404).json({ success: false, message: "No businesses found" });
-    }
-  } catch (error) {
-    console.error("Error retrieving user businesses:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal Server Error",
-        error: error.message,
-      });
-  }
-});
 router.put("/updateMyBusinessInfo/:ownerID", async (req, res) => {
   const { ownerID } = req.params;
   const data = req.body;
@@ -204,6 +183,47 @@ router.delete("/deleteBusiness/:businessId", async (req, res) => {
   } catch (error) {
     console.error("Error deleting business:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+//get all the Businesses htat the owner have
+router.get("/getAllUserBusinesses/:ownerID", async (req, res) => {
+  const { ownerID } = req.params;
+
+  try {
+    const businesses = await BusinessOwnerService.getAllUserBusinesses(ownerID);
+
+    if (businesses !== null) {
+      res.status(200).json({ success: true, data: businesses });
+    } else {
+      res.status(404).json({ success: false, message: "No businesses found" });
+    }
+  } catch (error) {
+    console.error("Error retrieving user businesses:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Internal Server Error",
+        error: error.message,
+      });
+  }
+});
+//get all the user information
+router.get('/getUserByUserID/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await BusinessOwnerService.getUserByUserID(userId);
+
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    console.error('Error getting user data by userId:', error);
+
+    if (error instanceof ApiError) {
+      res.status(error.statusCode).json({ success: false, message: error.message });
+    } else {
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
   }
 });
 module.exports = router;

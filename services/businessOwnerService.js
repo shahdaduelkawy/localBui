@@ -1,24 +1,36 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 const BusinessOwner = require("../models/businessOwnerModel");
+const User = require("../models/userModel");
+const ApiError = require('../utils/apiError');
+
 const { logActivity } = require("./activityLogService");
 
 
 const BusinessOwnerService = 
 {
-  async getUserBusiness(ownerID) {
-    try {
-      const businessData = await BusinessOwner.findOne({
-        userId: ownerID,
-      });
-      await logActivity(ownerID, "getUserBusiness", "User business retrieved successfully");
-
-      return businessData;
-    } catch (error) {
-      console.error("Error retrieving user business:", error);
-      return null;
+  async getUserByUserID (userId) {
+    // Find the user based on the user's ID
+    const user = await User.findOne({ _id: userId });
+  
+    if (!user) {
+      throw new ApiError('User not found for the given userId', 404);
     }
+  
+    // Remove sensitive information from the user object before returning
+    const sanitizedUser = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      birthday: user.birthday,
+      role: user.role,
+      gender: user.gender,
+      phone: user.phone,
+    };
+  
+    return sanitizedUser;
   },
+
   async uploadImage(ownerID, file) {
     try {
       const updateResult = await BusinessOwner.updateOne(
