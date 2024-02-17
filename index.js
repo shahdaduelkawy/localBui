@@ -3,6 +3,7 @@ require('dotenv').config({ path: './config.env' });
 const express = require("express");
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+const cors = require('cors')
 
 dotenv.config({ path: 'config.env' });
 const ApiError = require('./utils/apiError');
@@ -26,6 +27,7 @@ const app = express();
 // Middlewares
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'uploads')));
+app.use(cors())
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
