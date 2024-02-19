@@ -1,10 +1,35 @@
-/* eslint-disable no-undef */
-const express = require("express");
-
+const express = require('express');
 
 const router = express.Router();
-const {upload} = require("../middleware/fileUpload.middleware");
-const BusinessOwnerService = require("../services/businessOwnerService");
+const { upload } = require('../middleware/fileUpload.middleware');
+const BusinessOwnerService = require('../services/businessOwnerService');
+const ApiError = require('../utils/apiError');
+const { getIO } = require('../services/socket');
+
+
+// Assuming you have a function to send messages to customers in your service
+router.post('/sendMessageToCustomer/:ownerID/:customerID', async (req, res) => {
+  const { ownerID, customerID } = req.params;
+  const { message } = req.body;
+
+  try {
+    const result = await BusinessOwnerService.sendMessageToCustomer(ownerID, customerID, message);
+
+    if (result.success) {
+      // Emit a message to the business owner and customer indicating new messages
+      const io = getIO(); // Use getIO function to retrieve the io object
+      io.to(ownerID).emit('updatedMessages', { /* Update with relevant data based on your implementation */ });
+      io.to(customerID).emit('updatedMessages', { /* Update with relevant data based on your implementation */ });
+
+      res.status(200).json({ success: true, message: 'Message sent successfully' });
+    } else {
+      res.status(500).json({ success: false, message: 'Error sending message' });
+    }
+  } catch (error) {
+    console.error('Error in sendMessageToCustomer route:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
 
 
 router.put("/updateMyBusinessInfo/:ownerID", async (req, res) => {
@@ -226,4 +251,7 @@ router.get('/getUserByUserID/:userId', async (req, res) => {
     }
   }
 });
+
+
+
 module.exports = router;

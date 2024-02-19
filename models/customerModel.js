@@ -11,9 +11,14 @@ const customerSchema = new mongoose.Schema(
       type: String, 
       default: "Null",
       required: true,
-
-
     },
+    messages: [
+      {
+        sender: String,
+        content: String,
+        timestamp: Date,
+      },
+    ],
   },
   { timestamps: true }
 );

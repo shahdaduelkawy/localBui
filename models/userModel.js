@@ -56,11 +56,6 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// userSchema.virtual("myBusiness", {
-//   ref: "businessOwnerModel",
-//   localField: "_id",
-//   foreignField: "userId",
-// });
 
 userSchema.post("save", async (doc, next) => {
   if (doc.role === "businessOwner") {

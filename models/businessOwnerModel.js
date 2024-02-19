@@ -95,9 +95,15 @@ const businessOwnerSchema = new mongoose.Schema(
       endTime: {
         type: String,
         required: false,
-      },
+      }, 
     },
-
+    messages: [
+      {
+        sender: String,
+        content: String,
+        timestamp: Date,
+      },
+    ],
   },
   { timestamps: true }
 );
