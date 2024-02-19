@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-// socket.js
+//Socket.IO is a JavaScript library for real-time web applications. It enables bidirectional communication between clients 
 const socketIO = require('socket.io');
 
 let io;
