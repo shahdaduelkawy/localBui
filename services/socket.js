@@ -10,7 +10,7 @@ function initializeSocket(server) {
   io.on('connection', (socket) => {
     console.log('A business owner connected');
 
-    socket.on('messageFromCustomer', async ({ ownerID, customerID, message }) => {
+    socket.on('messageFromCustomer', async ({ ownerID, customerID }) => {
       try {
         // Handle the incoming message
         // Example: const result = await BusinessOwnerService.handleCustomerMessage(ownerID, customerID, message);
