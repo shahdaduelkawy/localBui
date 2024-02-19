@@ -104,6 +104,17 @@ const businessOwnerSchema = new mongoose.Schema(
         timestamp: Date,
       },
     ],
+    reviews: [
+      {
+        customerId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Customer",
+          required: true,
+        },
+        content: String,
+        timestamp: Date,
+      },
+    ],
   },
   { timestamps: true }
 );

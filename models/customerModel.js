@@ -12,6 +12,17 @@ const customerSchema = new mongoose.Schema(
       default: "Null",
       required: true,
     },
+    reviews: [
+      {
+        businessId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "BusinessOwner",
+          required: true,
+        },
+        content: String,
+        timestamp: Date,
+      },
+    ],
     messages: [
       {
         sender: String,

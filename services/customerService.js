@@ -19,8 +19,58 @@ const CustomerService = {
       return error.message;
       
     }
+  }, 
+   //customer can write a review to businessowner 
+  async writeReview(customerId, businessId, review) {
+    try {
+      const customer = await Customer.findOne({ userId: customerId });
+
+      if (!customer) {
+        return { success: false, message: "Customer not found" };
+      }
+
+      // Check if the provided businessId exists
+      const business = await BusinessOwner.findById(businessId);
+
+      if (!business) {
+        return { success: false, message: "Business not found" };
+      }
+
+      // Add the review to the customer's reviews array
+      customer.reviews.push({
+        businessId: businessId,
+        content: review,
+        timestamp: new Date(),
+      });
+
+      // Save the updated customer
+      await customer.save();
+
+      // Add the review to the businessOwnerModel's reviews array
+      business.reviews.push({
+        customerId: customerId,
+        content: review,
+        timestamp: new Date(),
+      });
+
+      // Save the updated businessOwnerModel
+      await business.save();
+
+      await logActivity(
+        customerId,
+        "writeReview",
+        `Wrote a review for ${business.businessName}`
+      );
+
+      return { success: true, message: "Review added successfully" };
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: "Internal Server Error" };
+    }
   },
-  };
+
+
+};
 
   const searchBusinessesByName = async (req, res) => {
     try {
