@@ -11,28 +11,38 @@ const { logActivity } = require("./activityLogService");
 
 const BusinessOwnerService = 
 {
-  async getUserByUserID (userId) {
-    // Find the user based on the user's ID
-    const user = await User.findOne({ _id: userId });
+  async getUserByUserID(userId) {
+    try {
+      // Find the user based on the user's ID
+      const user = await User.findOne({ _id: userId });
   
-    if (!user) {
-      throw new ApiError('User not found for the given userId', 404);
+      if (!user) {
+        throw new ApiError('User not found for the given userId', 404);
+      }
+  
+      // Include the `userProfile` field in the sanitized user object
+      const sanitizedUser = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        birthday: user.birthday,
+        role: user.role,
+        gender: user.gender,
+        phone: user.phone,
+        userProfile: user.userProfile, // Include the userProfile field
+      };
+  
+      return sanitizedUser;
+    } catch (error) {
+      console.error("Error getting user data by userId:", error);
+  
+      if (error instanceof ApiError) {
+        throw error;
+      } else {
+        throw new ApiError("Internal Server Error", 500);
+      }
     }
-  
-    // Remove sensitive information from the user object before returning
-    const sanitizedUser = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      birthday: user.birthday,
-      role: user.role,
-      gender: user.gender,
-      phone: user.phone,
-    };
-  
-    return sanitizedUser;
   },
-
   async uploadImage(ownerID, file) {
     try {
       const updateResult = await BusinessOwner.updateOne(
@@ -192,7 +202,7 @@ async addLogo(ownerID, logoFile) {
       return null;
     }
   },
-  async deleteBusinessById(businessId) {
+async deleteBusinessById(businessId) {
     try {
       const deletionResult = await BusinessOwner.deleteOne({ _id: businessId });
 
@@ -202,7 +212,7 @@ async addLogo(ownerID, logoFile) {
       return null;
     }
   },
-  async sendMessageToCustomer(ownerId, customerId, message) {
+async sendMessageToCustomer(ownerId, customerId, message) {
 
     try {
   
@@ -312,8 +322,28 @@ async addLogo(ownerID, logoFile) {
   
     }
   
-   }
-  
+  },
+async addProfileImg(userId, file) {
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userId },
+      { userProfile: file.path },
+      { new: true } // to return the updated document
+    );
+
+    if (updatedUser) {
+      await logActivity(userId, "addProfileImg", "Profile image added successfully");
+      return { success: true, message: 'Profile image added successfully' };
+    } 
+      return { success: false, message: 'User not found' };
+    
+  } catch (error) {
+    console.error('Error adding profile image:', error);
+    return { success: false, message: 'Internal Server Error' };
+  }
+},
+
+
 };
 module.exports = BusinessOwnerService;
 

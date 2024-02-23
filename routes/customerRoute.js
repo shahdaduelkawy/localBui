@@ -8,10 +8,8 @@ const {
 } = require("../services/customerService");
 
 router.get("/searchBusinesses/:businessName", searchBusinessesByName);
-router.patch(
-  "/updateCustomerProfileImage/:customerId",
-  upload.single("profileImg"),
-  async (req, res) => {
+router.patch("/updateCustomerProfileImage/:customerId",upload.single("profileImg"),
+   async (req, res) => {
     const { file } = req;
     const { customerId } = req.params;
 
@@ -34,8 +32,7 @@ router.patch(
         .status(500)
         .json({ success: false, message: "Internal Server Error" });
     }
-  }
-);
+  });
 router.post("/:customerId/writeReview/:businessId", async (req, res) => {
   try {
     const { customerId, businessId } = req.params;
@@ -55,7 +52,7 @@ router.post("/:customerId/writeReview/:businessId", async (req, res) => {
     console.error(error);
     return res.status(500).json({ status: "error", error: "Internal Server Error" });
   }
-});
+  });
 
 
 module.exports = router;

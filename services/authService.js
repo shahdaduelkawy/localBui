@@ -7,12 +7,10 @@ const sendEmail = require('../utils/sendEmail');
 const createToken = require('../utils/createToken');
 const User = require('../models/userModel');
 
-// @desc    Signup
-// @route   POST /api/v1/auth/signup
-// @access  Public
 exports.signup = asyncHandler(async (req, res, next) => {
   // 1- Create user
   const user = await User.create({
+    userProfile: req.body.userProfile,
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
