@@ -1,3 +1,4 @@
+/* eslint-disable radix */
 const BusinessOwner = require("../models/businessOwnerModel");
 
 const BusinessOwnerService = {
@@ -98,6 +99,41 @@ const BusinessOwnerService = {
       console.error(
         `Error pinning business on map for owner ${ownerID}: ${error.message}`
       );
+    }
+  },
+  async getBusinessesNearby(longitude, latitude, minDistance, maxDistance) {
+    try {
+      // Convert longitude and latitude to numbers
+      const longitudeNum = parseFloat(longitude);
+      const latitudeNum = parseFloat(latitude);
+
+      // Ensure valid longitude and latitude values
+      if (Number.isNaN(longitudeNum) || Number.isNaN(latitudeNum)) {
+        throw new Error("Invalid longitude or latitude values");
+      }
+
+      // Convert minDistance and maxDistance to numbers
+      const minDistanceNum = parseInt(minDistance);
+      const maxDistanceNum = parseInt(maxDistance);
+
+      // Perform the MongoDB query using the provided parameters
+      const businessOwners = await BusinessOwner.find({
+        business: {
+          $near: {
+            $geometry: {
+              type: "Point",
+              coordinates: [longitudeNum, latitudeNum],
+            },
+            $minDistance: minDistanceNum,
+            $maxDistance: maxDistanceNum,
+          },
+        },
+      });
+
+      return businessOwners;
+    } catch (error) {
+      console.error("Error getting nearby businesses:", error);
+      throw error;
     }
   },
 };
