@@ -1,11 +1,39 @@
 const express = require("express");
 const { upload } = require("../middleware/fileUpload.middleware");
+const { getIO } = require("../services/socket");
 
 const router = express.Router();
 const {
   CustomerService,
   searchBusinessesByName,
 } = require("../services/customerService");
+
+router.post("/sendMessageToBusinessOwner/:customerId/:ownerId", async (req, res) => {
+  const { customerId, ownerId } = req.params;
+  const { message } = req.body;
+
+  try {
+    const result = await CustomerService.sendMessageToBusinessOwner(customerId, ownerId, message);
+
+    if (result.success) {
+      // Emit a message to the customer and business owner indicating new messages
+      const io = getIO();
+      io.to(customerId).emit("updatedMessages", {
+        /* Update with relevant data based on your implementation */
+      });
+      io.to(ownerId).emit("updatedMessages", {
+        /* Update with relevant data based on your implementation */
+      });
+
+      res.status(200).json({ success: true, message: "Message sent successfully" });
+    } else {
+      res.status(500).json({ success: false, message: "Error sending message" });
+    }
+  } catch (error) {
+    console.error("Error in sendMessageToBusinessOwner route:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
 
 router.get("/searchBusinesses/:businessName", searchBusinessesByName);
 router.patch("/updateCustomerProfileImage/:customerId",upload.single("profileImg"),

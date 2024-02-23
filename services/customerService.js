@@ -1,10 +1,68 @@
 const Customer = require("../models/customerModel");
 const { logActivity } = require("./activityLogService");
 const BusinessOwner = require("../models/businessOwnerModel");
+const ApiError = require('../utils/apiError');
 
 
 const CustomerService = {
+  async sendMessageToBusinessOwner(customerId, ownerId, message) {
+    try {
+      // Check if the customer exists
+      const customer = await Customer.findOne({ userId: customerId });
 
+      if (!customer) {
+        throw new ApiError(`Customer not found for ID: ${customerId}`, 404);
+      }
+
+      // Check if the business owner exists
+      const businessOwner = await BusinessOwner.findOne({ userId: ownerId });
+
+      if (!businessOwner) {
+        throw new ApiError(`Business owner not found for ID: ${ownerId}`, 404);
+      }
+
+      // Ensure `messages` arrays exist and are not empty
+      customer.messages = Array.isArray(customer.messages) ? customer.messages : [];
+      businessOwner.messages = Array.isArray(businessOwner.messages) ? businessOwner.messages : [];
+
+      // Create the message objects consistently
+      const customerMessage = {
+        sender: 'customer',
+        content: message,
+        timestamp: new Date(),
+      };
+
+      const businessOwnerMessage = {
+        sender: 'customer',
+        content: message, // Ensure content is set correctly
+        timestamp: new Date(),
+      };
+
+      // Push messages into the arrays
+      customer.messages.push(customerMessage);
+      businessOwner.messages.push(businessOwnerMessage);
+
+      // Ensure data is saved to the database
+      await customer.save();
+      await businessOwner.save();
+
+      // Log activity after saving for consistency
+      await logActivity(customerId, "sendMessageToBusinessOwner", "Message sent successfully");
+
+      // Return the updated messages and status
+      return {
+        success: true,
+        message: "Message sent successfully",
+        customerMessages: customer.messages,
+        businessOwnerMessages: businessOwner.messages,
+      };
+    } catch (error) {
+      console.error(`Error sending message: ${error.message}`);
+      throw new ApiError("Error sending message", error.statusCode || 500);
+    }
+  },
+
+  
   async uploadCustomerImage(customerId, file) {
     try {
       const updateResult = await Customer.updateOne(
@@ -68,6 +126,8 @@ const CustomerService = {
       return { success: false, message: "Internal Server Error" };
     }
   },
+  
+
 
 
 };
@@ -94,7 +154,6 @@ const CustomerService = {
       return res.status(500).json({ status: 'error', error: "Internal Server Error" });
     }
   };
-  
   module.exports = {
     searchBusinessesByName,
     CustomerService
