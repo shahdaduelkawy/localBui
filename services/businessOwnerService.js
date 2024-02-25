@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 const BusinessOwner = require("../models/businessOwnerModel");
@@ -323,27 +324,25 @@ async deleteBusinessById(businessId) {
       return null;
     }
   },
-async addProfileImg(userId, file) {
-  try {
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: userId },
-      { userProfile: file.path },
-      { new: true } // to return the updated document
-    );
+  async addProfilePic(userId, profilePicPath) {
+    try {
+        const user = await User.findById(userId);
 
-    if (updatedUser) {
-      await logActivity(userId, "addProfileImg", "Profile image added successfully");
-      return { success: true, message: 'Profile image added successfully' };
-    } 
-      return { success: false, message: 'User not found' };
-    
-  } catch (error) {
-    console.error('Error adding profile image:', error);
-    return { success: false, message: 'Internal Server Error' };
-  }
-},
+        if (!user) {
+            throw new Error('User not found');
+        }
 
+        user.userProfile = profilePicPath;
+        await user.save();
 
+        return user;
+    } catch (error) {
+        throw error;
+    }
+}
 };
+
+
+
 module.exports = BusinessOwnerService;
 

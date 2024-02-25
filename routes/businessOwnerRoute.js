@@ -1,10 +1,11 @@
 const express = require("express");
 
 const router = express.Router();
-const { upload } = require("../middleware/fileUpload.middleware");
+const { upload , uploadProfilePic} = require("../middleware/fileUpload.middleware");
 const BusinessOwnerService = require("../services/businessOwnerService");
 const ApiError = require("../utils/apiError");
 const { getIO } = require("../services/socket");
+
 
 // Assuming you have a function to send messages to customers in your service
 router.post("/sendMessageToCustomer/:ownerID/:customerID", async (req, res) => {
@@ -274,28 +275,18 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
   }
 });
 
-router.patch("/addProfileImg/:userId",
-  upload.single("userProfile"),
-  async (req, res) => {
-    const { file } = req;
-    const { userId } = req.params;
+router.post('/uploadProfilePic/:customerId', uploadProfilePic.single('profilePic'), async (req, res) => {
+  try {
+      const userId = req.params.customerId;
+      const profilePicPath = req.file.path; // Assuming multer saves the file path
 
-    try {
-      const uploadedImage = await BusinessOwnerService.addProfileImg(
-        userId,
-        file
-      );
+      const updatedUser = await BusinessOwnerService.addProfilePic(userId, profilePicPath);
 
-      if (uploadedImage.success) {
-        res.status(200).json({ success: true, message: 'Profile image added successfully' });
-      } else {
-        res.status(404).json({ success: false, message: 'User not found' });
-      }
-    } catch (error) {
+      res.json(updatedUser);
+  } catch (error) {
       console.error(error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
-    }
+      res.status(500).json({ error: 'Internal Server Error' });
   }
-);
+});
 
 module.exports = router;

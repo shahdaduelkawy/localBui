@@ -48,7 +48,6 @@ const userSchema = new mongoose.Schema(
    userProfile: {
     type: String, 
     default: "Null",
-    required: false,
   },
     
   },
