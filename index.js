@@ -3,6 +3,8 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-use-before-define */
 /* eslint-disable import/no-extraneous-dependencies */
+const socketIO = require('socket.io');
+
 const path = require('path');
 require('dotenv').config({ path: './config.env' });
 const express = require("express");
