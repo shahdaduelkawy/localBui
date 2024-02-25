@@ -275,18 +275,22 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
   }
 });
 
-router.post('/uploadProfilePic/:customerId', uploadProfilePic.single('profilePic'), async (req, res) => {
+router.post('/add-photo/:userId', express.raw({ type: 'image/*' }), async (req, res) => {
   try {
-      const userId = req.params.customerId;
-      const profilePicPath = req.file.path; // Assuming multer saves the file path
+    const { userId } = req.params;
+    const photoBuffer = req.body;
 
-      const updatedUser = await BusinessOwnerService.addProfilePic(userId, profilePicPath);
+    // Assuming the photo data is received as raw binary, you may need to adjust accordingly
+    const photoUrl = await BusinessOwnerService.uploadPhotoBuffer(userId, photoBuffer);
 
-      res.json(updatedUser);
+    // Send a success response
+    res.status(200).json({ success: true, message: 'Photo added to user profile successfully', photoUrl });
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+    // Handle errors
+    console.error('Error adding photo:', error.message);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
+
 
 module.exports = router;
