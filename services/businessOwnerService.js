@@ -324,33 +324,6 @@ async deleteBusinessById(businessId) {
       return null;
     }
   },
-  async uploadPhotoBuffer(userId, photoBuffer) {
-    try {
-      // Find the user by ID
-      const user = await User.findById(userId);
-  
-      // If the user is not found, handle accordingly
-      if (!user) {
-        console.log('User not found');
-        return null;
-      }
-  
-      // Convert the buffer to a base64 string (or handle it according to your use case)
-      const base64Image = photoBuffer.toString('base64');
-  
-      // Update the user's userProfile property with the new photo data (base64 string)
-      user.userProfile = `data:image/*;base64,${base64Image}`;
-  
-      // Save the updated user
-      await user.save();
-  
-      console.log('Photo added to user profile successfully');
-      return user.userProfile; // Return the updated photo URL or data
-    } catch (error) {
-      console.error('Error adding photo to user profile:', error.message);
-      return null;
-    }
-  }
   
 };
 

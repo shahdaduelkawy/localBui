@@ -1,7 +1,7 @@
 const express = require("express");
 
 const router = express.Router();
-const { upload , uploadProfilePic} = require("../middleware/fileUpload.middleware");
+const { upload} = require("../middleware/fileUpload.middleware");
 const BusinessOwnerService = require("../services/businessOwnerService");
 const ApiError = require("../utils/apiError");
 const { getIO } = require("../services/socket");
@@ -275,22 +275,7 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
   }
 });
 
-router.post('/add-photo/:userId', express.raw({ type: 'image/*' }), async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const photoBuffer = req.body;
 
-    // Assuming the photo data is received as raw binary, you may need to adjust accordingly
-    const photoUrl = await BusinessOwnerService.uploadPhotoBuffer(userId, photoBuffer);
-
-    // Send a success response
-    res.status(200).json({ success: true, message: 'Photo added to user profile successfully', photoUrl });
-  } catch (error) {
-    // Handle errors
-    console.error('Error adding photo:', error.message);
-    res.status(500).json({ success: false, error: 'Internal Server Error' });
-  }
-});
 
 
 module.exports = router;

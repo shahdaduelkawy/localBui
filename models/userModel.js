@@ -45,11 +45,11 @@ const userSchema = new mongoose.Schema(
       type: Date,
     },
      
-   userProfile: {
-    type: String, 
-    default: "Null",
+  userProfile: {
+    type: String,
+    required: false,
   },
-    
+
   },
   { timestamps: true }
 );
