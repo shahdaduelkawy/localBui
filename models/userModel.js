@@ -46,8 +46,9 @@ const userSchema = new mongoose.Schema(
     },
      
   userProfile: {
-    type: String,
-    required: false,
+    type: String, 
+      default: "Null",
+      required: true,
   },
   
 
