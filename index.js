@@ -11,11 +11,10 @@ const globalError = require("./middleware/errorMiddleware");
 const dbConnection = require("./config/db");
 
 //Routes
-const authRoute = require('./routes/authRoute');
-const adminRoute = require('./routes/adminRoute');
-const businessOwnerRoute = require('./routes/businessOwnerRoute');
-const customerRouter = require('./routes/customerRouter');
-
+const authRoute = require("./routes/authRoute");
+const adminRoute = require("./routes/adminRoute");
+const businessOwnerRoute = require("./routes/businessOwnerRoute");
+const customerRouter = require("./routes/customerRouter");
 
 // connect db
 dbConnection();
@@ -33,21 +32,19 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // Mount Routes
-app.use('/businessOwner', businessOwnerRoute);
-app.use('/admin', adminRoute);
-app.use('/auth', authRoute);
-app.use('/customer', customerRouter);
+app.use("/businessOwner", businessOwnerRoute);
+app.use("/admin", adminRoute);
+app.use("/auth", authRoute);
+app.use("/customer", customerRouter);
 
-
-
-app.all('*', (req, res, next) => {
+app.all("*", (req, res, next) => {
   next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
 });
 
 // Global error handling middleware for express
 app.use(globalError);
 
-const PORT =  process.env.PORT || 3011;
+const PORT = process.env.PORT || 3011;
 app.listen(PORT, () => {
   console.log(`Server is running on port num ${PORT}`);
 });

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const businessOwnerSchema = new mongoose.Schema(
   {
@@ -21,42 +21,33 @@ const businessOwnerSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
     },
-    /*  location: {
-        type: {
-            type: String,
-            enum: ['Point'],
-            default: 'Point',
-        },
-      
-    },*/
-    // coordinates : {
-    //     type : [Number]
-    // },
+
     Country: {
       type: String,
       required: [true, "Country required"],
     },
 
     category: {
-        type: String,
-        required: [true, 'category required'],
-        enum: ['Restaurants and Cafés',
-            'Retail Stores',
-            'Health and Beauty Services',
-            'Medical and Healthcare Services',
-            'Tourism and Hospitality',
-            'Education and Training Centers:',
-            'Real Estate and Construction',
-            'Real Estate and Construction',
-            'Arts and Entertainment',
-            'Home Services',
-            'Auto Services',
-            'Other',
-        ],
+      type: String,
+      required: [true, "category required"],
+      enum: [
+        "Restaurants and Cafés",
+        "Retail Stores",
+        "Health and Beauty Services",
+        "Medical and Healthcare Services",
+        "Tourism and Hospitality",
+        "Education and Training Centers:",
+        "Real Estate and Construction",
+        "Real Estate and Construction",
+        "Arts and Entertainment",
+        "Home Services",
+        "Auto Services",
+        "Other",
+      ],
     },
     attachment: {
-        type: String,
-        required: [true, 'attachment required'],
+      type: String,
+      required: [true, "attachment required"],
     },
     status: {
       type: String,
