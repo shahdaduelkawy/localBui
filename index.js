@@ -1,15 +1,6 @@
-// index.js
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-/* eslint-disable no-use-before-define */
-/* eslint-disable import/no-extraneous-dependencies */
-const socketIO = require('socket.io');
-
 const path = require('path');
 require('dotenv').config({ path: './config.env' });
-const express = require("express");
-// eslint-disable-next-line no-unused-vars
-const dotenv = require('dotenv');
+const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 
@@ -29,14 +20,15 @@ const activityLogRoute = require('./routes/activityLogRoute');
 const app = express();
 
 // Middlewares
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'uploads')));
-app.use(cors());
-
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
   console.log(`mode: ${process.env.NODE_ENV}`);
 }
+
+app.use(cors());
+app.use(express.json());
+app.use('/img', express.static('img/'));
+app.use(express.static(path.join(__dirname, 'img')));
 
 // Connect to db
 dbConnection();

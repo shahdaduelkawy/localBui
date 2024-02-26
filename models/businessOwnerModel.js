@@ -84,7 +84,7 @@ const businessOwnerSchema = new mongoose.Schema(
       required: false,
     },
     logo: {
-      type: Buffer, 
+      type: Buffer,
       required: false,
     },
     workTime: {
@@ -95,7 +95,7 @@ const businessOwnerSchema = new mongoose.Schema(
       endTime: {
         type: String,
         required: false,
-      }, 
+      },
     },
     messages: [
       {
