@@ -155,23 +155,6 @@ const BusinessOwnerService =
       }
     }
   },
-  async uploadImage(ownerID, file) {
-    try {
-      const updateResult = await BusinessOwner.updateOne(
-        {
-          userId: ownerID,
-        },
-        {
-          attachment: file.path,
-        }
-      );
-      await logActivity(ownerID, "uploadImage", "Image uploaded successfully");
-
-      return updateResult;
-    } catch (error) {
-      return error.message;
-    }
-  },
   async uploadedmedia(ownerID, files) {
     try {
       const updateResults = await Promise.all(
@@ -324,6 +307,42 @@ async deleteBusinessById(businessId) {
       return null;
     }
   },
+  async uploadImage(ownerID, file) {
+    try {
+      const updateResult = await BusinessOwner.updateOne(
+        {
+          userId: ownerID,
+        },
+        {
+          attachment: file.path,
+        }
+      );
+      await logActivity(ownerID, "uploadImage", "Image uploaded successfully");
+
+      return updateResult;
+    } catch (error) {
+      return error.message;
+    }
+  },
+  async addImageToUserProfile(userId, imagePath) {
+    try {
+      const updateppResult = await User.updateOne(
+        {
+           _id: userId
+           },
+        { 
+          userProfile: imagePath 
+        }
+      );
+      await logActivity(userId, "uploadImage", "Image uploaded successfully");
+
+      return updateppResult;
+    } catch (error) {
+      console.error("Error adding image to user profile:", error);
+      throw error;
+    }
+  },
+  
   
 };
 

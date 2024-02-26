@@ -275,7 +275,32 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
   }
 });
 
+router.patch(
+  "/addImageToUserProfile/:userId",
+  upload.single("img"),
+  async (req, res) => {
+    const { file } = req;
+    const { userId } = req.params;
 
+    try {
+      const updatedUserProfile = await BusinessOwnerService.addImageToUserProfile(
+        userId,
+        file.path
+      );
 
+      if (updatedUserProfile) {
+        res.status(200).json({ success: true, data: updatedUserProfile });
+      } else {
+        res
+          .status(404)
+          .json({ success: false, message: "Image Can't Be Uploaded" });
+      }
+    } catch (error) {
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  }
+);
 
 module.exports = router;
