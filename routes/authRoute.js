@@ -51,9 +51,14 @@ router.put('/updateUserData/:userId', async (req, res) => {
 router.patch('/changePassword/:userId',
   asyncHandler(async (req, res, next) => {
     const { userId } = req.params;
-    const { oldPassword, newPassword } = req.body;
+    const { oldPassword, newPassword, passwordConfirm } = req.body;
 
     try {
+      // Check if newPassword and passwordConfirm match
+      if (newPassword !== passwordConfirm) {
+        return next(new ApiError('New password and password confirmation do not match', 400));
+      }
+
       // Call the changePassword function
       const user = await User.findById(userId);
 
@@ -67,7 +72,7 @@ router.patch('/changePassword/:userId',
       // Password changed successfully
       res.status(200).json({ message: 'Password changed successfully' });
     } catch (error) {
-      // Handle errors, such as incorrect old password
+      // Handle errors, such as incorrect old password or validation errors
       return next(new ApiError(error.message, 400));
     }
   })
