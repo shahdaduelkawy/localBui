@@ -1,4 +1,9 @@
+
 const express = require('express');
+const asyncHandler = require('express-async-handler');
+const ApiError = require("../utils/apiError");
+const User = require("../models/userModel");
+
 const {
   signupValidator,
   loginValidator,
@@ -43,5 +48,31 @@ router.put('/updateUserData/:userId', async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
+router.patch('/changePassword/:userId',
+  asyncHandler(async (req, res, next) => {
+    const { userId } = req.params;
+    const { oldPassword, newPassword } = req.body;
+
+    try {
+      // Call the changePassword function
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return next(new ApiError('User not found', 404));
+      }
+
+      // Call the changePassword method
+      await user.changePassword(oldPassword, newPassword);
+
+      // Password changed successfully
+      res.status(200).json({ message: 'Password changed successfully' });
+    } catch (error) {
+      // Handle errors, such as incorrect old password
+      return next(new ApiError(error.message, 400));
+    }
+  })
+);
+
+
 
 module.exports = router;

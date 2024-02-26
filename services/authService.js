@@ -249,5 +249,27 @@ exports.updateUserData = asyncHandler(async (userId, updateCriteria) => {
     return null;
   }
 });
+exports.changePassword = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id; // Assuming you have the authenticated user in the request
+  const { oldPassword, newPassword } = req.body;
+
+  try {
+    // Find the user by ID
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return next(new ApiError('User not found', 404));
+    }
+
+    // Call the changePassword function
+    await user.changePassword(oldPassword, newPassword);
+
+    // Password changed successfully
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    // Handle errors, such as incorrect old password
+    return next(new ApiError(error.message, 400));
+  }
+});
 
 
