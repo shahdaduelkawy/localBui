@@ -1,7 +1,7 @@
 const express = require("express");
 
 const router = express.Router();
-const { upload} = require("../middleware/fileUpload.middleware");
+const { upload, uploadProfilePic} = require("../middleware/fileUpload.middleware");
 const BusinessOwnerService = require("../services/businessOwnerService");
 const ApiError = require("../utils/apiError");
 const { getIO } = require("../services/socket");
@@ -277,19 +277,19 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
 
 router.patch(
   "/addImageToUserProfile/:userId",
-  upload.single("img"),
+  uploadProfilePic.single("userProfile"),
   async (req, res) => {
-    const { file } = req;
+    const { file  } = req;
     const { userId } = req.params;
 
     try {
-      const updatedUserProfile = await BusinessOwnerService.addImageToUserProfile(
+      const uploadedImage = await BusinessOwnerService.addImageToUserProfile(
         userId,
-        file.path
+        file 
       );
 
-      if (updatedUserProfile) {
-        res.status(200).json({ success: true, data: updatedUserProfile });
+      if (uploadedImage) {
+        res.status(200).json({ success: true, data: uploadedImage });
       } else {
         res
           .status(404)

@@ -324,19 +324,19 @@ async deleteBusinessById(businessId) {
       return error.message;
     }
   },
-  async addImageToUserProfile(userId, imagePath) {
+  async addImageToUserProfile(userId, file ) {
     try {
-      const updateppResult = await User.updateOne(
+      const updateResult = await User.updateOne(
         {
            _id: userId
            },
         { 
-          userProfile: imagePath 
+          userProfile: file.path,  
         }
       );
       await logActivity(userId, "uploadImage", "Image uploaded successfully");
 
-      return updateppResult;
+      return updateResult;
     } catch (error) {
       console.error("Error adding image to user profile:", error);
       throw error;

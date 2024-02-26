@@ -1,5 +1,5 @@
 const express = require("express");
-const { upload } = require("../middleware/fileUpload.middleware");
+const { uploadProfilePic } = require("../middleware/fileUpload.middleware");
 const { getIO } = require("../services/socket");
 
 const router = express.Router();
@@ -36,7 +36,8 @@ router.post("/sendMessageToBusinessOwner/:customerId/:ownerId", async (req, res)
 });
 
 router.get("/searchBusinesses/:businessName", searchBusinessesByName);
-router.patch("/updateCustomerProfileImage/:customerId",upload.single("profileImg"),
+router.patch("/updateCustomerProfileImage/:customerId",
+uploadProfilePic.single("profileImg"),
    async (req, res) => {
     const { file } = req;
     const { customerId } = req.params;

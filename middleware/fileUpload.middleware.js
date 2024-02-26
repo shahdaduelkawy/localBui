@@ -2,7 +2,7 @@ const multer = require("multer")
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "uploads/")
+        cb(null, "img/uploads/")
     },
     filename: (req, file, cb) => {
         const ext = file.originalname.split(".").pop()
@@ -25,7 +25,7 @@ const upload = multer({
 
 const profilePicStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "profile-pics/");
+        cb(null, "img/profile-pics/");
     },
     filename: (req, file, cb) => {
         const ext = file.originalname.split(".").pop();
