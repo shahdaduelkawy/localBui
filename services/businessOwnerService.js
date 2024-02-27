@@ -198,9 +198,9 @@ const BusinessOwnerService =
     }
   },
   
-  async pinBusinessOnMap(ownerID, coordinates) {
+  async pinBusinessOnMap(businessId, coordinates) {
     try {
-      const businessOwner = await BusinessOwner.findOne({ userId: ownerID });
+      const businessOwner = await BusinessOwner.findOne({ _id: businessId });
 
       if (!businessOwner) {
         throw new Error("Business owner not found");
@@ -212,19 +212,19 @@ const BusinessOwnerService =
       };
 
       await businessOwner.save();
-      await logActivity(ownerID, "pinBusinessOnMap", "Business location pinned successfully");
+      await logActivity(businessId, "pinBusinessOnMap", "Business location pinned successfully");
 
       console.log("Business location pinned successfully");
     } catch (error) {
       console.error(
-        `Error pinning business on map for owner ${ownerID}: ${error.message}`
+        `Error pinning business on map for owner ${businessId}: ${error.message}`
       );
     }
   },
   async updateUserBusiness(businessId, updateCriteria) {
     try {
       // Check if a business for the given userId already exists
-      const existingBusiness = await BusinessOwner.findOne({ userId: businessId });
+      const existingBusiness = await BusinessOwner.findOne({ _id: businessId });
   
       if (existingBusiness) {
         // If a business exists, update the existing document

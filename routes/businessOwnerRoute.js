@@ -130,15 +130,14 @@ router.patch("/updateMyBusinessMedia/:businessId",
     }
   }
 );
-router.patch(
-  "/pinMyBusinessOnMap/:ownerID",
+router.patch("/pinMyBusinessOnMap/:businessId",
   express.json(), // Middleware for parsing JSON in the request body
   async (req, res) => {
-    const { ownerID } = req.params;
+    const { businessId } = req.params;
     const { coordinates } = req.body;
 
     try {
-      await BusinessOwnerService.pinBusinessOnMap(ownerID, coordinates);
+      await BusinessOwnerService.pinBusinessOnMap(businessId, coordinates);
       res.status(200).json({
         success: true,
         message: "Business location pinned successfully",
