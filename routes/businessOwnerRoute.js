@@ -130,25 +130,6 @@ router.patch("/updateMyBusinessMedia/:businessId",
     }
   }
 );
-router.patch("/pinMyBusinessOnMap/:businessId",
-  express.json(), // Middleware for parsing JSON in the request body
-  async (req, res) => {
-    const { businessId } = req.params;
-    const { coordinates } = req.body;
-
-    try {
-      await BusinessOwnerService.pinBusinessOnMap(businessId, coordinates);
-      res.status(200).json({
-        success: true,
-        message: "Business location pinned successfully",
-      });
-    } catch (error) {
-      res
-        .status(500)
-        .json({ success: false, message: "Internal Server Error" });
-    }
-  }
-);
 router.post("/addMultipleBusinesses/:ownerID", async (req, res) => {
   const { ownerID } = req.params;
   const businessesData = req.body;
@@ -296,5 +277,41 @@ router.patch( "/addImageToUserProfile/:userId",
     }
   }
 );
+// Add new route for pinning business on the map
+router.patch("/pinMyBusinessOnMap/:ownerID",
+  express.json(), // Middleware for parsing JSON in the request body
+  async (req, res) => {
+    const {ownerID} = req.params;
+    const {coordinates} = req.body;
+
+    try {
+      await BusinessOwnerService.pinBusinessOnMap(ownerID, coordinates);
+      res.status(200).json({
+        success: true,
+        message: "Business location pinned successfully",
+      });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  }
+);
+router.get("/getBusinessesNearby", async (req, res) => {
+  const { longitude, latitude, minDistance, maxDistance } = req.query;
+
+  try {
+    const nearbyBusinesses = await BusinessOwnerService.getBusinessesNearby(
+      longitude,
+      latitude,
+      minDistance,
+      maxDistance
+    );
+
+    res.status(200).json({ success: true, data: nearbyBusinesses });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
 
 module.exports = router;

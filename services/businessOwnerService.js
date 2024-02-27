@@ -1,3 +1,4 @@
+/* eslint-disable radix */
 /* eslint-disable no-useless-catch */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
@@ -197,30 +198,6 @@ const BusinessOwnerService =
       return null;
     }
   },
-  
-  async pinBusinessOnMap(businessId, coordinates) {
-    try {
-      const businessOwner = await BusinessOwner.findOne({ _id: businessId });
-
-      if (!businessOwner) {
-        throw new Error("Business owner not found");
-      }
-
-      businessOwner.business = {
-        type: "Point",
-        coordinates: coordinates,
-      };
-
-      await businessOwner.save();
-      await logActivity(businessId, "pinBusinessOnMap", "Business location pinned successfully");
-
-      console.log("Business location pinned successfully");
-    } catch (error) {
-      console.error(
-        `Error pinning business on map for owner ${businessId}: ${error.message}`
-      );
-    }
-  },
   async updateUserBusiness(businessId, updateCriteria) {
     try {
       // Check if a business for the given userId already exists
@@ -348,7 +325,63 @@ async deleteBusinessById(businessId) {
       throw error;
     }
   },
-  
+  async pinBusinessOnMap(ownerID, coordinates) {
+    try {
+      const businessOwner = await BusinessOwner.findOne({ userId: ownerID });
+
+      if (!businessOwner) {
+        throw new Error("Business owner not found");
+      }
+
+      businessOwner.business = {
+        type: "Point",
+        coordinates: coordinates,
+      };
+
+      await businessOwner.save();
+
+      console.log("Business location pinned successfully");
+    } catch (error) {
+      console.error(
+        `Error pinning business on map for owner ${ownerID}: ${error.message}`
+      );
+    }
+  },
+  async getBusinessesNearby(longitude, latitude, minDistance, maxDistance) {
+    try {
+      // Convert longitude and latitude to numbers
+      const longitudeNum = parseFloat(longitude);
+      const latitudeNum = parseFloat(latitude);
+
+      // Ensure valid longitude and latitude values
+      if (Number.isNaN(longitudeNum) || Number.isNaN(latitudeNum)) {
+        throw new Error("Invalid longitude or latitude values");
+      }
+
+      // Convert minDistance and maxDistance to numbers
+      const minDistanceNum = parseInt(minDistance);
+      const maxDistanceNum = parseInt(maxDistance);
+
+      // Perform the MongoDB query using the provided parameters
+      const businessOwners = await BusinessOwner.find({
+        business: {
+          $near: {
+            $geometry: {
+              type: "Point",
+              coordinates: [longitudeNum, latitudeNum],
+            },
+            $minDistance: minDistanceNum,
+            $maxDistance: maxDistanceNum,
+          },
+        },
+      });
+
+      return businessOwners;
+    } catch (error) {
+      console.error("Error getting nearby businesses:", error);
+      throw error;
+    }
+  },
   
 };
 
