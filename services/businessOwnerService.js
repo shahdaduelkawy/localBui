@@ -155,43 +155,49 @@ const BusinessOwnerService =
       }
     }
   },
-  async uploadedmedia(ownerID, files) {
+  async uploadedmedia(businessId, files) {
     try {
       const updateResults = await Promise.all(
         files.map(async (file) => {
           const updateResult = await BusinessOwner.updateOne(
-            { userId: ownerID },
+            { _id: businessId },
             { $push: { media: file.path } } // Assuming 'media' is an array in the BusinessOwner schema
           );
           return updateResult;
         })
       );
-      await logActivity(ownerID, "uploadedmedia", "Media uploaded successfully");
+      await logActivity(businessId, "uploadedmedia", "Media uploaded successfully");
 
       return updateResults;
     } catch (error) {
       return error.message;
     }
   },
-  async profileSetup(ownerID, updateCriteria) {
+  async profileSetup(businessId, updateCriteria) {
     try {
       const profileSetup = await BusinessOwner.findOneAndUpdate(
         {
-          userId: ownerID,
+          _id: businessId,
         },
         updateCriteria,
-        { new: true, upsert: true } // Create a new document if not found
+        {new: true, upsert: true  } // Return the modified document
       );
-      await logActivity(ownerID, "profileSetup", "Profile setup completed successfully");
-
+  
+      if (!profileSetup) {
+        // If profileSetup is null, the business with the given ID was not found
+        console.error("Business not found with ID:", businessId);
+        return null;
+      }
+  
+      await logActivity(businessId, "profileSetup", "Profile setup completed successfully");
+  
       return profileSetup;
-      
-      
     } catch (error) {
       console.error("Error updating user business:", error);
       return null;
     }
   },
+  
   async pinBusinessOnMap(ownerID, coordinates) {
     try {
       const businessOwner = await BusinessOwner.findOne({ userId: ownerID });
@@ -215,28 +221,28 @@ const BusinessOwnerService =
       );
     }
   },
-  async updateUserBusiness(ownerID, updateCriteria) {
+  async updateUserBusiness(businessId, updateCriteria) {
     try {
       // Check if a business for the given userId already exists
-      const existingBusiness = await BusinessOwner.findOne({ userId: ownerID });
+      const existingBusiness = await BusinessOwner.findOne({ userId: businessId });
   
       if (existingBusiness) {
         // If a business exists, update the existing document
         const updatedOwner = await BusinessOwner.findOneAndUpdate(
-          { userId: ownerID },
+          { _id: businessId },
           updateCriteria,
           { new: true, upsert: true } // Update the existing document
         );
-        await logActivity(ownerID, "updateUserBusiness", "New user business created successfully");
+        await logActivity(businessId, "updateUserBusiness", "New user business created successfully");
         return updatedOwner;
       } 
         // If no business exists, create a new document
         const newBusiness = await BusinessOwner.create({
-          userId: ownerID,
+          _id: businessId,
           ...updateCriteria,
         });
 
-        await logActivity(ownerID, "updateUserBusiness", "New user business created successfully");
+        await logActivity(businessId, "updateUserBusiness", "New user business created successfully");
 
         return newBusiness;
       
@@ -284,10 +290,10 @@ async getAllUserBusinesses(ownerID) {
     return null;
   }
   }, 
-async addLogo(ownerID, logoFile) {
+async addLogo(businessId, logoFile) {
     try {
       const updateResult = await BusinessOwner.updateOne(
-        { userId: ownerID },
+        { _id: businessId },
         { logo: logoFile.path } // Assuming 'logo' is a field in the BusinessOwner schema
       );
 
@@ -307,17 +313,17 @@ async deleteBusinessById(businessId) {
       return null;
     }
   },
-  async uploadImage(ownerID, file) {
+  async uploadImage(businessId, file) {
     try {
       const updateResult = await BusinessOwner.updateOne(
         {
-          userId: ownerID,
+          _id: businessId,
         },
         {
           attachment: file.path,
         }
       );
-      await logActivity(ownerID, "uploadImage", "Image uploaded successfully");
+      await logActivity(businessId, "uploadImage", "Image uploaded successfully");
 
       return updateResult;
     } catch (error) {

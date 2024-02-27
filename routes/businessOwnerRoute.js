@@ -42,13 +42,13 @@ router.post("/sendMessageToCustomer/:ownerID/:customerID", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
-router.put("/updateMyBusinessInfo/:ownerID", async (req, res) => {
-  const { ownerID } = req.params;
+router.put("/updateMyBusinessInfo/:businessId", async (req, res) => {
+  const { businessId } = req.params;
   const data = req.body;
 
   try {
     const updatedData = await BusinessOwnerService.updateUserBusiness(
-      ownerID,
+      businessId,
       data
     );
 
@@ -61,13 +61,13 @@ router.put("/updateMyBusinessInfo/:ownerID", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
-router.put("/profileSetup/:ownerID", async (req, res) => {
+router.put("/profileSetup/:businessId", async (req, res) => {
   try {
-    const { ownerID } = req.params;
+    const { businessId } = req.params;
     const data = req.body;
 
     // Call the modified profileSetup function from BusinessOwnerService
-    const result = await BusinessOwnerService.profileSetup(ownerID, data);
+    const result = await BusinessOwnerService.profileSetup(businessId, data);
 
     if (result) {
       return res.status(200).json(result);
@@ -78,16 +78,15 @@ router.put("/profileSetup/:ownerID", async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
-router.patch(
-  "/updateMyBusinessAttachment/:ownerID",
+router.patch("/updateMyBusinessAttachment/:businessId",
   upload.single("img"),
   async (req, res) => {
     const { file } = req;
-    const { ownerID } = req.params;
+    const { businessId } = req.params;
 
     try {
       const uploadedImage = await BusinessOwnerService.uploadImage(
-        ownerID,
+        businessId,
         file
       );
 
@@ -105,16 +104,15 @@ router.patch(
     }
   }
 );
-router.patch(
-  "/updateMyBusinessMedia/:ownerID",
+router.patch("/updateMyBusinessMedia/:businessId",
   upload.array("media", 10),
   async (req, res) => {
     const { files } = req;
-    const { ownerID } = req.params;
+    const { businessId } = req.params;
 
     try {
       const uploadedmedia = await BusinessOwnerService.uploadedmedia(
-        ownerID,
+        businessId,
         files
       );
 
@@ -184,15 +182,14 @@ router.post("/addMultipleBusinesses/:ownerID", async (req, res) => {
     });
   }
 });
-router.patch(
-  "/addLogoToBusiness/:ownerID",
+router.patch("/addLogoToBusiness/:businessId",
   upload.single("logo"),
   async (req, res) => {
     const { file } = req;
-    const { ownerID } = req.params;
+    const { businessId } = req.params;
 
     try {
-      const addedLogo = await BusinessOwnerService.addLogo(ownerID, file);
+      const addedLogo = await BusinessOwnerService.addLogo(businessId, file);
 
       if (addedLogo) {
         res.status(200).json({ success: true, data: addedLogo });
@@ -274,9 +271,7 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
     }
   }
 });
-
-router.patch(
-  "/addImageToUserProfile/:userId",
+router.patch( "/addImageToUserProfile/:userId",
   uploadProfilePic.single("userProfile"),
   async (req, res) => {
     const { file  } = req;
