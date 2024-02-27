@@ -42,12 +42,13 @@ const businessOwnerSchema = new mongoose.Schema(
         "Arts and Entertainment",
         "Home Services",
         "Auto Services",
+        "BookStore",
         "Other",
       ],
     },
     attachment: {
       type: String,
-      required: [true, "attachment required"],
+      required: [false, "attachment required"],
     },
     status: {
       type: String,
