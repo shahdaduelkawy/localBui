@@ -1,7 +1,6 @@
 /* eslint-disable global-require */
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const BusinessOwner = require("./businessOwnerModel");
 
 const userSchema = new mongoose.Schema(
   {
@@ -21,6 +20,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
     },
     phone: String,
+    profileImg: String,
 
     password: {
       type: String,
@@ -43,12 +43,6 @@ const userSchema = new mongoose.Schema(
     birthday: {
       type: Date,
     },
-
-    userProfile: {
-      type: String,
-      default: "Null",
-      required: true,
-    },
   },
   { timestamps: true }
 );
@@ -60,45 +54,27 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// Define the changePassword method
-userSchema.methods.changePassword = async function (oldPassword, newPassword) {
-  // Check if the provided old password matches the current password
-  const isPasswordMatch = await bcrypt.compare(oldPassword, this.password);
-
-  if (!isPasswordMatch) {
-    throw new Error("Incorrect old password");
-  }
-
-  // Change the password
-  this.password = newPassword;
-  await this.save();
-};
+// userSchema.virtual("myBusiness", {
+//   ref: "businessOwnerModel",
+//   localField: "_id",
+//   foreignField: "userId",
+// });
 
 userSchema.post("save", async (doc, next) => {
   if (doc.role === "businessOwner") {
     try {
+      const BusinessOwner = require("./businessOwnerModel");
       await BusinessOwner.create({
         businessName: "My Business",
         userId: doc._id,
-        attachment: "null",
+        attachment: "null", //this is default values
         Country: "Egypt",
         category: "Other",
       });
     } catch (err) {
       console.error("Error creating business owner:", err);
     }
-  } else if (doc.role === "customer") {
-    try {
-      const Customer = require("./customerModel");
-      await Customer.create({
-        profileImg: "Null",
-        userId: doc._id,
-      });
-    } catch (err) {
-      console.error("Error creating customer:", err);
-    }
   }
-
   next();
 });
 
