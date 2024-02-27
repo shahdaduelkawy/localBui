@@ -21,7 +21,17 @@ const businessOwnerSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
     },
-
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        //required: [true, 'Location coordinates are required'],
+      },
+    },
     Country: {
       type: String,
       required: [true, "Country required"],
@@ -48,7 +58,7 @@ const businessOwnerSchema = new mongoose.Schema(
     },
     attachment: {
       type: String,
-      required: [false, "attachment required"],
+      required: [true, "attachment required"],
     },
     status: {
       type: String,
@@ -58,8 +68,50 @@ const businessOwnerSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "businessOwner must be belong to parent user"],
+      required: [true, "businessOwner must belong to parent user"],
     },
+    media: {
+        type: [String],
+        required: [true, "attachment required"],
+      },
+    description: {
+      type: String,
+    },
+    address: {
+      type: String,
+    },
+    logo: {
+      type: Buffer,
+      required: false,
+    },
+    workTime: {
+      startTime: {
+        type: String,
+        required: false,
+      },
+      endTime: {
+        type: String,
+        required: false,
+      },
+    },
+    messages: [
+      {
+        sender: String,
+        content: String,
+        timestamp: Date,
+      },
+    ],
+    reviews: [
+      {
+        customerId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Customer",
+          required: true,
+        },
+        content: String,
+        timestamp: Date,
+      },
+    ],
   },
   { timestamps: true }
 );

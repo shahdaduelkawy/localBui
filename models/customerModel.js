@@ -2,20 +2,38 @@ const mongoose = require("mongoose");
 
 const customerSchema = new mongoose.Schema(
   {
-    customerId: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    /* favourite: [
+    profileImg: {
+      type: String, 
+      default: "Null",
+      required: true,
+    },
+    reviews: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // Reference to the userModel
+        businessId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "BusinessOwner",
+          required: true,
+        },
+        content: String,
+        timestamp: Date,
       },
-    ], */ // Is favourite an attribute or function?
+    ],
+    messages: [
+      {
+        sender: String,
+        content: String,
+        timestamp: Date,
+      },
+    ],
   },
   { timestamps: true }
 );
-const customerModel = mongoose.model("customer", customerSchema);
+
+const customerModel = mongoose.model("Customer", customerSchema);
 
 module.exports = customerModel;

@@ -2,6 +2,7 @@ const slugify = require('slugify');
 const { check } = require('express-validator');
 const validatorMiddleware = require('../../middleware/validatorMiddleware');
 const User = require('../../models/userModel');
+
 exports.signupValidator = [
   check('name')
     .notEmpty()
@@ -30,7 +31,7 @@ exports.signupValidator = [
     .notEmpty()
     .withMessage('Password required')
     .isLength({ min: 4 })
-    .withMessage('Password must be at least 6 characters')
+    .withMessage('Password must be at least 4 characters')
     .custom((password, { req }) => {
       if (password !== req.body.passwordConfirm) {
         throw new Error('Password Confirmation incorrect');
@@ -58,7 +59,7 @@ exports.loginValidator = [
     .notEmpty()
     .withMessage('Password required')
     .isLength({ min: 4 })
-    .withMessage('Password must be at least 6 characters'),
+    .withMessage('Password must be at least 4 characters'),
 
   validatorMiddleware,
 ];

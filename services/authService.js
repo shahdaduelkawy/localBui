@@ -1,21 +1,16 @@
 const crypto = require('crypto');
-
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-
 const asyncHandler = require('express-async-handler');
 const ApiError = require('../utils/apiError');
 const sendEmail = require('../utils/sendEmail');
 const createToken = require('../utils/createToken');
-
 const User = require('../models/userModel');
 
-// @desc    Signup
-// @route   GET /api/v1/auth/signup
-// @access  Public
 exports.signup = asyncHandler(async (req, res, next) => {
   // 1- Create user
   const user = await User.create({
+    userProfile: req.body.userProfile,
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
@@ -24,26 +19,20 @@ exports.signup = asyncHandler(async (req, res, next) => {
     gender: req.body.gender,
     phone: req.body.phone,
   });
-
   // 2- Generate token
   const token = jwt.sign({
     userId: user._id
   }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRE_TIME,
   });
-
   res.status(201).json({
     data: user,
     token
   });
 });
-
-// @desc    Login
-// @route   GET /api/v1/auth/login
-// @access  Public
 exports.login = asyncHandler(async (req, res, next) => {
   // 1) check if password and email in the body (validation)
-  // 2) check if user exist & check if password is correct
+  // 2) check if user exists & check if password is correct
   const user = await User.findOne({
     email: req.body.email
   });
@@ -56,14 +45,12 @@ exports.login = asyncHandler(async (req, res, next) => {
 
   // Delete password from response
   delete user._doc.password;
-  // 4) send response to client side
+  // 4) send response to the client side
   res.status(200).json({
     data: user,
     token
   });
 });
-
-// @desc   make sure the user is logged in
 exports.protect = asyncHandler(async (req, res, next) => {
   // 1) Check if token exist, if exist get
   let token;
@@ -116,8 +103,6 @@ exports.protect = asyncHandler(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
-
-// @desc    Authorization (User Permissions)
 exports.allowedTo = (...roles) =>
   asyncHandler(async (req, res, next) => {
     // 1) access roles
@@ -129,10 +114,6 @@ exports.allowedTo = (...roles) =>
     }
     next();
   });
-
-// @desc    Forgot password
-// @route   POST /api/v1/auth/forgotPassword
-// @access  Public
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
   // 1) Get user by email
   const user = await User.findOne({
@@ -191,10 +172,6 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
 
 });
-
-// @desc    Verify password reset code
-// @route   POST /api/v1/auth/verifyResetCode
-// @access  Public
 exports.verifyPassResetCode = asyncHandler(async (req, res, next) => {
   // 1) Get user based on reset code
   const hashedResetCode = crypto
@@ -220,10 +197,6 @@ exports.verifyPassResetCode = asyncHandler(async (req, res, next) => {
     status: 'Success',
   });
 });
-
-// @desc    Reset password
-// @route   POST /api/v1/auth/resetPassword
-// @access  Public
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   // 1) Get user based on email
   const user = await User.findOne({
@@ -253,3 +226,50 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
     token
   });
 });
+exports.updateUserData = asyncHandler(async (userId, updateCriteria) => {
+  try {
+    // Check if a user for the given userId already exists
+    const existingUser = await User.findById(userId);
+
+    if (existingUser) {
+      // If a user exists, update the existing document
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        updateCriteria,
+        { new: true } // Return the modified document
+      );
+
+      return updatedUser;
+    } 
+      // If no user exists, return null or handle as needed
+      return null;
+    
+  } catch (error) {
+    console.error('Error updating user data:', error);
+    return null;
+  }
+});
+exports.changePassword = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id; // Assuming you have the authenticated user in the request
+  const { oldPassword, newPassword } = req.body;
+
+  try {
+    // Find the user by ID
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return next(new ApiError('User not found', 404));
+    }
+
+    // Call the changePassword function
+    await user.changePassword(oldPassword, newPassword);
+
+    // Password changed successfully
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    // Handle errors, such as incorrect old password
+    return next(new ApiError(error.message, 400));
+  }
+});
+
+

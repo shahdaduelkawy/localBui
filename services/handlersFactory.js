@@ -10,8 +10,14 @@ exports.deleteOne = (Model) =>
     if (!document) {
       return next(new ApiError(`No document for this id ${id}`, 404));
     }
-    res.status(204).send();
+
+    // Send a success message in the response
+    res.status(200).json({
+      status: 'success',
+      message: `Document with id ${id} successfully deleted.`,
+    });
   });
+
 
 exports.updateOne = (Model) =>
   asyncHandler(async (req, res, next) => {
