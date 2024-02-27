@@ -43,6 +43,7 @@ const businessOwnerSchema = new mongoose.Schema(
         "Arts and Entertainment",
         "Home Services",
         "Auto Services",
+        "BookStore",
         "Other",
       ],
     },

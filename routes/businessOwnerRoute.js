@@ -285,9 +285,8 @@ router.patch(
   }
 );
 // Add new route for pinning business on the map
-router.patch(
-  "/pinMyBusinessOnMap/:businessId",
-  express.json(), // Middleware for parsing JSON in the request body
+router.patch("/pinMyBusinessOnMap/:businessId",
+  express.json(),
   async (req, res) => {
     const { businessId } = req.params;
     const { coordinates } = req.body;
@@ -298,17 +297,21 @@ router.patch(
         success: true,
         message: "Business location pinned successfully",
       });
-      res.status(200).json({
-        success: true,
-        message: "Business location pinned successfully",
-      });
     } catch (error) {
-      res
-        .status(500)
-        .json({ success: false, message: "Internal Server Error" });
+      console.error(
+        `Error pinning business on map for owner ${businessId}: ${error.message}`
+      );
+
+      // Check if the response has already been sent
+      if (!res.headersSent) {
+        res
+          .status(500)
+          .json({ success: false, message: "Internal Server Error" });
+      }
     }
   }
 );
+
 router.get("/getBusinessesNearby", async (req, res) => {
   const { longitude, latitude, minDistance, maxDistance } = req.query;
 
