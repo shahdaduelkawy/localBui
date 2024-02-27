@@ -12,16 +12,6 @@ const businessOwnerSchema = new mongoose.Schema(
       },
     },
 
-    business: {
-      type: {
-        type: String,
-        required: true,
-      },
-      coordinates: {
-        type: [Number],
-      },
-    },
-
     businessName: {
       type: String,
       trim: true,
