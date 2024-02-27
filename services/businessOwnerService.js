@@ -325,9 +325,9 @@ async deleteBusinessById(businessId) {
       throw error;
     }
   },
-  async pinBusinessOnMap(ownerID, coordinates) {
+  async pinBusinessOnMap(businessId, coordinates) {
     try {
-      const businessOwner = await BusinessOwner.findOne({ userId: ownerID });
+      const businessOwner = await BusinessOwner.findOne({ _id: businessId });
 
       if (!businessOwner) {
         throw new Error("Business owner not found");
@@ -343,7 +343,7 @@ async deleteBusinessById(businessId) {
       console.log("Business location pinned successfully");
     } catch (error) {
       console.error(
-        `Error pinning business on map for owner ${ownerID}: ${error.message}`
+        `Error pinning business on map for owner ${businessId}: ${error.message}`
       );
     }
   },

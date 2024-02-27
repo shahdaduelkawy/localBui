@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const businessOwnerSchema = new mongoose.Schema(
   {
-    station: {
+    business: {
       type: {
         type: String,
         enum: ["Point"], // Specify the GeoJSON type
@@ -13,7 +13,7 @@ const businessOwnerSchema = new mongoose.Schema(
         default: [0, 0], // Default coordinates [longitude, latitude]
       },
     },
-
+  
     businessName: {
       type: String,
       trim: true,

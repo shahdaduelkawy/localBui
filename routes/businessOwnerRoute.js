@@ -2,11 +2,13 @@
 const express = require("express");
 
 const router = express.Router();
-const { upload, uploadProfilePic} = require("../middleware/fileUpload.middleware");
+const {
+  upload,
+  uploadProfilePic,
+} = require("../middleware/fileUpload.middleware");
 const BusinessOwnerService = require("../services/businessOwnerService");
 const ApiError = require("../utils/apiError");
 const { getIO } = require("../services/socket");
-
 
 // Assuming you have a function to send messages to customers in your service
 router.post("/sendMessageToCustomer/:ownerID/:customerID", async (req, res) => {
@@ -79,7 +81,8 @@ router.put("/profileSetup/:businessId", async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
-router.patch("/updateMyBusinessAttachment/:businessId",
+router.patch(
+  "/updateMyBusinessAttachment/:businessId",
   upload.single("img"),
   async (req, res) => {
     const { file } = req;
@@ -105,7 +108,8 @@ router.patch("/updateMyBusinessAttachment/:businessId",
     }
   }
 );
-router.patch("/updateMyBusinessMedia/:businessId",
+router.patch(
+  "/updateMyBusinessMedia/:businessId",
   upload.array("media", 10),
   async (req, res) => {
     const { files } = req;
@@ -163,7 +167,8 @@ router.post("/addMultipleBusinesses/:ownerID", async (req, res) => {
     });
   }
 });
-router.patch("/addLogoToBusiness/:businessId",
+router.patch(
+  "/addLogoToBusiness/:businessId",
   upload.single("logo"),
   async (req, res) => {
     const { file } = req;
@@ -236,7 +241,7 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
     if (user) {
       res.status(200).json({ success: true, data: user });
     } else {
-      res.status(404).json({ success: false, message: 'User not found' });
+      res.status(404).json({ success: false, message: "User not found" });
     }
   } catch (error) {
     console.error("Error getting user data by userId:", error);
@@ -252,16 +257,17 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
     }
   }
 });
-router.patch( "/addImageToUserProfile/:userId",
+router.patch(
+  "/addImageToUserProfile/:userId",
   uploadProfilePic.single("userProfile"),
   async (req, res) => {
-    const { file  } = req;
+    const { file } = req;
     const { userId } = req.params;
 
     try {
       const uploadedImage = await BusinessOwnerService.addImageToUserProfile(
         userId,
-        file 
+        file
       );
 
       if (uploadedImage) {
@@ -280,14 +286,14 @@ router.patch( "/addImageToUserProfile/:userId",
 );
 // Add new route for pinning business on the map
 router.patch(
-  "/pinMyBusinessOnMap/:ownerID",
+  "/pinMyBusinessOnMap/:businessId",
   express.json(), // Middleware for parsing JSON in the request body
   async (req, res) => {
-    const {ownerID} = req.params;
-    const {coordinates} = req.body;
+    const { businessId } = req.params;
+    const { coordinates } = req.body;
 
     try {
-      await BusinessOwnerService.pinBusinessOnMap(ownerID, coordinates);
+      await BusinessOwnerService.pinBusinessOnMap(businessId, coordinates);
       res.status(200).json({
         success: true,
         message: "Business location pinned successfully",
@@ -316,7 +322,14 @@ router.get("/getBusinessesNearby", async (req, res) => {
 
     res.status(200).json({ success: true, data: nearbyBusinesses });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    console.error("Error getting nearby businesses:", error);
+
+    // Check if the response has already been sent
+    if (!res.headersSent) {
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
   }
 });
 
