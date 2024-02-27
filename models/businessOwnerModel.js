@@ -21,17 +21,6 @@ const businessOwnerSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
     },
-    /*  location: {
-        type: {
-            type: String,
-            enum: ['Point'],
-            default: 'Point',
-        },
-      
-    },*/
-    // coordinates : {
-    //     type : [Number]
-    // },
     Country: {
       type: String,
       required: [true, "Country required"],
