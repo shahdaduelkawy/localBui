@@ -40,6 +40,8 @@ router.get("/searchBusinesses/:businessName", searchBusinessesByName);
 router.get("/searchBusinesses/", searchBusinessesByName);
 
 router.get("/filterbycategory/:category", filterbycategory);
+router.get("/filterbycategory/", filterbycategory);
+
 
 router.patch("/updateCustomerProfileImage/:customerId",
 uploadProfilePic.single("profileImg"),

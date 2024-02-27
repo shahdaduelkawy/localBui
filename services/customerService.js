@@ -126,20 +126,25 @@ const CustomerService = {
       return { success: false, message: "Internal Server Error" };
     }
   },
-  
-
-
-
 };
+
+
 const filterbycategory = async (req, res) => {
   try {
-    const {category} = req.params;
+    let { category } = req.params;
+
+    // If category is not provided, set it to an empty string to retrieve all businesses
+    category = category || "";
 
     // Use a case-insensitive regex for the search
     const regex = new RegExp(category, 'i');
 
     // Search for businesses with names matching the provided term
-    const businesses = await BusinessOwner.find({ category: regex });
+    const businesses = await BusinessOwner.find(
+      category
+        ? { category: regex }
+        : {} // Return all businesses when no specific category is provided
+    );
 
     // Check if businesses were found
     if (businesses.length === 0) {
