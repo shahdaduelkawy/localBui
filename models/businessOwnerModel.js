@@ -12,6 +12,16 @@ const businessOwnerSchema = new mongoose.Schema(
       },
     },
 
+    business: {
+      type: {
+        type: String,
+        required: true,
+      },
+      coordinates: {
+        type: [Number],
+      },
+    },
+
     businessName: {
       type: String,
       trim: true,
@@ -20,6 +30,17 @@ const businessOwnerSchema = new mongoose.Schema(
     slug: {
       type: String,
       lowercase: true,
+    },
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        //required: [true, 'Location coordinates are required'],
+      },
     },
     Country: {
       type: String,
@@ -56,19 +77,17 @@ const businessOwnerSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "businessOwner must be belong to parent user"],
+      required: [true, "businessOwner must belong to parent user"],
     },
     media: {
-      type: [String],
-      required: false,
-    },
+        type: [String],
+        required: [true, "attachment required"],
+      },
     description: {
       type: String,
-      required: false,
     },
     address: {
       type: String,
-      required: false,
     },
     logo: {
       type: Buffer,

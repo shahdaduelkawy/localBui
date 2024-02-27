@@ -56,8 +56,13 @@ app.all('*', (req, res, next) => {
 // Global error handling middleware for express
 app.use(globalError);
 
+const PORT =  process.env.PORT || 3011;
+app.listen(PORT, () => {
+  console.log(`Server is running on port num ${PORT}`);
+});
+
 // Handle rejection outside express
-process.on('unhandledRejection', (err) => {
+process.on("unhandledRejection", (err) => {
   console.error(`UnhandledRejection Errors: ${err.name} | ${err.message}`);
   server.close(() => {
     console.error(`Shutting down....`);

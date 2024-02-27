@@ -1,4 +1,4 @@
-const { validationResult } = require('express-validator');
+const { validationResult } = require("express-validator");
 
 // @desc  Finds the validation errors in this request and wraps them in an object with handy functions
 const validatorMiddleware = (req, res, next) => {

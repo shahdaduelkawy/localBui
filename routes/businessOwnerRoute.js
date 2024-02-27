@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 const express = require("express");
 
 const router = express.Router();
@@ -278,7 +279,8 @@ router.patch( "/addImageToUserProfile/:userId",
   }
 );
 // Add new route for pinning business on the map
-router.patch("/pinMyBusinessOnMap/:ownerID",
+router.patch(
+  "/pinMyBusinessOnMap/:ownerID",
   express.json(), // Middleware for parsing JSON in the request body
   async (req, res) => {
     const {ownerID} = req.params;
@@ -286,6 +288,10 @@ router.patch("/pinMyBusinessOnMap/:ownerID",
 
     try {
       await BusinessOwnerService.pinBusinessOnMap(ownerID, coordinates);
+      res.status(200).json({
+        success: true,
+        message: "Business location pinned successfully",
+      });
       res.status(200).json({
         success: true,
         message: "Business location pinned successfully",

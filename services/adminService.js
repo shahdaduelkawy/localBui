@@ -1,6 +1,8 @@
 const factory = require("./handlersFactory");
 
 const User = require("../models/userModel");
+const businessOwner = require("../models/businessOwnerModel");
+
 
 const businessOwner = require("../models/businessOwnerModel");
 
