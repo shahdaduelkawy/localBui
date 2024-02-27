@@ -6,6 +6,7 @@ const router = express.Router();
 const {
   CustomerService,
   searchBusinessesByName,
+  filterbycategory,
 } = require("../services/customerService");
 
 router.post("/sendMessageToBusinessOwner/:customerId/:ownerId", async (req, res) => {
@@ -36,6 +37,10 @@ router.post("/sendMessageToBusinessOwner/:customerId/:ownerId", async (req, res)
 });
 
 router.get("/searchBusinesses/:businessName", searchBusinessesByName);
+router.get("/searchBusinesses/", searchBusinessesByName);
+
+router.get("/filterbycategory/:category", filterbycategory);
+
 router.patch("/updateCustomerProfileImage/:customerId",
 uploadProfilePic.single("profileImg"),
    async (req, res) => {

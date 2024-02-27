@@ -131,32 +131,63 @@ const CustomerService = {
 
 
 };
+const filterbycategory = async (req, res) => {
+  try {
+    const {category} = req.params;
 
-  const searchBusinessesByName = async (req, res) => {
-    try {
-      const {businessName} = req.params;
-  
-      // Use a case-insensitive regex for the search
-      const regex = new RegExp(businessName, 'i');
-  
-      // Search for businesses with names matching the provided term
-      const businesses = await BusinessOwner.find({ businessName: regex });
-  
-      // Check if businesses were found
-      if (businesses.length === 0) {
-        return res.status(404).json({ status: 'fail', message: 'No businesses found for the given search term' });
-      }
-  
-      // Return the number of businesses found along with the list of businesses
-      return res.status(200).json({ status: 'success', count: businesses.length, businesses });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ status: 'error', error: "Internal Server Error" });
+    // Use a case-insensitive regex for the search
+    const regex = new RegExp(category, 'i');
+
+    // Search for businesses with names matching the provided term
+    const businesses = await BusinessOwner.find({ category: regex });
+
+    // Check if businesses were found
+    if (businesses.length === 0) {
+      return res.status(404).json({ status: 'fail', message: 'No businesses found for the given search term' });
     }
-  };
+
+    // Return the number of businesses found along with the list of businesses
+    return res.status(200).json({ status: 'success', count: businesses.length, businesses });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: 'error', error: "Internal Server Error" });
+  }
+};
+const searchBusinessesByName = async (req, res) => {
+  try {
+    let { businessName } = req.params;
+
+    // If businessName is not provided, set it to an empty string to retrieve all businesses
+    businessName = businessName || "";
+
+    // Use a case-insensitive regex for the search
+    const regex = new RegExp(businessName, 'i');
+
+    // Search for businesses with names matching the provided term
+    const businesses = await BusinessOwner.find(
+      businessName
+        ? { businessName: regex }
+        : {} // Return all businesses when no specific businessName is provided
+    );
+
+    // Check if businesses were found
+    if (businesses.length === 0) {
+      return res.status(404).json({ status: 'fail', message: 'No businesses found for the given search term' });
+    }
+
+    // Return the number of businesses found along with the list of businesses
+    return res.status(200).json({ status: 'success', count: businesses.length, businesses });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: 'error', error: "Internal Server Error" });
+  }
+};
+
+
   module.exports = {
     searchBusinessesByName,
-    CustomerService
+    CustomerService,
+    filterbycategory,
   };
  
   
