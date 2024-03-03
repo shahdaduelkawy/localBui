@@ -77,6 +77,21 @@ userSchema.post("save", async (doc, next) => {
   }
   next();
 });
+userSchema.post("save", async (doc, next) => {
+  if (doc.role === "customer") {
+    try {
+      const Customer = require("./customerModel");
+      await Customer.create({
+        profileImg: "Null",
+        userId: doc._id,
+        
+      });
+    } catch (err) {
+      console.error("Error creating business owner:", err);
+    }
+  }
+  next();
+});
 
 const User = mongoose.model("User", userSchema);
 
