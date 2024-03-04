@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema(
     birthday: {
       type: Date,
     },
+    userProfile: {
+      type: String, 
+      default: "Null",
+      required: false,
+    },
   },
   { timestamps: true }
 );
