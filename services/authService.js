@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -6,6 +7,8 @@ const ApiError = require('../utils/apiError');
 const sendEmail = require('../utils/sendEmail');
 const createToken = require('../utils/createToken');
 const User = require('../models/userModel');
+const { logActivity } = require("./activityLogService");
+
 
 exports.signup = asyncHandler(async (req, res, next) => {
   // 1- Create user
@@ -19,12 +22,19 @@ exports.signup = asyncHandler(async (req, res, next) => {
     gender: req.body.gender,
     phone: req.body.phone,
   });
+
+  const userId = user._id;
+
+  // Log activity
+  await logActivity(userId, "signup", "User signup successfully");
+
   // 2- Generate token
   const token = jwt.sign({
     userId: user._id
   }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRE_TIME,
   });
+
   res.status(201).json({
     data: user,
     token
@@ -50,6 +60,10 @@ exports.login = asyncHandler(async (req, res, next) => {
     data: user,
     token
   });
+  const userId = user._id;
+
+  // Log activity
+  await logActivity(userId, "login", "User login successfully");
 });
 exports.protect = asyncHandler(async (req, res, next) => {
   // 1) Check if token exist, if exist get
@@ -239,6 +253,9 @@ exports.updateUserData = asyncHandler(async (userId, updateCriteria) => {
         { new: true } // Return the modified document
       );
 
+      // Log activity
+      await logActivity(userId, "updateUserData", "User update their data successfully");
+      
       return updatedUser;
     } 
       // If no user exists, return null or handle as needed
@@ -248,9 +265,11 @@ exports.updateUserData = asyncHandler(async (userId, updateCriteria) => {
     console.error('Error updating user data:', error);
     return null;
   }
+  
 });
+
 exports.changePassword = asyncHandler(async (req, res, next) => {
-  const userId = req.user._id; // Assuming you have the authenticated user in the request
+  const userId = req.user._id;
   const { oldPassword, newPassword } = req.body;
 
   try {
@@ -263,6 +282,7 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
 
     // Call the changePassword function
     await user.changePassword(oldPassword, newPassword);
+
 
     // Password changed successfully
     res.status(200).json({ message: 'Password changed successfully' });
