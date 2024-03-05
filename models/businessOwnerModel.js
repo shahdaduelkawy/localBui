@@ -13,7 +13,7 @@ const businessOwnerSchema = new mongoose.Schema(
         default: [0, 0], // Default coordinates [longitude, latitude]
       },
     },
-  
+
     businessName: {
       type: String,
       trim: true,
@@ -86,6 +86,11 @@ const businessOwnerSchema = new mongoose.Schema(
         type: String,
         required: false,
       },
+     
+    },
+    days: {
+      type: [String],
+      enum: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday","Friday","Saturday" ],
     },
     messages: [
       {
