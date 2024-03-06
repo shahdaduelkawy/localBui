@@ -20,6 +20,10 @@ const customerSchema = new mongoose.Schema(
           required: true,
         },
         content: String,
+        starRating: {
+          type: Number,
+          enum: [1, 2, 3, 4, 5],
+        },
         timestamp: Date,
       },
     ],
@@ -30,6 +34,7 @@ const customerSchema = new mongoose.Schema(
         timestamp: Date,
       },
     ],
+
   },
   { timestamps: true }
 );

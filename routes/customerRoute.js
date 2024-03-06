@@ -2,11 +2,13 @@ const express = require("express");
 const { uploadProfilePic } = require("../middleware/fileUpload.middleware");
 const { getIO } = require("../services/socket");
 
+
 const router = express.Router();
 const {
   CustomerService,
   searchBusinessesByName,
   filterbycategory,
+  rateBusiness,
 } = require("../services/customerService");
 
 router.post("/sendMessageToBusinessOwner/:customerId/:ownerId", async (req, res) => {
@@ -89,6 +91,22 @@ router.post("/:customerId/writeReview/:businessId", async (req, res) => {
     return res.status(500).json({ status: "error", error: "Internal Server Error" });
   }
   });
-
+  router.post('/:customerId/rate/:businessId', async (req, res) => {
+    try {
+      const { customerId, businessId } = req.params;
+      const { starRating } = req.body;
+  
+      const result = await rateBusiness(customerId, businessId, starRating);
+  
+      if (result) {
+        return res.status(200).json({ status: 'success', message: result.message });
+      }
+  
+      return res.status(400).json({ status: 'fail', message: result.message });
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+  });
 
 module.exports = router;

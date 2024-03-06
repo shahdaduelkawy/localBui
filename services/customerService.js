@@ -126,8 +126,129 @@ const CustomerService = {
       return { success: false, message: "Internal Server Error" };
     }
   },
+
+  
 };
 
+/*async function rateBusiness(customerId, businessId, starRating) {
+  try {
+
+    if (starRating < 1 || starRating > 5) {
+    throw new Error('Star rating must be between 1 and 5.');
+  }
+    const customer = await Customer.findOne({ userId: customerId });
+
+    if (!customer) {
+      return { success: false, message: "Customer not found" };
+    }
+
+    // Check if the provided businessId exists
+    const business = await BusinessOwner.findById(businessId);
+
+    if (!business) {
+      return { success: false, message: "Business not found" };
+    }
+    // Update or add the review
+    const existingReviewIndex = customer.reviews.findIndex(
+      (review) => review.businessId.toString() === businessId
+    );
+
+    if (existingReviewIndex !== -1) {
+      // If the customer already reviewed this business, update the star rating
+      customer.reviews[existingReviewIndex].starRating = starRating;
+    } else {
+      // If the customer hasn't reviewed this business, add a new review
+      customer.reviews.push({
+        businessId,
+        starRating,
+        timestamp: new Date(),
+      });
+    }
+
+    // Save the updated customer document
+    await customer.save();
+
+    return {
+      status: 'success',
+      message: 'Business rated successfully.',
+    };
+  }catch (error) {
+    return {
+      status: 'error',
+      message: error.message,
+    };
+  }
+}*/
+async function rateBusiness(customerId, businessId, starRating) {
+  try {
+    if (starRating < 1 || starRating > 5) {
+      throw new Error('Star rating must be between 1 and 5.');
+    }
+
+    const customer = await Customer.findOne({ userId: customerId });
+
+    if (!customer) {
+      return { success: false, message: 'Customer not found' };
+    }
+
+    // Check if the provided businessId exists
+    const business = await BusinessOwner.findById(businessId);
+
+    if (!business) {
+      return { success: false, message: 'Business not found' };
+    }
+
+    // Update or add the review
+    const existingReviewIndex = customer.reviews.findIndex(
+      (review) => review.businessId.toString() === businessId
+    );
+
+    if (existingReviewIndex !== -1) {
+      // If the customer already reviewed this business, update the star rating
+      customer.reviews[existingReviewIndex].starRating = starRating;
+    } else {
+      // If the customer hasn't reviewed this business, add a new review
+      customer.reviews.push({
+        businessId,
+        starRating,
+        timestamp: new Date(),
+      });
+    }
+
+    // Save the updated customer document
+    await customer.save();
+
+    // Update or add the starRating in the businessOwnerModel
+    const existingBusinessReviewIndex = business.reviews.findIndex(
+      (review) => review.customerId.toString() === customer._id.toString()
+    );
+
+    if (existingBusinessReviewIndex !== -1) {
+      // If the customer already reviewed this business, update the star rating
+      business.reviews[existingBusinessReviewIndex].starRating = starRating;
+    } else {
+      // If the customer hasn't reviewed this business, add a new review
+      business.reviews.push({
+        customerId: customer._id,
+        starRating,
+        timestamp: new Date(),
+      });
+    }
+
+    // Save the updated businessOwnerModel document
+    await business.save();
+
+    return {
+      status: 'success',
+      message: 'Business rated successfully.',
+    };
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error.message,
+    };
+  }
+}
 
 const filterbycategory = async (req, res) => {
   try {
@@ -193,6 +314,8 @@ const searchBusinessesByName = async (req, res) => {
     searchBusinessesByName,
     CustomerService,
     filterbycategory,
+    rateBusiness,
+    
   };
  
   

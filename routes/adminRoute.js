@@ -1,10 +1,9 @@
-const express = require('express');
 
+const express = require('express');
 const {
   createAdminValidator,
   deleteAdminValidator,
   getSearchValidator,
- 
 } = require('../utils/validators/adminValidator');
 
 const {
@@ -12,6 +11,7 @@ const {
   deleteAdmin,
   getSearch,
   getRequests,
+  deleteReview,
 } = require('../services/adminService');
 
 const authService = require('../services/authService');
@@ -20,18 +20,19 @@ const router = express.Router();
 
 router.use(authService.protect);
 
-
 // Admin
-router.use(authService.allowedTo('admin','subAdmin'));
+router.use(authService.allowedTo('admin', 'subAdmin'));
 router
   .route('/')
   .get(getRequests)
   .post(createAdminValidator, createAdmin);
 router
-.route('/delete/:id')
-.delete(deleteAdminValidator, deleteAdmin);
+  .route('/delete/:id')
+  .delete(deleteAdminValidator, deleteAdmin); 
 router
-.route('/Search/:id')
-.get(getSearchValidator, getSearch);
+  .route('/Search/:id')
+  .get(getSearchValidator, getSearch);
+
+router.route('/deleteReview/:id').delete(deleteReview); 
 
 module.exports = router;

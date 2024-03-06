@@ -15,6 +15,7 @@ const adminRoute = require("./routes/adminRoute");
 const businessOwnerRoute = require("./routes/businessOwnerRoute");
 const customerRoute = require("./routes/customerRoute");
 const activityLogRoute = require("./routes/activityLogRoute");
+const reportReviewRoute = require("./routes/reportReviewRoute");
 
 // Express app
 const app = express();
@@ -47,6 +48,7 @@ app.use("/admin", adminRoute);
 app.use("/auth", authRoute);
 app.use("/customer", customerRoute);
 app.use("/log", activityLogRoute);
+app.use("/report",reportReviewRoute);
 
 // Move the wildcard route to the end
 app.all("*", (req, res, next) => {

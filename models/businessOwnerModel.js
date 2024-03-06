@@ -102,6 +102,10 @@ const businessOwnerSchema = new mongoose.Schema(
           required: true,
         },
         content: String,
+        starRating: {
+          type: Number,
+          enum: [1, 2, 3, 4, 5],
+        },
         timestamp: Date,
       },
     ],

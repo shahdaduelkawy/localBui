@@ -9,6 +9,7 @@ const {
 const BusinessOwnerService = require("../services/businessOwnerService");
 const ApiError = require("../utils/apiError");
 const { getIO } = require("../services/socket");
+const businessOwnerModel= require("../models/businessOwnerModel")
 
 // Assuming you have a function to send messages to customers in your service
 router.post("/sendMessageToCustomer/:ownerID/:customerID", async (req, res) => {
@@ -333,6 +334,40 @@ router.get("/getBusinessesNearby", async (req, res) => {
         .status(500)
         .json({ success: false, message: "Internal Server Error" });
     }
+  }
+});
+router.get('/rating/:businessId', async (req, res) => {
+  try {
+    const { businessId } = req.params;
+
+    const business = await businessOwnerModel.findById(businessId);
+
+    if (!business) {
+      return res.status(404).json({ status: 'fail', message: 'Business not found' });
+    }
+
+
+    // Filter out reviews without starRating
+    const validReviews = business.reviews.filter(review => typeof review.starRating === 'number');
+
+    const totalRatings = validReviews.length;
+
+    if (totalRatings === 0) {
+      return res.status(200).json({ status: 'success', rating: 0, message: 'No reviews yet' });
+    }
+
+    const totalRating = validReviews.reduce((sum, review) => {
+      const starRating = review.starRating; // No need for default, as we filter out undefined values
+      return sum + starRating;
+    }, 0);
+
+    const averageRating = totalRating / totalRatings;
+
+    // Return the average rating
+    return res.status(200).json({ status: 'success', rating: averageRating });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: 'error', error: 'Internal Server Error' });
   }
 });
 
