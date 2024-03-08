@@ -14,5 +14,8 @@ exports.getSearch = factory.getOne(User);
 
 exports.getRequests = factory.getAll(businessOwner);
 
+exports.getreports = factory.getAll(reportReviewModel);
+
+
 exports.deleteReview = factory.deleteOne(reportReviewModel)
   

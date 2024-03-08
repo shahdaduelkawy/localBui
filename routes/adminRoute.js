@@ -12,6 +12,7 @@ const {
   getSearch,
   getRequests,
   deleteReview,
+  getreports,
 } = require('../services/adminService');
 
 const authService = require('../services/authService');
@@ -25,6 +26,7 @@ router.use(authService.allowedTo('admin', 'subAdmin'));
 router
   .route('/')
   .get(getRequests)
+  .get(getreports)
   .post(createAdminValidator, createAdmin);
 router
   .route('/delete/:id')
@@ -34,5 +36,6 @@ router
   .get(getSearchValidator, getSearch);
 
 router.route('/deleteReview/:id').delete(deleteReview); 
+router.route('/getreports').get(getreports); 
 
 module.exports = router;
