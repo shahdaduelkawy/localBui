@@ -3,14 +3,12 @@ const express = require('express');
 const {
   createAdminValidator,
   deleteAdminValidator,
-  getSearchValidator,
 } = require('../utils/validators/adminValidator');
 const { getActivities } = require('../services/activityLogService');
 
 const {
   createAdmin,
   deleteAdmin,
-  getSearch,
   getRequests,
   deleteReview,
   getreports,
@@ -32,9 +30,6 @@ router
 router
   .route('/delete/:id')
   .delete(deleteAdminValidator, deleteAdmin); 
-router
-  .route('/Search/:id')
-  .get(getSearchValidator, getSearch);
 
 router.route('/deleteReview/:id').delete(deleteReview); 
 router.route('/getreports').get(getreports); 
@@ -62,4 +57,11 @@ router.get('/activities/:userId', async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
+const { searchUserByName } = require('../services/adminService');
+
+// ...
+
+// The searchUserByName route should be separate from the '/'
+router.get('/searchUserByName/:name', searchUserByName);
+
 module.exports = router;
