@@ -39,19 +39,20 @@ router
 router.route('/deleteReview/:id').delete(deleteReview); 
 router.route('/getreports').get(getreports); 
 router.get('/activities/:userId', async (req, res) => {
-  const {userId} = req.params;
+  const { userId } = req.params;
 
   try {
-    const activities = await getActivities(userId);
+    const { activities, activityCount, mostCommonAction } = await getActivities(userId);
 
-    if (activities !== null) {
+    if (activities.length !== 0) {
       // Set Cache-Control header to disable caching
       res.setHeader('Cache-Control', 'no-store');
 
       console.log('Fetched activities for userId:', userId);
-      console.log('Number of activities:', activities.length);
+      console.log('Number of activities:', activityCount);
+      console.log('Most common action:', mostCommonAction);
 
-      res.status(200).json({ success: true, activities });
+      res.status(200).json({ success: true, activityCount, mostCommonAction, activities });
     } else {
       console.log('No activities found for userId:', userId);
       res.status(404).json({ success: false, message: 'No activities found' });
