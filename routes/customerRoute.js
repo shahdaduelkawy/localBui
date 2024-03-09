@@ -1,7 +1,7 @@
 const express = require("express");
 const { uploadProfilePic } = require("../middleware/fileUpload.middleware");
 const { getIO } = require("../services/socket");
-
+const BusinessOwnerService = require("../services/businessOwnerService");
 
 const router = express.Router();
 const {
@@ -11,6 +11,12 @@ const {
   rateBusiness,
 } = require("../services/customerService");
 
+
+router.get("/searchBusinesses/:businessName", searchBusinessesByName);
+router.get("/searchBusinesses/", searchBusinessesByName);
+router.get("/filterbycategory/:category", filterbycategory);
+router.get("/filterbycategory/", filterbycategory);
+//customer send Message To BusinessOwner
 router.post("/sendMessageToBusinessOwner/:customerId/:ownerId", async (req, res) => {
   const { customerId, ownerId } = req.params;
   const { message } = req.body;
@@ -37,14 +43,7 @@ router.post("/sendMessageToBusinessOwner/:customerId/:ownerId", async (req, res)
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
-
-router.get("/searchBusinesses/:businessName", searchBusinessesByName);
-router.get("/searchBusinesses/", searchBusinessesByName);
-
-router.get("/filterbycategory/:category", filterbycategory);
-router.get("/filterbycategory/", filterbycategory);
-
-
+// Customer update his Profile Image
 router.patch("/updateCustomerProfileImage/:customerId",
 uploadProfilePic.single("profileImg"),
    async (req, res) => {
@@ -71,6 +70,31 @@ uploadProfilePic.single("profileImg"),
         .json({ success: false, message: "Internal Server Error" });
     }
   });
+  //customer find nearest business
+  router.get("/getBusinessesNearby", async (req, res) => {
+    const { longitude, latitude, minDistance, maxDistance } = req.query;
+  
+    try {
+      const nearbyBusinesses = await BusinessOwnerService.getBusinessesNearby(
+        longitude,
+        latitude,
+        minDistance,
+        maxDistance
+      );
+  
+      res.status(200).json({ success: true, data: nearbyBusinesses });
+    } catch (error) {
+      console.error("Error getting nearby businesses:", error);
+  
+      // Check if the response has already been sent
+      if (!res.headersSent) {
+        res
+          .status(500)
+          .json({ success: false, message: "Internal Server Error" });
+      }
+    }
+  });
+  //customer write review to business
 router.post("/:customerId/writeReview/:businessId", async (req, res) => {
   try {
     const { customerId, businessId } = req.params;
@@ -91,6 +115,7 @@ router.post("/:customerId/writeReview/:businessId", async (req, res) => {
     return res.status(500).json({ status: "error", error: "Internal Server Error" });
   }
   });
+    //customer rating the business
   router.post('/:customerId/rate/:businessId', async (req, res) => {
     try {
       const { customerId, businessId } = req.params;
@@ -108,5 +133,6 @@ router.post("/:customerId/writeReview/:businessId", async (req, res) => {
       res.status(500).json({ status: 'error', message: 'Internal Server Error' });
     }
   });
-
+  
+  
 module.exports = router;

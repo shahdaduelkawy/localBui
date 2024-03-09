@@ -11,7 +11,6 @@ const ApiError = require("../utils/apiError");
 const { getIO } = require("../services/socket");
 const businessOwnerModel= require("../models/businessOwnerModel")
 
-// Assuming you have a function to send messages to customers in your service
 router.post("/sendMessageToCustomer/:ownerID/:customerID", async (req, res) => {
   const { ownerID, customerID } = req.params;
   const { message } = req.body;
@@ -82,8 +81,7 @@ router.put("/profileSetup/:businessId", async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
-router.patch(
-  "/updateMyBusinessAttachment/:businessId",
+router.patch("/updateMyBusinessAttachment/:businessId",
   upload.single("img"),
   async (req, res) => {
     const { file } = req;
@@ -109,8 +107,7 @@ router.patch(
     }
   }
 );
-router.patch(
-  "/updateMyBusinessMedia/:businessId",
+router.patch("/updateMyBusinessMedia/:businessId",
   upload.array("media", 10),
   async (req, res) => {
     const { files } = req;
@@ -168,8 +165,7 @@ router.post("/addMultipleBusinesses/:ownerID", async (req, res) => {
     });
   }
 });
-router.patch(
-  "/addLogoToBusiness/:businessId",
+router.patch("/addLogoToBusiness/:businessId",
   upload.single("logo"),
   async (req, res) => {
     const { file } = req;
@@ -211,7 +207,7 @@ router.delete("/deleteBusiness/:businessId", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
-//get all the Businesses htat the owner have
+//get all the Businesses that the owner have
 router.get("/getAllUserBusinesses/:ownerID", async (req, res) => {
   const { ownerID } = req.params;
 
@@ -258,8 +254,7 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
     }
   }
 });
-router.patch(
-  "/addImageToUserProfile/:userId",
+router.patch("/addImageToUserProfile/:userId",
   uploadProfilePic.single("userProfile"),
   async (req, res) => {
     const { file } = req;
@@ -285,7 +280,7 @@ router.patch(
     }
   }
 );
-// Add new route for pinning business on the map
+// pinning business on the map
 router.patch("/pinMyBusinessOnMap/:businessId",
   express.json(),
   async (req, res) => {
@@ -312,63 +307,39 @@ router.patch("/pinMyBusinessOnMap/:businessId",
     }
   }
 );
-
-router.get("/getBusinessesNearby", async (req, res) => {
-  const { longitude, latitude, minDistance, maxDistance } = req.query;
-
-  try {
-    const nearbyBusinesses = await BusinessOwnerService.getBusinessesNearby(
-      longitude,
-      latitude,
-      minDistance,
-      maxDistance
-    );
-
-    res.status(200).json({ success: true, data: nearbyBusinesses });
-  } catch (error) {
-    console.error("Error getting nearby businesses:", error);
-
-    // Check if the response has already been sent
-    if (!res.headersSent) {
-      res
-        .status(500)
-        .json({ success: false, message: "Internal Server Error" });
+  //customer view the total  average Rating
+  router.get('/rating/:businessId', async (req, res) => {
+    try {
+      const { businessId } = req.params;
+  
+      const business = await businessOwnerModel.findById(businessId);
+  
+      if (!business) {
+        return res.status(404).json({ status: 'fail', message: 'Business not found' });
+      }
+  
+      // Filter out reviews without starRating
+      const validReviews = business.reviews.filter(review => typeof review.starRating === 'number');
+  
+      const totalRatings = validReviews.length;
+  
+      if (totalRatings === 0) {
+        return res.status(200).json({ status: 'success', rating: 0, message: 'No reviews yet' });
+      }
+  
+      const totalRating = validReviews.reduce((sum, review) => {
+        const { starRating } = review; // No need for default, as we filter out undefined values
+        return sum + starRating;
+      }, 0);
+  
+      const averageRating = Math.round(totalRating / totalRatings); // Round to the nearest integer
+  
+      // Return the average rating
+      return res.status(200).json({ status: 'success', rating: averageRating });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ status: 'error', error: 'Internal Server Error' });
     }
-  }
-});
-router.get('/rating/:businessId', async (req, res) => {
-  try {
-    const { businessId } = req.params;
-
-    const business = await businessOwnerModel.findById(businessId);
-
-    if (!business) {
-      return res.status(404).json({ status: 'fail', message: 'Business not found' });
-    }
-
-
-    // Filter out reviews without starRating
-    const validReviews = business.reviews.filter(review => typeof review.starRating === 'number');
-
-    const totalRatings = validReviews.length;
-
-    if (totalRatings === 0) {
-      return res.status(200).json({ status: 'success', rating: 0, message: 'No reviews yet' });
-    }
-
-    const totalRating = validReviews.reduce((sum, review) => {
-      const starRating = review.starRating; // No need for default, as we filter out undefined values
-      return sum + starRating;
-    }, 0);
-
-    const averageRating = totalRating / totalRatings;
-
-    // Return the average rating
-    return res.status(200).json({ status: 'success', rating: averageRating });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ status: 'error', error: 'Internal Server Error' });
-  }
-});
+  });
 
 module.exports = router;

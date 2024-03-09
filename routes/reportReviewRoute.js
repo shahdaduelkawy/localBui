@@ -1,11 +1,18 @@
 const express = require("express");
 
+const mongoose = require("mongoose");
+
 const router = express.Router();
 const reportReviewService = require("../services/reportReviewService");
 
+// Utility function to check if a string is a valid ObjectId
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+// user can report a rivew
 router.post("/:reviewId/:reporterId", async (req, res) => {
-  const reviewId = req.params.reviewId;
-  const reporterId = req.params.reporterId;
+  const {reviewId} = req.params;
+  const {reporterId} = req.params;
 
   try {
     const { reason } = req.body;
@@ -45,16 +52,7 @@ router.post("/:reviewId/:reporterId", async (req, res) => {
   }
 });
 
-// Utility function to check if a string is a valid ObjectId
-function isValidObjectId(id) {
-  const mongoose = require("mongoose");
-  return mongoose.Types.ObjectId.isValid(id);
-}
 
-// Utility function to check if a string is a valid ObjectId
-function isValidObjectId(id) {
-  const mongoose = require("mongoose");
-  return mongoose.Types.ObjectId.isValid(id);
-}
+
 
 module.exports = router;

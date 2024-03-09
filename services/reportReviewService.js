@@ -1,3 +1,4 @@
+/* eslint-disable new-cap */
 const reportReviewModel= require("../models/reportReviewModel");
 
 
