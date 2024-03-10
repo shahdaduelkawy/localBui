@@ -63,5 +63,6 @@ const { searchUserByName } = require('../services/adminService');
 
 // The searchUserByName route should be separate from the '/'
 router.get('/searchUserByName/:name', searchUserByName);
+router.get('/searchUserByName', searchUserByName);
 
 module.exports = router;
