@@ -11,6 +11,8 @@ const ApiError = require('../utils/apiError');
 const { logActivity } = require("./activityLogService");
 
 
+
+
 const BusinessOwnerService = 
 {
   async sendMessageToCustomer(ownerId, customerId, message) {
@@ -382,6 +384,24 @@ async deleteBusinessById(businessId) {
       throw error;
     }
   },
+  async getBusinessReviews(businessId) {
+    try {
+      // Find the business owner by ID
+      const business = await BusinessOwner.findOne({ _id: businessId });
+  
+      if (!business) {
+        throw new Error("Business not found");
+      }
+  
+      // Return the reviews associated with the business
+      return business.reviews;
+    } catch (error) {
+      throw new Error(`Error retrieving reviews for business: ${error.message}`);
+    }
+  }
+  
+  
+  
 };
 
 
