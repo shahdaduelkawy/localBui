@@ -342,4 +342,19 @@ router.patch("/pinMyBusinessOnMap/:businessId",
     }
   });
 
+  router.get("/businessReviews/:businessId", async (req, res) => {
+    const { businessId } = req.params;
+  
+    try {
+      // Call the function to retrieve reviews for the business
+      const reviews = await BusinessOwnerService.getBusinessReviews(businessId);
+  
+      res.status(200).json({ success: true, data: reviews });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+  });
+  
+
 module.exports = router;
