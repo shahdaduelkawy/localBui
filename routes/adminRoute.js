@@ -37,17 +37,18 @@ router.get('/activities/:userId', async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const { activities, activityCount, mostCommonAction } = await getActivities(userId);
+    const { activities, activityCount, mostCommonAction, userName } = await getActivities(userId);
 
     if (activities.length !== 0) {
       // Set Cache-Control header to disable caching
       res.setHeader('Cache-Control', 'no-store');
+      console.log('Name of user:', userName);
 
       console.log('Fetched activities for userId:', userId);
       console.log('Number of activities:', activityCount);
       console.log('Most common action:', mostCommonAction);
 
-      res.status(200).json({ success: true, activityCount, mostCommonAction, activities });
+      res.status(200).json({ success: true, activityCount, mostCommonAction, activities, userName });
     } else {
       console.log('No activities found for userId:', userId);
       res.status(404).json({ success: false, message: 'No activities found' });
@@ -57,6 +58,7 @@ router.get('/activities/:userId', async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
+
 const { searchUserByName } = require('../services/adminService');
 
 // ...

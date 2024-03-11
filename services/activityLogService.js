@@ -3,7 +3,7 @@ const Activity = require("../models/activityModel");
 async function logActivity(userID, activityType, details) {
   try {
     const activity = new Activity({
-      userID: userID, // Update the field name to match the schema
+      userID: userID,
       activityType,
       details,
     });
@@ -17,7 +17,7 @@ async function logActivity(userID, activityType, details) {
 
 async function getActivities(userID) {
   try {
-    const activities = await Activity.find({ userID }).sort({ timeStamp: -1 });
+    const activities = await Activity.find({ userID }).sort({ timeStamp: -1 }).populate('userID', 'name');
     const activityCount = activities.length;
 
     // Calculate the most common action
@@ -30,7 +30,7 @@ async function getActivities(userID) {
       actionCounts[a] > actionCounts[b] ? a : b
     );
 
-    return { activities, activityCount, mostCommonAction };
+    return { activities, activityCount, mostCommonAction, userName: activities[0].userID.name };
   } catch (error) {
     console.error("Error retrieving activities:", error);
     throw error;
