@@ -393,13 +393,18 @@ async deleteBusinessById(businessId) {
         throw new Error("Business not found");
       }
   
-      // Return the reviews associated with the business
-      return business.reviews;
+      // Get the reviews associated with the business
+      const {reviews} = business;
+      
+      // Count the reviews
+      const reviewCount = reviews.length;
+  
+      // Return an object containing reviews and their count
+      return { reviews, reviewCount };
     } catch (error) {
       throw new Error(`Error retrieving reviews for business: ${error.message}`);
     }
   }
-  
   
   
 };

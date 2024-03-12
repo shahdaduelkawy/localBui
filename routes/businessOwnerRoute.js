@@ -348,13 +348,14 @@ router.patch("/pinMyBusinessOnMap/:businessId",
     try {
       // Call the function to retrieve reviews for the business
       const reviews = await BusinessOwnerService.getBusinessReviews(businessId);
+      
+      // Count the reviews
+      const reviewCount = reviews.length;
   
-      res.status(200).json({ success: true, data: reviews });
+      res.status(200).json({ success: true, data: { reviews, reviewCount } });
     } catch (error) {
       console.error(error.message);
       res.status(500).json({ success: false, message: "Internal Server Error" });
     }
   });
-  
-
 module.exports = router;
