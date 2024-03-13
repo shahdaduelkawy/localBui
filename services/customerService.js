@@ -1,8 +1,8 @@
 const Customer = require("../models/customerModel");
 const { logActivity } = require("./activityLogService");
 const BusinessOwner = require("../models/businessOwnerModel");
-const ApiError = require('../utils/apiError');
-
+const ApiError = require("../utils/apiError");
+const User = require("../models/userModel");
 
 const CustomerService = {
   async sendMessageToBusinessOwner(customerId, ownerId, message) {
@@ -22,18 +22,22 @@ const CustomerService = {
       }
 
       // Ensure `messages` arrays exist and are not empty
-      customer.messages = Array.isArray(customer.messages) ? customer.messages : [];
-      businessOwner.messages = Array.isArray(businessOwner.messages) ? businessOwner.messages : [];
+      customer.messages = Array.isArray(customer.messages)
+        ? customer.messages
+        : [];
+      businessOwner.messages = Array.isArray(businessOwner.messages)
+        ? businessOwner.messages
+        : [];
 
       // Create the message objects consistently
       const customerMessage = {
-        sender: 'customer',
+        sender: "customer",
         content: message,
         timestamp: new Date(),
       };
 
       const businessOwnerMessage = {
-        sender: 'customer',
+        sender: "customer",
         content: message, // Ensure content is set correctly
         timestamp: new Date(),
       };
@@ -47,7 +51,11 @@ const CustomerService = {
       await businessOwner.save();
 
       // Log activity after saving for consistency
-      await logActivity(customerId, "sendMessageToBusinessOwner", "Message sent successfully");
+      await logActivity(
+        customerId,
+        "sendMessageToBusinessOwner",
+        "Message sent successfully"
+      );
 
       // Return the updated messages and status
       return {
@@ -62,56 +70,69 @@ const CustomerService = {
     }
   },
 
-  
   async uploadCustomerImage(customerId, file) {
     try {
       const updateResult = await Customer.updateOne(
-        { userId: customerId, },
-        { profileImg: file.path, }
+        { userId: customerId },
+        { profileImg: file.path }
       );
 
-     await logActivity(customerId, "uploadImage", "Image uploaded successfully");
+      await logActivity(
+        customerId,
+        "uploadImage",
+        "Image uploaded successfully"
+      );
 
       return updateResult;
-    } catch (error)  {
+    } catch (error) {
       return error.message;
-      
     }
-  }, 
-   //customer can write a review to businessowner 
+  },
+  //customer can write a review to businessowner
+
   async writeReview(customerId, businessId, review) {
     try {
       const customer = await Customer.findOne({ userId: customerId });
-
       if (!customer) {
         return { success: false, message: "Customer not found" };
       }
 
-      // Check if the provided businessId exists
       const business = await BusinessOwner.findById(businessId);
-
       if (!business) {
         return { success: false, message: "Business not found" };
       }
+// Assuming userId in Customer model references the User model
+const user = await User.findById(customer.userId);
+if (!user) {
+  return { success: false, message: "User not found" };
+}
 
-      // Add the review to the customer's reviews array
+const customerName = user.name;
+
+      // Check if 'reviews' array exists in customer and business objects
+      if (!customer.reviews) {
+        customer.reviews = [];
+      }
+      if (!business.reviews) {
+        business.reviews = [];
+      }
+
       customer.reviews.push({
         businessId: businessId,
         content: review,
         timestamp: new Date(),
+        userName: customerName,
       });
 
-      // Save the updated customer
       await customer.save();
 
-      // Add the review to the businessOwnerModel's reviews array
       business.reviews.push({
         customerId: customerId,
         content: review,
         timestamp: new Date(),
+        userName: customerName,
       });
 
-      // Save the updated businessOwnerModel
       await business.save();
 
       await logActivity(
@@ -126,16 +147,13 @@ const CustomerService = {
       return { success: false, message: "Internal Server Error" };
     }
   },
-
-  
 };
-
-/*async function rateBusiness(customerId, businessId, starRating) {
+async function rateBusiness(customerId, businessId, starRating) {
   try {
-
     if (starRating < 1 || starRating > 5) {
-    throw new Error('Star rating must be between 1 and 5.');
-  }
+      throw new Error("Star rating must be between 1 and 5.");
+    }
+
     const customer = await Customer.findOne({ userId: customerId });
 
     if (!customer) {
@@ -147,55 +165,6 @@ const CustomerService = {
 
     if (!business) {
       return { success: false, message: "Business not found" };
-    }
-    // Update or add the review
-    const existingReviewIndex = customer.reviews.findIndex(
-      (review) => review.businessId.toString() === businessId
-    );
-
-    if (existingReviewIndex !== -1) {
-      // If the customer already reviewed this business, update the star rating
-      customer.reviews[existingReviewIndex].starRating = starRating;
-    } else {
-      // If the customer hasn't reviewed this business, add a new review
-      customer.reviews.push({
-        businessId,
-        starRating,
-        timestamp: new Date(),
-      });
-    }
-
-    // Save the updated customer document
-    await customer.save();
-
-    return {
-      status: 'success',
-      message: 'Business rated successfully.',
-    };
-  }catch (error) {
-    return {
-      status: 'error',
-      message: error.message,
-    };
-  }
-}*/
-async function rateBusiness(customerId, businessId, starRating) {
-  try {
-    if (starRating < 1 || starRating > 5) {
-      throw new Error('Star rating must be between 1 and 5.');
-    }
-
-    const customer = await Customer.findOne({ userId: customerId });
-
-    if (!customer) {
-      return { success: false, message: 'Customer not found' };
-    }
-
-    // Check if the provided businessId exists
-    const business = await BusinessOwner.findById(businessId);
-
-    if (!business) {
-      return { success: false, message: 'Business not found' };
     }
 
     // Update or add the review
@@ -239,12 +208,12 @@ async function rateBusiness(customerId, businessId, starRating) {
     await business.save();
 
     return {
-      status: 'success',
-      message: 'Business rated successfully.',
+      status: "success",
+      message: "Business rated successfully.",
     };
   } catch (error) {
     return {
-      status: 'error',
+      status: "error",
       message: error.message,
     };
   }
@@ -258,25 +227,30 @@ const filterbycategory = async (req, res) => {
     category = category || "";
 
     // Use a case-insensitive regex for the search
-    const regex = new RegExp(category, 'i');
+    const regex = new RegExp(category, "i");
 
     // Search for businesses with names matching the provided term
     const businesses = await BusinessOwner.find(
-      category
-        ? { category: regex }
-        : {} // Return all businesses when no specific category is provided
+      category ? { category: regex } : {} // Return all businesses when no specific category is provided
     );
 
     // Check if businesses were found
     if (businesses.length === 0) {
-      return res.status(404).json({ status: 'fail', message: 'No businesses found for the given search term' });
+      return res.status(404).json({
+        status: "fail",
+        message: "No businesses found for the given search term",
+      });
     }
 
     // Return the number of businesses found along with the list of businesses
-    return res.status(200).json({ status: 'success', count: businesses.length, businesses });
+    return res
+      .status(200)
+      .json({ status: "success", count: businesses.length, businesses });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ status: 'error', error: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: "error", error: "Internal Server Error" });
   }
 };
 const searchBusinessesByName = async (req, res) => {
@@ -287,36 +261,36 @@ const searchBusinessesByName = async (req, res) => {
     businessName = businessName || "";
 
     // Use a case-insensitive regex for the search
-    const regex = new RegExp(businessName, 'i');
+    const regex = new RegExp(businessName, "i");
 
     // Search for businesses with names matching the provided term
     const businesses = await BusinessOwner.find(
-      businessName
-        ? { businessName: regex }
-        : {} // Return all businesses when no specific businessName is provided
+      businessName ? { businessName: regex } : {} // Return all businesses when no specific businessName is provided
     );
 
     // Check if businesses were found
     if (businesses.length === 0) {
-      return res.status(404).json({ status: 'fail', message: 'No businesses found for the given search term' });
+      return res.status(404).json({
+        status: "fail",
+        message: "No businesses found for the given search term",
+      });
     }
 
     // Return the number of businesses found along with the list of businesses
-    return res.status(200).json({ status: 'success', count: businesses.length, businesses });
+    return res
+      .status(200)
+      .json({ status: "success", count: businesses.length, businesses });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ status: 'error', error: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: "error", error: "Internal Server Error" });
   }
 };
 
-
-  module.exports = {
-    searchBusinessesByName,
-    CustomerService,
-    filterbycategory,
-    rateBusiness,
-    
-  };
- 
-  
-  
+module.exports = {
+  searchBusinessesByName,
+  CustomerService,
+  filterbycategory,
+  rateBusiness,
+};
