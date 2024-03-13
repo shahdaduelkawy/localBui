@@ -261,8 +261,6 @@ async getAllUserBusinesses(ownerID) {
   try {
     const businesses = await BusinessOwner.find({ userId: ownerID });
     const numberOfBusinesses = await BusinessOwner.countDocuments({ userId: ownerID });
-    await logActivity(ownerID, "getAllUserBusinesses", "All user businesses retrieved successfully");
-
     return { numberOfBusinesses, businesses };
   } catch (error) {
     console.error("Error retrieving user businesses:", error);
