@@ -33,6 +33,8 @@ const customerSchema = new mongoose.Schema(
         sender: String,
         content: String,
         timestamp: Date,
+        userName:String
+
       },
     ],
 

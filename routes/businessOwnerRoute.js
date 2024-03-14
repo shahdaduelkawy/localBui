@@ -11,13 +11,13 @@ const ApiError = require("../utils/apiError");
 const { getIO } = require("../services/socket");
 const businessOwnerModel= require("../models/businessOwnerModel")
 
-router.post("/sendMessageToCustomer/:ownerID/:customerID", async (req, res) => {
-  const { ownerID, customerID } = req.params;
+router.post("/sendMessageToCustomer/:businessId/:customerID", async (req, res) => {
+  const { businessId, customerID } = req.params;
   const { message } = req.body;
 
   try {
     const result = await BusinessOwnerService.sendMessageToCustomer(
-      ownerID,
+      businessId,
       customerID,
       message
     );
@@ -25,7 +25,7 @@ router.post("/sendMessageToCustomer/:ownerID/:customerID", async (req, res) => {
     if (result.success) {
       // Emit a message to the business owner and customer indicating new messages
       const io = getIO(); // Use getIO function to retrieve the io object
-      io.to(ownerID).emit("updatedMessages", {
+      io.to(businessId).emit("updatedMessages", {
         /* Update with relevant data based on your implementation */
       });
       io.to(customerID).emit("updatedMessages", {

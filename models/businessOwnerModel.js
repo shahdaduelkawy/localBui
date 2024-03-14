@@ -97,6 +97,8 @@ const businessOwnerSchema = new mongoose.Schema(
         sender: String,
         content: String,
         timestamp: Date,
+        userName:String
+
       },
     ],
     reviews: [

@@ -17,12 +17,12 @@ router.get("/searchBusinesses/", searchBusinessesByName);
 router.get("/filterbycategory/:category", filterbycategory);
 router.get("/filterbycategory/", filterbycategory);
 //customer send Message To BusinessOwner
-router.post("/sendMessageToBusinessOwner/:customerId/:ownerId", async (req, res) => {
-  const { customerId, ownerId } = req.params;
+router.post("/sendMessageToBusinessOwner/:customerId/:businessId", async (req, res) => {
+  const { customerId, businessId } = req.params;
   const { message } = req.body;
 
   try {
-    const result = await CustomerService.sendMessageToBusinessOwner(customerId, ownerId, message);
+    const result = await CustomerService.sendMessageToBusinessOwner(customerId, businessId, message);
 
     if (result.success) {
       // Emit a message to the customer and business owner indicating new messages
@@ -30,7 +30,7 @@ router.post("/sendMessageToBusinessOwner/:customerId/:ownerId", async (req, res)
       io.to(customerId).emit("updatedMessages", {
         /* Update with relevant data based on your implementation */
       });
-      io.to(ownerId).emit("updatedMessages", {
+      io.to(businessId).emit("updatedMessages", {
         /* Update with relevant data based on your implementation */
       });
 
