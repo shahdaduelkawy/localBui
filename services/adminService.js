@@ -54,4 +54,35 @@ exports.updateBusinessOwnerStatus = asyncHandler( async (businessId, newStatus) 
       throw new Error(`Failed to update business owner status: ${error.message}`);
     }
   });
+  exports.searchReviewsByContent = asyncHandler(async (req, res, next) => {
+    const { content } = req.query;
   
+    try {
+      // If content is not provided, return an error
+      if (!content) {
+        return next(new ApiError("Content is required for searching reviews", 400));
+      }
+  
+      // Construct a case-insensitive regex pattern to match the entire search term anywhere in the content
+      const regex = new RegExp(content, "i");
+  
+      // Search for reviews with content matching the provided term
+      const businesses = await businessOwner.find({ "reviews.content": regex }, { "reviews": 1, "userName": 1 });
+  
+      // Check if reviews were found
+      if (businesses.length === 0) {
+        return res.status(404).json({ success: false, message: `No reviews found for the given content: ${content}` });
+      }
+  
+      // Extract the necessary information (review content and user name)
+      const filteredReviews = businesses.map((business) => ({
+        userName: business.userName,
+        reviews: business.reviews.filter((review) => regex.test(review.content))
+      }));
+  
+      res.status(200).json({ success: true, count: filteredReviews.length, reviews: filteredReviews });
+    } catch (error) {
+      console.error("Error searching reviews by content:", error);
+      res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});

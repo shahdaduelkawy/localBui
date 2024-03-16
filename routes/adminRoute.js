@@ -1,7 +1,7 @@
 
 const express = require('express');
 
-const { searchUserByName ,updateBusinessOwnerStatus } = require('../services/adminService');
+const { searchUserByName ,updateBusinessOwnerStatus ,searchReviewsByContent } = require('../services/adminService');
 
 
 const {
@@ -78,6 +78,7 @@ router.get('/activities/:userId', async (req, res) => {
 });
 router.get('/searchUserByName/:name', searchUserByName);
 router.get('/searchUserByName', searchUserByName);
+router.get('/searchReviewsByContent', searchReviewsByContent);
 
 
 
