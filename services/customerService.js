@@ -286,10 +286,66 @@ const searchBusinessesByName = async (req, res) => {
       .json({ status: "error", error: "Internal Server Error" });
   }
 };
+const countCustomerRatings = async (businessId) => {
+  try {
+    // Find the business owner document by ID
+    const business = await BusinessOwner.findById(businessId);
+
+    if (!business) {
+      throw new ApiError('Business owner not found', 404);
+    }
+
+    // Initialize counters for each star rating
+    let oneStarCount = 0;
+    let twoStarCount = 0;
+    let threeStarCount = 0;
+    let fourStarCount = 0;
+    let fiveStarCount = 0;
+    let unratedCount = 0;
+
+    // Iterate through the reviews array and count occurrences of each star rating
+    business.reviews.forEach((review) => {
+      switch (review.starRating) {
+        case 1:
+          oneStarCount += 1;
+          break;
+        case 2:
+          twoStarCount += 1;
+          break;
+        case 3:
+          threeStarCount += 1;
+          break;
+        case 4:
+          fourStarCount += 1;
+          break;
+        case 5:
+          fiveStarCount += 1;
+          break;
+        default:
+          unratedCount += 1;
+          break;
+      }
+    });
+
+    // Return an object containing counts for each star rating
+    return {
+      oneStarCount,
+      twoStarCount,
+      threeStarCount,
+      fourStarCount,
+      fiveStarCount,
+      unratedCount
+    };
+  } catch (error) {
+    throw new ApiError(`Failed to count customer ratings: ${error.message}`, error.statusCode || 500);
+  }
+};
+
 
 module.exports = {
   searchBusinessesByName,
   CustomerService,
   filterbycategory,
   rateBusiness,
+  countCustomerRatings
 };

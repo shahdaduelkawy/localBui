@@ -9,6 +9,7 @@ const {
   searchBusinessesByName,
   filterbycategory,
   rateBusiness,
+  countCustomerRatings
 } = require("../services/customerService");
 
 
@@ -115,10 +116,6 @@ uploadProfilePic.single("profileImg"),
       return res.status(500).json({ status: "error", error: "Internal Server Error" });
     }
     });
-
-
-
-
     //customer rating the business
   router.post('/:customerId/rate/:businessId', async (req, res) => {
     try {
@@ -137,7 +134,17 @@ uploadProfilePic.single("profileImg"),
       res.status(500).json({ status: 'error', message: 'Internal Server Error' });
     }
   });
-  
+router.get('/countRatings/:businessId', async (req, res) => {
+  const { businessId } = req.params;
+
+  try {
+    const ratingCounts = await countCustomerRatings(businessId);
+    res.status(200).json({ success: true, ratingCounts });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
   
 module.exports = router;
  
