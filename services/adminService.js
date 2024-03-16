@@ -6,17 +6,11 @@ const businessOwner = require("../models/businessOwnerModel");
 const reportReviewModel = require("../models/reportReviewModel");
 const ApiError = require('../utils/apiError');
 
-
 exports.createAdmin = factory.createOne(User);
-
 exports.deleteAdmin = factory.deleteOne(User);
 exports.getRequests = factory.getAll(businessOwner);
-
 exports.getreports = factory.getAll(reportReviewModel);
-
-
 exports.deleteReview = factory.deleteOne(reportReviewModel)
-  
 exports.searchUserByName = asyncHandler(async (req, res, next) => {
     const { name } = req.params;
   
@@ -85,4 +79,21 @@ exports.updateBusinessOwnerStatus = asyncHandler( async (businessId, newStatus) 
       console.error("Error searching reviews by content:", error);
       res.status(500).json({ success: false, message: "Internal Server Error" });
     }
+});
+exports.searchbusinessByName = asyncHandler(async (req, res, next) => {
+  const { businessName } = req.params;
+
+  // If businessName is not provided, set it to an empty string to retrieve all businesses
+  const regex = new RegExp(businessName || '', 'i');
+
+  // Search for businesses with names matching the provided term
+  const businesses= await businessOwner.find({ businessName: regex });
+
+  // Check if businesses were found
+  if (businesses.length === 0) {
+    return next(new ApiError(`No businesses found for the given search term ${businessName}`, 404));
+  }
+
+  // Return the number of businesses found along with the list of businesses
+  res.status(200).json({ success: true, count: businesses.length, businesses });
 });
