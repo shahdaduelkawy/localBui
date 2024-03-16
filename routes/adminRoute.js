@@ -1,5 +1,9 @@
 
 const express = require('express');
+
+const { searchUserByName ,updateBusinessOwnerStatus } = require('../services/adminService');
+
+
 const {
   createAdminValidator,
   deleteAdminValidator,
@@ -22,6 +26,20 @@ router.use(authService.protect);
 
 // Admin
 router.use(authService.allowedTo('admin', 'subAdmin'));
+
+// Define the route to accept or decline business owner requests
+router.put('/managebusinesses/:businessId', async (req, res) => {
+  const { businessId } = req.params;
+  const { status } = req.body;
+
+  try {
+    const updatedBusinessOwner = await updateBusinessOwnerStatus(businessId, status);
+    res.json(updatedBusinessOwner);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 router
   .route('/')
   .get(getRequests)
@@ -58,13 +76,9 @@ router.get('/activities/:userId', async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
-
-const { searchUserByName } = require('../services/adminService');
-
-// ...
-
-// The searchUserByName route should be separate from the '/'
 router.get('/searchUserByName/:name', searchUserByName);
 router.get('/searchUserByName', searchUserByName);
+
+
 
 module.exports = router;

@@ -34,4 +34,24 @@ exports.searchUserByName = asyncHandler(async (req, res, next) => {
     // Return the number of users found along with the list of users
     res.status(200).json({ success: true, count: users.length, users });
   });
+exports.updateBusinessOwnerStatus = asyncHandler( async (businessId, newStatus) => {
+    try {
+      // Find the business owner document by ID
+      const BusinessOwner = await businessOwner.findById(businessId);
+  
+      if (!businessOwner) {
+        throw new Error('Business owner not found');
+      }
+  
+      // Update the status
+      BusinessOwner.status = newStatus;
+  
+      // Save the updated document
+      await BusinessOwner.save();
+  
+      return BusinessOwner; // Return the updated business owner document
+    } catch (error) {
+      throw new Error(`Failed to update business owner status: ${error.message}`);
+    }
+  });
   
