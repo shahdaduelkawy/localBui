@@ -146,6 +146,18 @@ const customerName = user.name;
       return { success: false, message: "Internal Server Error" };
     }
   },
+  async getBusinessById(businessId) {
+    try {
+      const business = await BusinessOwner.findById(businessId);
+      if (!business) {
+        throw new ApiError('Business not found for the given businessId', 404);
+      }
+      return business; // Return the business directly, not inside an object
+    } catch (error) {
+      console.error("Error retrieving business:", error);
+      throw new ApiError("Internal Server Error", 500);
+    }
+  },
 };
 async function rateBusiness(customerId, businessId, starRating) {
   try {

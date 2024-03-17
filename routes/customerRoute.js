@@ -144,7 +144,26 @@ router.get('/countRatings/:businessId', async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+router.get("/getBusinessById/:businessId", async (req, res) => {
+  const { businessId } = req.params;
 
+  try {
+    const business = await CustomerService.getBusinessById(businessId);
+
+    if (business !== null) {
+      res.status(200).json({ success: true, data: business });
+    } else {
+      res.status(404).json({ success: false, message: "No business found" });
+    }
+  } catch (error) {
+    console.error("Error retrieving  business:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+});
   
 module.exports = router;
  
