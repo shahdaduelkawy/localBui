@@ -220,19 +220,6 @@ async getAllUserBusinesses(ownerID) {
     return null;
   }
   }, 
-async addLogo(businessId, logoFile) {
-    try {
-      const updateResult = await BusinessOwner.updateOne(
-        { _id: businessId },
-        { logo: logoFile.path } // Assuming 'logo' is a field in the BusinessOwner schema
-      );
-
-      return updateResult;
-    } catch (error) {
-      console.error("Error adding logo to business:", error);
-      return null;
-    }
-  },
 async deleteBusinessById(businessId) {
     try {
       const deletionResult = await BusinessOwner.deleteOne({ _id: businessId });
@@ -355,7 +342,24 @@ async deleteBusinessById(businessId) {
     } catch (error) {
       throw new Error(`Error retrieving reviews for business: ${error.message}`);
     }
-  }
+  },
+  async addLogo(businessId, file) {
+    try {
+      const updateResult = await BusinessOwner.updateOne(
+        {
+          _id: businessId,
+        },
+        {
+          logo: file.path,
+        }
+      );
+      await logActivity(businessId, "addLogo", "logo uploaded successfully");
+
+      return updateResult;
+    } catch (error) {
+      return error.message;
+    }
+  },
   
   
 };

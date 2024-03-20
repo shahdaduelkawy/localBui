@@ -133,6 +133,32 @@ router.patch("/updateMyBusinessMedia/:businessId",
     }
   }
 );
+router.patch("/addLogoToBusiness/:businessId",
+  upload.single("logo"),
+  async (req, res) => {
+    const { file } = req;
+    const { businessId } = req.params;
+
+    try {
+      const uploadedImage = await BusinessOwnerService.addLogo(
+        businessId,
+        file
+      );
+
+      if (uploadedImage) {
+        res.status(200).json({ success: true, data: uploadedImage });
+      } else {
+        res
+          .status(404)
+          .json({ success: false, message: "Image Can't Be Uploaded" });
+      }
+    } catch (error) {
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  }
+);
 router.post("/addMultipleBusinesses/:ownerID", async (req, res) => {
   const { ownerID } = req.params;
   const businessesData = req.body;
@@ -165,29 +191,6 @@ router.post("/addMultipleBusinesses/:ownerID", async (req, res) => {
     });
   }
 });
-router.patch("/addLogoToBusiness/:businessId",
-  upload.single("logo"),
-  async (req, res) => {
-    const { file } = req;
-    const { businessId } = req.params;
-
-    try {
-      const addedLogo = await BusinessOwnerService.addLogo(businessId, file);
-
-      if (addedLogo) {
-        res.status(200).json({ success: true, data: addedLogo });
-      } else {
-        res
-          .status(404)
-          .json({ success: false, message: "Logo can't be added to business" });
-      }
-    } catch (error) {
-      res
-        .status(500)
-        .json({ success: false, message: "Internal Server Error" });
-    }
-  }
-);
 router.delete("/deleteBusiness/:businessId", async (req, res) => {
   const { businessId } = req.params;
 
