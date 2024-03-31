@@ -7,7 +7,7 @@ const Customer = require("../models/customerModel");
 
 const User = require("../models/userModel");
 const ApiError = require('../utils/apiError');
-
+const service=require('../models/serviceRequestModel');
 const { logActivity } = require("./activityLogService");
 
 
@@ -360,8 +360,48 @@ async deleteBusinessById(businessId) {
       return error.message;
     }
   },
-  
-  
+
+  async updateServiceRequestStatus(serviceRequestId, newStatus, approvalStatus) {
+    try {
+        // Validate newStatus
+        if (!['Pending', 'In Progress', 'Completed'].includes(newStatus)) {
+            return { success: false, message: "Invalid status value" };
+        }
+
+        // Validate approvalStatus
+        if (!['Pending', 'Accepted', 'Declined'].includes(approvalStatus)) {
+            return { success: false, message: "Invalid approval status value" };
+        }
+
+        // Find the service request by ID
+        const serviceRequest = await service.findById(serviceRequestId);
+
+        // Check if the service request exists
+        if (!serviceRequest) {
+            return { success: false, message: "Service request not found" };
+        }
+
+        // Update the approval status
+        serviceRequest.approvalStatus = approvalStatus;
+        console.log(`New approval status set: ${serviceRequest.approvalStatus}`);
+
+        // If approvalStatus is 'Accepted', then update the status
+        if (approvalStatus === 'Accepted') {
+            serviceRequest.status = newStatus;
+            console.log(`New status set: ${serviceRequest.status}`);
+        }
+
+        // Save the updated service request
+        await serviceRequest.save();
+        console.log(`Service request updated: ${serviceRequest}`);
+
+        return { success: true, message: "Service request status updated successfully" };
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: "Internal Server Error" };
+    }
+}
+
 };
 
 

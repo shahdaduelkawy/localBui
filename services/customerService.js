@@ -3,8 +3,12 @@ const { logActivity } = require("./activityLogService");
 const BusinessOwner = require("../models/businessOwnerModel");
 const ApiError = require("../utils/apiError");
 const User = require("../models/userModel");
+const ServiceRequest= require("../models/serviceRequestModel");
+const mongoose = require('mongoose');
+
 
 const CustomerService = {
+  
   async sendMessageToBusinessOwner(customerId, businessId, message) {
     try {
         // Check if the customer exists
@@ -159,6 +163,50 @@ const customerName = user.name;
     }
   },
 };
+
+
+  async function createServiceRequest(customerId, businessOwnerId, requestDetails) {
+    try {
+        // Check if the customer exists
+        const customer = await Customer.findOne({ userId: customerId });
+        if (!customer) {
+            return { success: false, message: "Customer not found" };
+        }
+
+        // Check if the business owner exists
+        const business = await BusinessOwner.findById(businessOwnerId);
+        if (!business) {
+            return { success: false, message: "Business not found" };
+        }
+
+        // Check if a service request already exists with the given details
+        const existingRequest = await ServiceRequest.findOne({ customerId, businessOwnerId, requestDetails });
+
+        if (existingRequest) {
+            return { message: 'Service request already exists.', existingRequest };
+        }
+
+        // If no existing request, create a new one
+        const newServiceRequest = new ServiceRequest({
+            customerId,
+            businessOwnerId,
+            requestDetails
+        });
+
+        await newServiceRequest.save();
+        return { message: 'Service request submitted successfully.', newServiceRequest };
+    } catch (error) {
+        if (error instanceof mongoose.Error.CastError) {
+            // Handle invalid ObjectId error
+            return { success: false, message: "Invalid ID provided" };
+        } else {
+            // Handle other errors
+            throw new Error(`Error creating service request: ${error.message}`);
+        }
+    }
+}
+
+
 async function rateBusiness(customerId, businessId, starRating) {
   try {
     if (starRating < 1 || starRating > 5) {
@@ -354,10 +402,14 @@ const countCustomerRatings = async (businessId) => {
 };
 
 
+
 module.exports = {
   searchBusinessesByName,
   CustomerService,
   filterbycategory,
   rateBusiness,
-  countCustomerRatings
+  countCustomerRatings,
+  createServiceRequest,
+
+  
 };

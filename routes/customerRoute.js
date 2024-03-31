@@ -9,7 +9,8 @@ const {
   searchBusinessesByName,
   filterbycategory,
   rateBusiness,
-  countCustomerRatings
+  countCustomerRatings,
+  createServiceRequest,
 } = require("../services/customerService");
 
 
@@ -164,6 +165,20 @@ router.get("/getBusinessById/:businessId", async (req, res) => {
     });
   }
 });
-  
+router.post('/:customerId/serviceRequest/:businessId', async (req, res) => {
+  try {
+      const { customerId, businessId } = req.params;
+      const { requestDetails } = req.body;
+
+     // Create service request with extracted ids
+     const newRequest = await createServiceRequest(customerId, businessId, requestDetails);
+     res.status(201).json(newRequest);
+ } catch (error) {
+     console.error('Error creating service request:', error);
+     res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+ }
+});
+
+
 module.exports = router;
  

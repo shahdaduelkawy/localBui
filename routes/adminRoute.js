@@ -1,6 +1,5 @@
 
 const express = require('express');
-
 const {
    searchUserByName ,
   updateBusinessOwnerStatus ,
@@ -23,6 +22,8 @@ const {
   getreports,
 } = require('../services/adminService');
 
+const ServiceRequest =require('../models/serviceRequestModel');
+
 const authService = require('../services/authService');
 
 const router = express.Router();
@@ -42,6 +43,20 @@ router.put('/managebusinesses/:businessId', async (req, res) => {
     res.json(updatedBusinessOwner);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/serviceRequests/:businessId', async (req, res) => {
+  const { businessId } = req.params;
+  try {
+    // Fetch all service requests associated with the specified businessId
+    const serviceRequests = await ServiceRequest.find({ businessOwnerId: businessId });
+
+    // Return the fetched service requests
+    res.status(200).json(serviceRequests);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 

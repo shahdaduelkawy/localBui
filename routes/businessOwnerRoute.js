@@ -361,4 +361,17 @@ router.patch("/pinMyBusinessOnMap/:businessId",
       res.status(500).json({ success: false, message: "Internal Server Error" });
     }
   });
+
+  router.put('/updateStatus/:serviceRequestId', async (req, res) => {
+    const { serviceRequestId } = req.params;
+    const { newStatus, approvalStatus } = req.body;
+
+    const result = await BusinessOwnerService.updateServiceRequestStatus(serviceRequestId, newStatus, approvalStatus);
+
+    if (result.success) {
+        res.status(200).json({ message: result.message });
+    } else {
+        res.status(500).json({ message: result.message });
+    }
+});
 module.exports = router;
