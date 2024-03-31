@@ -1,7 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const ApiError = require('../utils/apiError');
 const ApiFeatures = require('../utils/apiFeatures');
-const mongoose = require('mongoose');
 
 
 exports.deleteOne = (Model) =>

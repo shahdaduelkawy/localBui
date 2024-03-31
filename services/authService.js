@@ -291,5 +291,13 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
     return next(new ApiError(error.message, 400));
   }
 });
+exports.updateUserStatus = async (userId, online) => {
+  try {
+    await User.findByIdAndUpdate(userId, { online, lastSeenAt: new Date() });
+  } catch (error) {
+    console.error('Error updating user status:', error);
+    throw new Error('Failed to update user status');
+  }
+};
 
 

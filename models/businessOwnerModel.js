@@ -74,7 +74,7 @@ const businessOwnerSchema = new mongoose.Schema(
       required: false,
     },
     logo: {
-      type: Buffer,
+      type: String,
       required: false,
     },
     workTime: {
@@ -97,6 +97,8 @@ const businessOwnerSchema = new mongoose.Schema(
         sender: String,
         content: String,
         timestamp: Date,
+        userName:String
+
       },
     ],
     reviews: [
@@ -112,6 +114,7 @@ const businessOwnerSchema = new mongoose.Schema(
           enum: [1, 2, 3, 4, 5],
         },
         timestamp: Date,
+        userName:String
       },
     ],
   },

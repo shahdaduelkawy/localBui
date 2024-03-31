@@ -17,6 +17,7 @@ const {
   forgotPassword,
   verifyPassResetCode,
   resetPassword,
+  updateUserStatus
 } = authService; // Destructure authService methods
 
 const businessOwnersRoute = require('./businessOwnerRoute');
@@ -78,6 +79,18 @@ router.patch('/changePassword/:userId',
   })
 );
 
+// PUT route to update user's online status
+router.put('/status/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const { online } = req.body;
 
+  try {
+    await updateUserStatus(userId, online);
+    res.status(200).json({ success: true, message: 'User status updated successfully' });
+  } catch (error) {
+    console.error('Error updating user status:', error);
+    res.status(500).json({ success: false, message: 'Failed to update user status' });
+  }
+});
 
 module.exports = router;

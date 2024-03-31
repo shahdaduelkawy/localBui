@@ -11,119 +11,74 @@ const ApiError = require('../utils/apiError');
 const { logActivity } = require("./activityLogService");
 
 
+
+
 const BusinessOwnerService = 
 {
-  async sendMessageToCustomer(ownerId, customerId, message) {
-
+  async sendMessageToCustomer(businessId, customerId, message) {
     try {
-  
-     // Check if the business owner exists
-  
-     const businessOwner = await BusinessOwner.findOne({ userId: ownerId });
-  
-    
-  
-     if (!businessOwner) {
-  
-      throw new ApiError(`Business owner not found for ID: ${ownerId}`, 404);
-  
-     }
-  
-    
-  
-     // Check if the customer exists
-  
-     const customer = await Customer.findOne({ userId: customerId });
-  
-    
-  
-     if (!customer) {
-  
-      throw new ApiError(`Customer not found for ID: ${customerId}`, 404);
-  
-     }
-  
-    
-  
-     // Ensure `messages` arrays exist and are not empty
-  
-     businessOwner.messages = Array.isArray(businessOwner.messages) ? businessOwner.messages : [];
-  
-     customer.messages = Array.isArray(customer.messages) ? customer.messages : [];
-  
-    
-  
-     // Create the message objects consistently
-  
-     const businessOwnerMessage = {
-  
-      sender: 'businessOwner',
-  
-      content: message,
-  
-      timestamp: new Date(),
-  
-     };
-  
-    
-  
-     const customerMessage = {
-  
-      sender: 'businessOwner',
-  
-      content: message, // Ensure content is set correctly
-  
-      timestamp: new Date(),
-  
-     };
-  
-    
-  
-     // Push messages into the arrays
-  
-     businessOwner.messages.push(businessOwnerMessage);
-  
-     customer.messages.push(customerMessage);
-  
-    
-  
-     // Ensure data is saved to the database
-  
-     await businessOwner.save();
-  
-     await customer.save();
-  
-    
-  
-     // Log activity after saving for consistency
-  
-     await logActivity(ownerId, "sendMessageToCustomer", "Message sent successfully");
-  
-    
-  
-     // Return the updated messages and status
-  
-     return {
-  
-      success: true,
-  
-      message: "Message sent successfully",
-  
-      businessOwnerMessages: businessOwner.messages,
-  
-      customerMessages: customer.messages,
-  
-     };
-  
+        // Check if the business owner exists
+        const businessOwner = await BusinessOwner.findById(businessId); // Remove curly braces around businessId
+        if (!businessOwner) {
+            throw new ApiError(`Business owner not found for ID: ${businessId}`, 404);
+        }
+
+        // Check if the customer exists
+        const customer = await Customer.findOne({ userId: customerId });
+        if (!customer) {
+            throw new ApiError(`Customer not found for ID: ${customerId}`, 404);
+        }
+
+        const user = await User.findById(businessOwner.userId);
+        if (!user) {
+            return { success: false, message: "User not found" };
+        }
+
+        const businessOwnerName = user.name;
+
+        // Ensure `messages` arrays exist and are not empty
+        businessOwner.messages = Array.isArray(businessOwner.messages) ? businessOwner.messages : [];
+        customer.messages = Array.isArray(customer.messages) ? customer.messages : [];
+
+        // Create the message objects consistently
+        const businessOwnerMessage = {
+            sender: 'businessOwner',
+            content: message,
+            timestamp: new Date(),
+            userName: businessOwnerName,
+        };
+
+        const customerMessage = {
+            sender: 'businessOwner',
+            content: message, // Ensure content is set correctly
+            timestamp: new Date(),
+            userName: businessOwnerName,
+        };
+
+        // Push messages into the arrays
+        businessOwner.messages.push(businessOwnerMessage);
+        customer.messages.push(customerMessage);
+
+        // Ensure data is saved to the database
+        await businessOwner.save();
+        await customer.save();
+
+        // Log activity after saving for consistency
+        await logActivity(businessId, "sendMessageToCustomer", "Message sent successfully");
+
+        // Return the updated messages and status
+        return {
+            success: true,
+            message: "Message sent successfully",
+            businessOwnerMessages: businessOwner.messages,
+            customerMessages: customer.messages,
+        };
     } catch (error) {
-  
-     console.error(`Error sending message: ${error.message}`);
-  
-     throw new ApiError("Error sending message", error.statusCode || 500);
-  
+        console.error(`Error sending message: ${error.message}`);
+        throw new ApiError("Error sending message", error.statusCode || 500);
     }
-  
-  },
+},
+
   async getUserByUserID(userId) {
     try {
       // Find the user based on the user's ID
@@ -259,27 +214,12 @@ async getAllUserBusinesses(ownerID) {
   try {
     const businesses = await BusinessOwner.find({ userId: ownerID });
     const numberOfBusinesses = await BusinessOwner.countDocuments({ userId: ownerID });
-    await logActivity(ownerID, "getAllUserBusinesses", "All user businesses retrieved successfully");
-
     return { numberOfBusinesses, businesses };
   } catch (error) {
     console.error("Error retrieving user businesses:", error);
     return null;
   }
   }, 
-async addLogo(businessId, logoFile) {
-    try {
-      const updateResult = await BusinessOwner.updateOne(
-        { _id: businessId },
-        { logo: logoFile.path } // Assuming 'logo' is a field in the BusinessOwner schema
-      );
-
-      return updateResult;
-    } catch (error) {
-      console.error("Error adding logo to business:", error);
-      return null;
-    }
-  },
 async deleteBusinessById(businessId) {
     try {
       const deletionResult = await BusinessOwner.deleteOne({ _id: businessId });
@@ -382,6 +322,46 @@ async deleteBusinessById(businessId) {
       throw error;
     }
   },
+  async getBusinessReviews(businessId) {
+    try {
+      // Find the business owner by ID
+      const business = await BusinessOwner.findOne({ _id: businessId });
+  
+      if (!business) {
+        throw new Error("Business not found");
+      }
+  
+      // Get the reviews associated with the business
+      const {reviews} = business;
+      
+      // Count the reviews
+      const reviewCount = reviews.length;
+  
+      // Return an object containing reviews and their count
+      return { reviews, reviewCount };
+    } catch (error) {
+      throw new Error(`Error retrieving reviews for business: ${error.message}`);
+    }
+  },
+  async addLogo(businessId, file) {
+    try {
+      const updateResult = await BusinessOwner.updateOne(
+        {
+          _id: businessId,
+        },
+        {
+          logo: file.path,
+        }
+      );
+      await logActivity(businessId, "addLogo", "logo uploaded successfully");
+
+      return updateResult;
+    } catch (error) {
+      return error.message;
+    }
+  },
+  
+  
 };
 
 

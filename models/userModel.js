@@ -50,6 +50,15 @@ const userSchema = new mongoose.Schema(
       default: "Null",
       required: false,
     },
+    online: {
+      type: Boolean,
+      default: false, // Initially set to offline
+    },
+    lastSeenAt: {
+      type: Date,
+      default: Date.now,
+    },
+  
   },
   { timestamps: true }
 );

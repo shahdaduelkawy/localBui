@@ -16,7 +16,7 @@ const customerSchema = new mongoose.Schema(
       {
         businessId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "BusinessOwner",
+          ref: "businessOwner", // Change this to match the model name
           required: true,
         },
         content: String,
@@ -25,6 +25,7 @@ const customerSchema = new mongoose.Schema(
           enum: [1, 2, 3, 4, 5],
         },
         timestamp: Date,
+        userName: String
       },
     ],
     messages: [
@@ -32,6 +33,8 @@ const customerSchema = new mongoose.Schema(
         sender: String,
         content: String,
         timestamp: Date,
+        userName:String
+
       },
     ],
 
