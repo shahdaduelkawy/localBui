@@ -1,25 +1,43 @@
+
 const mongoose = require("mongoose");
 
 const reportReviewSchema = new mongoose.Schema({
-     
-      reporterId: {
+    businessOwnerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'businessOwner',
         required: true,
-      },
-      reason: {
+    },
+    customerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Customer',
+        required: true,
+    },
+    reviewId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Review',
+        required: true,
+    },
+    businessName: {
         type: String,
         required: true,
-      },
-      status: {
+    },
+    customerName: {
+        type: String,
+        required: true,
+    },
+    review: {
+        type: String,
+        required: true,
+    },
+    status: {
         type: String,
         enum: ['pending', 'approved', 'rejected'],
         default: 'pending',
-      },
-    }, {
-      timestamps: true,
+    },
+}, {
+    timestamps: true,
+});
 
-})
 const reportReviewModel = mongoose.model('report', reportReviewSchema);
 
 module.exports = reportReviewModel;
