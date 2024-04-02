@@ -1,20 +1,19 @@
-
 const mongoose = require("mongoose");
 
 const reportReviewSchema = new mongoose.Schema({
+    reviewId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Review',
+        required: true,
+    },
     businessOwnerId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'businessOwner',
+        ref: 'BusinessOwner',
         required: true,
     },
     customerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Customer',
-        required: true,
-    },
-    reviewId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Review',
         required: true,
     },
     businessName: {
@@ -38,6 +37,6 @@ const reportReviewSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-const reportReviewModel = mongoose.model('report', reportReviewSchema);
+const ReportReview = mongoose.model('ReportReview', reportReviewSchema);
 
-module.exports = reportReviewModel;
+module.exports = ReportReview;

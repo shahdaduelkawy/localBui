@@ -1,20 +1,20 @@
-
 const express = require("express");
-const mongoose = require("mongoose");
 const router = express.Router();
 const reportReviewService = require("../services/reportReviewService");
 
-// User can report a review
+// Route to report a review
 router.post("/:reviewId/:businessOwnerId/:customerId", async (req, res) => {
   const { reviewId, businessOwnerId, customerId } = req.params;
+  const { status } = req.body;
 
   try {
     const result = await reportReviewService.reportReview(
       reviewId,
       businessOwnerId,
-      customerId
+      customerId,
+      status
     );
-    console.log(result);
+
     // Check if the report was created successfully
     if (result.message === "Report already submitted for this review.") {
       return res
@@ -32,4 +32,3 @@ router.post("/:reviewId/:businessOwnerId/:customerId", async (req, res) => {
 });
 
 module.exports = router;
-
