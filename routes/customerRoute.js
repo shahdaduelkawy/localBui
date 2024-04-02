@@ -2,6 +2,8 @@ const express = require("express");
 const { uploadProfilePic } = require("../middleware/fileUpload.middleware");
 const { getIO } = require("../services/socket");
 const BusinessOwnerService = require("../services/businessOwnerService");
+const Customer = require("../models/customerModel");
+const BusinessOwner = require("../models/businessOwnerModel");
 
 const router = express.Router();
 const {
@@ -178,6 +180,74 @@ router.post('/:customerId/serviceRequest/:businessId', async (req, res) => {
      res.status(500).json({ status: 'error', message: 'Internal Server Error' });
  }
 });
+
+router.post('/favorites/:customerId/:businessId', async (req, res) => {
+  try {
+      const { customerId, businessId } = req.params; // Updated to use businessId
+      const customer = await Customer.findById(customerId);
+      if (!customer) {
+          return res.status(404).send({ error: 'Customer not found' });
+      }
+      // Check if the business is already a favorite
+      const isFavorite = customer.favoriteBusinesses.some(business => business.businessId.equals(businessId));
+      if (isFavorite) {
+          return res.status(400).send({ error: 'Business already favorited' });
+      }
+      customer.favoriteBusinesses.push({ businessId });
+      await customer.save();
+      res.status(201).send({ message: 'Business favorited successfully' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: 'Internal Server Error' });
+  }
+});
+
+router.delete('/favorites/:customerId/:businessId', async (req, res) => {
+  try {
+      const { customerId, businessId } = req.params;
+      const customer = await Customer.findById(customerId);
+      if (!customer) {
+          return res.status(404).send({ error: 'Customer not found' });
+      }
+      // Check if the business is favorited
+      const isFavorite = customer.favoriteBusinesses.some(business => business.businessId.equals(businessId));
+      if (!isFavorite) {
+          return res.status(400).send({ error: 'Business not favorited' });
+      }
+      // Remove the business from favorites
+      customer.favoriteBusinesses = customer.favoriteBusinesses.filter(business => !business.businessId.equals(businessId));
+      await customer.save();
+      res.status(200).send({ message: 'Business removed from favorites successfully' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: 'Internal Server Error' });
+  }
+});
+
+router.get('/favorites/:customerId', async (req, res) => {
+  try {
+      const { customerId } = req.params;
+      
+      const customer = await Customer.findById(customerId);
+      
+      if (!customer) {
+          return res.status(404).send({ error: 'Customer not found' });
+      }
+      
+      // Extract business names from favoriteBusinesses array
+      const favoriteBusinessNames = await Promise.all(customer.favoriteBusinesses.map(async (favorite) => {
+        const business = await BusinessOwner.findById(favorite.businessId);
+        return business ? business.businessName : null;
+      }));
+      
+      // Filter out null values and send the response
+      res.status(200).send(favoriteBusinessNames.filter(name => name !== null));
+  } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: 'Internal Server Error' });
+  }
+});
+
 
 
 module.exports = router;

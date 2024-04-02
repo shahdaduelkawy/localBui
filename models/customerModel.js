@@ -37,6 +37,14 @@ const customerSchema = new mongoose.Schema(
 
       },
     ],
+    favoriteBusinesses: [
+      {
+        businessId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "businessOwner", // Reference the business owner model
+        }
+      }
+    ]
 
   },
   { timestamps: true }
