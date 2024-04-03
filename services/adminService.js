@@ -8,7 +8,6 @@ const ApiError = require('../utils/apiError');
 
 exports.createAdmin = factory.createOne(User);
 exports.deleteAdmin = factory.deleteOne(User);
-exports.getRequests = factory.getAll(businessOwner);
 exports.getreports = factory.getAll(reportReviewModel);
 exports.deleteReview = factory.deleteOne(reportReviewModel)
 exports.searchUserByName = asyncHandler(async (req, res, next) => {
@@ -96,4 +95,22 @@ exports.searchbusinessByName = asyncHandler(async (req, res, next) => {
 
   // Return the number of businesses found along with the list of businesses
   res.status(200).json({ success: true, count: businesses.length, businesses });
+});
+exports.getRequests = asyncHandler(async (req, res, next) => {
+  try {
+    // Fetch all businesses
+    const businesses = await businessOwner.find();
+
+    // Arrange businesses by status: pending first, then rejected, then accepted
+    const sortedBusinesses = businesses.sort((a, b) => {
+      const statusOrder = { pending: 1, rejected: 2, accepted: 3 };
+      return statusOrder[a.status] - statusOrder[b.status];
+    });
+
+    // Return the sorted businesses
+    res.status(200).json({ success: true, count: sortedBusinesses.length, businesses: sortedBusinesses });
+  } catch (error) {
+    console.error("Error fetching businesses:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
 });
