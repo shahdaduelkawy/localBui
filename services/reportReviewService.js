@@ -28,10 +28,10 @@ async function reportReview(reviewId, businessOwnerId, customerId, status, reaso
             throw new Error(`User with ID ${customer.userId} not found.`);
         }
 
-        // Fetch the review from the customer's reviews array based on reviewId
+        // Fetch the review from the businessOwner's reviews array based on reviewId
         let review;
-        if (customer) {
-            review = customer.reviews.find(review => review._id.equals(reviewId));
+        if (businessOwner) {
+            review = businessOwner.reviews.find(review => review._id.equals(reviewId));
         }
 
         if (!review) {
