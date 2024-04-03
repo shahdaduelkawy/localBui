@@ -93,6 +93,7 @@ async function reportReview(reviewId, businessOwnerId, customerId, status, reaso
         // Fetch the review from the customer's reviews array based on reviewId
         let review;
         if (customer) {
+            // eslint-disable-next-line no-shadow
             review = customer.reviews.find(review => review._id.equals(reviewId));
         }
 
