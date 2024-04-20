@@ -1,18 +1,16 @@
-
-const express = require('express');
+const express = require("express");
 const {
-   searchUserByName ,
-  updateBusinessOwnerStatus ,
-  searchReviewsByContent ,
-  searchbusinessByName 
-} = require('../services/adminService');
-
+  searchUserByName,
+  updateBusinessOwnerStatus,
+  searchReviewsByContent,
+  searchbusinessByName,
+} = require("../services/adminService");
 
 const {
   createAdminValidator,
   deleteAdminValidator,
-} = require('../utils/validators/adminValidator');
-const { getActivities } = require('../services/activityLogService');
+} = require("../utils/validators/adminValidator");
+const { getActivities } = require("../services/activityLogService");
 
 const {
   createAdmin,
@@ -20,88 +18,83 @@ const {
   getRequests,
   deleteReview,
   getreports,
-} = require('../services/adminService');
+} = require("../services/adminService");
 
-const ServiceRequest =require('../models/serviceRequestModel');
 
-const authService = require('../services/authService');
+const authService = require("../services/authService");
 
 const router = express.Router();
 
 router.use(authService.protect);
 
 // Admin
-router.use(authService.allowedTo('admin', 'subAdmin'));
+router.use(authService.allowedTo("admin", "subAdmin"));
 
 // Define the route to accept or decline business owner requests
-router.put('/managebusinesses/:businessId', async (req, res) => {
+router.put("/managebusinesses/:businessId", async (req, res) => {
   const { businessId } = req.params;
   const { status } = req.body;
 
   try {
-    const updatedBusinessOwner = await updateBusinessOwnerStatus(businessId, status);
+    const updatedBusinessOwner = await updateBusinessOwnerStatus(
+      businessId,
+      status
+    );
     res.json(updatedBusinessOwner);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-router.get('/serviceRequests/:businessId', async (req, res) => {
-  const { businessId } = req.params;
-  try {
-    // Fetch all service requests associated with the specified businessId
-    const serviceRequests = await ServiceRequest.find({ businessOwnerId: businessId });
 
-    // Return the fetched service requests
-    res.status(200).json(serviceRequests);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-});
 
 router
-  .route('/')
+  .route("/")
   .get(getRequests)
   .get(getreports)
   .post(createAdminValidator, createAdmin);
-router
-  .route('/delete/:id')
-  .delete(deleteAdminValidator, deleteAdmin); 
+router.route("/delete/:id").delete(deleteAdminValidator, deleteAdmin);
 
-router.route('/deleteReview/:id').delete(deleteReview); 
-router.route('/getreports').get(getreports); 
-router.get('/activities/:userId', async (req, res) => {
+router.route("/deleteReview/:id").delete(deleteReview);
+router.route("/getreports").get(getreports);
+router.get("/activities/:userId", async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const { activities, activityCount, mostCommonAction, userName } = await getActivities(userId);
+    const { activities, activityCount, mostCommonAction, userName } =
+      await getActivities(userId);
 
     if (activities.length !== 0) {
       // Set Cache-Control header to disable caching
-      res.setHeader('Cache-Control', 'no-store');
-      console.log('Name of user:', userName);
+      res.setHeader("Cache-Control", "no-store");
+      console.log("Name of user:", userName);
 
-      console.log('Fetched activities for userId:', userId);
-      console.log('Number of activities:', activityCount);
-      console.log('Most common action:', mostCommonAction);
+      console.log("Fetched activities for userId:", userId);
+      console.log("Number of activities:", activityCount);
+      console.log("Most common action:", mostCommonAction);
 
-      res.status(200).json({ success: true, activityCount, mostCommonAction, activities, userName });
+      res
+        .status(200)
+        .json({
+          success: true,
+          activityCount,
+          mostCommonAction,
+          activities,
+          userName,
+        });
     } else {
-      console.log('No activities found for userId:', userId);
-      res.status(404).json({ success: false, message: 'No activities found' });
+      console.log("No activities found for userId:", userId);
+      res.status(404).json({ success: false, message: "No activities found" });
     }
   } catch (err) {
-    console.error('Error retrieving activities:', err);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
+    console.error("Error retrieving activities:", err);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
-router.get('/searchUserByName/:name', searchUserByName);
-router.get('/searchUserByName', searchUserByName);
-router.get('/searchReviewsByContent', searchReviewsByContent);
-router.get('/searchbusinessByName/:businessName', searchbusinessByName);
-router.get('/searchbusinessByName', searchbusinessByName);
-
-
+router.get("/searchUserByName/:name", searchUserByName);
+router.get("/searchUserByName", searchUserByName);
+router.get("/searchReviewsByContent", searchReviewsByContent);
+router.get("/searchbusinessByName/:businessName", searchbusinessByName);
+router.get("/searchbusinessByName", searchbusinessByName);
 
 module.exports = router;
