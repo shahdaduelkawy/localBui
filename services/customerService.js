@@ -1,10 +1,11 @@
+const mongoose = require('mongoose');
+
 const Customer = require("../models/customerModel");
 const { logActivity } = require("./activityLogService");
 const BusinessOwner = require("../models/businessOwnerModel");
 const ApiError = require("../utils/apiError");
 const User = require("../models/userModel");
 const ServiceRequest= require("../models/serviceRequestModel");
-const mongoose = require('mongoose');
 
 
 const CustomerService = {
@@ -199,10 +200,10 @@ const customerName = user.name;
         if (error instanceof mongoose.Error.CastError) {
             // Handle invalid ObjectId error
             return { success: false, message: "Invalid ID provided" };
-        } else {
+        } 
             // Handle other errors
             throw new Error(`Error creating service request: ${error.message}`);
-        }
+        
     }
 }
 
