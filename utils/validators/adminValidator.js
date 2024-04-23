@@ -49,11 +49,18 @@ exports.createAdminValidator = [
   validatorMiddleware,
 ];
 
-exports.deleteAdminValidator = [
+exports.deleteUsersValidator = [
   check('id').isMongoId().withMessage('Invalid Admin id format'),
 
   validatorMiddleware,
 ];
+
+exports.deleteBusinessValidator = [
+  check('id').isMongoId().withMessage('Invalid Admin id format'),
+
+  validatorMiddleware,
+];
+
 exports.getSearchValidator = [
   check('id').isMongoId().withMessage('Invalid Search id format'),
   validatorMiddleware,

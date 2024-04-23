@@ -1,79 +1,87 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const Customer = require("../models/customerModel");
 const { logActivity } = require("./activityLogService");
 const BusinessOwner = require("../models/businessOwnerModel");
 const ApiError = require("../utils/apiError");
 const User = require("../models/userModel");
-const ServiceRequest= require("../models/serviceRequestModel");
-
+const ServiceRequest = require("../models/serviceRequestModel");
 
 const CustomerService = {
-  
   async sendMessageToBusinessOwner(customerId, businessId, message) {
     try {
-        // Check if the customer exists
-        const customer = await Customer.findOne({ userId: customerId });
-        if (!customer) {
-            throw new ApiError(`Customer not found for ID: ${customerId}`, 404);
-        }
+      // Check if the customer exists
+      const customer = await Customer.findOne({ userId: customerId });
+      if (!customer) {
+        throw new ApiError(`Customer not found for ID: ${customerId}`, 404);
+      }
 
-        // Check if the business owner exists
-        const businessOwner = await BusinessOwner.findById(businessId); // Remove curly braces
-        if (!businessOwner) {
-            throw new ApiError(`Business owner not found for ID: ${businessId}`, 404);
-        }
+      // Check if the business owner exists
+      const businessOwner = await BusinessOwner.findById(businessId); // Remove curly braces
+      if (!businessOwner) {
+        throw new ApiError(
+          `Business owner not found for ID: ${businessId}`,
+          404
+        );
+      }
 
-        const user = await User.findById(customer.userId);
-        if (!user) {
-            return { success: false, message: "User not found" };
-        }
+      const user = await User.findById(customer.userId);
+      if (!user) {
+        return { success: false, message: "User not found" };
+      }
 
-        // Ensure `messages` arrays exist and are not empty
-        customer.messages = Array.isArray(customer.messages) ? customer.messages : [];
-        businessOwner.messages = Array.isArray(businessOwner.messages) ? businessOwner.messages : [];
+      // Ensure `messages` arrays exist and are not empty
+      customer.messages = Array.isArray(customer.messages)
+        ? customer.messages
+        : [];
+      businessOwner.messages = Array.isArray(businessOwner.messages)
+        ? businessOwner.messages
+        : [];
 
-        const customerName = user.name;
+      const customerName = user.name;
 
-        // Create the message objects consistently
-        const customerMessage = {
-            sender: "customer",
-            content: message,
-            userName: customerName,
-            timestamp: new Date(),
-        };
+      // Create the message objects consistently
+      const customerMessage = {
+        sender: "customer",
+        content: message,
+        userName: customerName,
+        timestamp: new Date(),
+      };
 
-        const businessOwnerMessage = {
-            sender: "customer",
-            content: message, // Ensure content is set correctly
-            timestamp: new Date(),
-            userName: customerName,
-        };
+      const businessOwnerMessage = {
+        sender: "customer",
+        content: message, // Ensure content is set correctly
+        timestamp: new Date(),
+        userName: customerName,
+      };
 
-        // Push messages into the arrays
-        customer.messages.push(customerMessage);
-        businessOwner.messages.push(businessOwnerMessage);
+      // Push messages into the arrays
+      customer.messages.push(customerMessage);
+      businessOwner.messages.push(businessOwnerMessage);
 
-        // Ensure data is saved to the database
-        await customer.save();
-        await businessOwner.save();
+      // Ensure data is saved to the database
+      await customer.save();
+      await businessOwner.save();
 
-        // Log activity after saving for consistency
-        await logActivity(customerId, "sendMessageToBusinessOwner", "Message sent successfully");
+      // Log activity after saving for consistency
+      await logActivity(
+        customerId,
+        "sendMessageToBusinessOwner",
+        "Message sent successfully"
+      );
 
-        // Return the updated messages and status
-        return {
-            success: true,
-            message: "Message sent successfully",
-            customerMessages: customer.messages,
-            businessOwnerMessages: businessOwner.messages,
-        };
+      // Return the updated messages and status
+      return {
+        success: true,
+        message: "Message sent successfully",
+        customerMessages: customer.messages,
+        businessOwnerMessages: businessOwner.messages,
+      };
     } catch (error) {
-        console.error(`Error sending message: ${error.message}`);
-        throw new ApiError("Error sending message", error.statusCode || 500);
+      console.error(`Error sending message: ${error.message}`);
+      throw new ApiError("Error sending message", error.statusCode || 500);
     }
-},
-
+  },
 
   async uploadCustomerImage(customerId, file) {
     try {
@@ -106,12 +114,12 @@ const CustomerService = {
       if (!business) {
         return { success: false, message: "Business not found" };
       }
-const user = await User.findById(customer.userId);
-if (!user) {
-  return { success: false, message: "User not found" };
-}
+      const user = await User.findById(customer.userId);
+      if (!user) {
+        return { success: false, message: "User not found" };
+      }
 
-const customerName = user.name;
+      const customerName = user.name;
 
       // Check if 'reviews' array exists in customer and business objects
       if (!customer.reviews) {
@@ -155,7 +163,7 @@ const customerName = user.name;
     try {
       const business = await BusinessOwner.findById(businessId);
       if (!business) {
-        throw new ApiError('Business not found for the given businessId', 404);
+        throw new ApiError("Business not found for the given businessId", 404);
       }
       return business; // Return the business directly, not inside an object
     } catch (error) {
@@ -165,48 +173,56 @@ const customerName = user.name;
   },
 };
 
-
-  async function createServiceRequest(customerId, businessOwnerId, requestDetails) {
-    try {
-        // Check if the customer exists
-        const customer = await Customer.findOne({ userId: customerId });
-        if (!customer) {
-            return { success: false, message: "Customer not found" };
-        }
-
-        // Check if the business owner exists
-        const business = await BusinessOwner.findById(businessOwnerId);
-        if (!business) {
-            return { success: false, message: "Business not found" };
-        }
-
-        // Check if a service request already exists with the given details
-        const existingRequest = await ServiceRequest.findOne({ customerId, businessOwnerId, requestDetails });
-
-        if (existingRequest) {
-            return { message: 'Service request already exists.', existingRequest };
-        }
-
-        // If no existing request, create a new one
-        const newServiceRequest = new ServiceRequest({
-            customerId,
-            businessOwnerId,
-            requestDetails
-        });
-
-        await newServiceRequest.save();
-        return { message: 'Service request submitted successfully.', newServiceRequest };
-    } catch (error) {
-        if (error instanceof mongoose.Error.CastError) {
-            // Handle invalid ObjectId error
-            return { success: false, message: "Invalid ID provided" };
-        } 
-            // Handle other errors
-            throw new Error(`Error creating service request: ${error.message}`);
-        
+async function createServiceRequest(
+  customerId,
+  businessOwnerId,
+  requestDetails
+) {
+  try {
+    // Check if the customer exists
+    const customer = await Customer.findOne({ userId: customerId });
+    if (!customer) {
+      return { success: false, message: "Customer not found" };
     }
-}
 
+    // Check if the business owner exists
+    const business = await BusinessOwner.findById(businessOwnerId);
+    if (!business) {
+      return { success: false, message: "Business not found" };
+    }
+
+    // Check if a service request already exists with the given details
+    const existingRequest = await ServiceRequest.findOne({
+      customerId,
+      businessOwnerId,
+      requestDetails,
+    });
+
+    if (existingRequest) {
+      return { message: "Service request already exists.", existingRequest };
+    }
+
+    // If no existing request, create a new one
+    const newServiceRequest = new ServiceRequest({
+      customerId,
+      businessOwnerId,
+      requestDetails,
+    });
+
+    await newServiceRequest.save();
+    return {
+      message: "Service request submitted successfully.",
+      newServiceRequest,
+    };
+  } catch (error) {
+    if (error instanceof mongoose.Error.CastError) {
+      // Handle invalid ObjectId error
+      return { success: false, message: "Invalid ID provided" };
+    }
+    // Handle other errors
+    throw new Error(`Error creating service request: ${error.message}`);
+  }
+}
 
 async function rateBusiness(customerId, businessId, starRating) {
   try {
@@ -353,7 +369,7 @@ const countCustomerRatings = async (businessId) => {
     const business = await BusinessOwner.findById(businessId);
 
     if (!business) {
-      throw new ApiError('Business owner not found', 404);
+      throw new ApiError("Business owner not found", 404);
     }
 
     // Initialize counters for each star rating
@@ -395,14 +411,15 @@ const countCustomerRatings = async (businessId) => {
       threeStarCount,
       fourStarCount,
       fiveStarCount,
-      unratedCount
+      unratedCount,
     };
   } catch (error) {
-    throw new ApiError(`Failed to count customer ratings: ${error.message}`, error.statusCode || 500);
+    throw new ApiError(
+      `Failed to count customer ratings: ${error.message}`,
+      error.statusCode || 500
+    );
   }
 };
-
-
 
 module.exports = {
   searchBusinessesByName,
@@ -411,6 +428,4 @@ module.exports = {
   rateBusiness,
   countCustomerRatings,
   createServiceRequest,
-
-  
 };

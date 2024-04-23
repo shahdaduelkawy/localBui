@@ -7,7 +7,8 @@ const reportReviewModel = require("../models/reportReviewModel");
 const ApiError = require('../utils/apiError');
 
 exports.createAdmin = factory.createOne(User);
-exports.deleteAdmin = factory.deleteOne(User);
+exports.deleteUsers = factory.deleteOne(User);
+exports.deleteBusiness = factory.deleteOne(businessOwner);
 exports.getreports = factory.getAll(reportReviewModel);
 exports.deleteReview = factory.deleteOne(reportReviewModel)
 exports.searchUserByName = asyncHandler(async (req, res, next) => {
@@ -114,3 +115,20 @@ exports.getRequests = asyncHandler(async (req, res, next) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
+
+exports.getbusinesses = asyncHandler(async (req, res, next) => {
+  try {
+    // Fetch all businesses
+    const businesses = await businessOwner.find();
+
+    // Filter businesses to include only those with the "accepted" status
+    const acceptedBusinesses = businesses.filter(business => business.status === "accepted");
+
+    // Return the accepted businesses
+    res.status(200).json({ success: true, count: acceptedBusinesses.length, businesses: acceptedBusinesses });
+  } catch (error) {
+    console.error("Error fetching businesses:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+

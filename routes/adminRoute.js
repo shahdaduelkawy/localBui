@@ -8,18 +8,20 @@ const {
 
 const {
   createAdminValidator,
-  deleteAdminValidator,
+  deleteUsersValidator,
+  deleteBusinessValidator,
 } = require("../utils/validators/adminValidator");
 const { getActivities } = require("../services/activityLogService");
 
 const {
   createAdmin,
-  deleteAdmin,
+  deleteUsers,
+  deleteBusiness,
   getRequests,
   deleteReview,
   getreports,
+  getbusinesses,
 } = require("../services/adminService");
-
 
 const authService = require("../services/authService");
 
@@ -29,7 +31,23 @@ router.use(authService.protect);
 
 // Admin
 router.use(authService.allowedTo("admin", "subAdmin"));
-
+router
+  .route("/")
+  .get(getRequests)
+  .get(getreports)
+  .post(createAdminValidator, createAdmin);
+router.route("/deleteUsers/:id").delete(deleteUsersValidator, deleteUsers);
+router.route("/getallbusinesses").get(getbusinesses);
+router
+  .route("/deleteBusiness/:id")
+  .delete(deleteBusinessValidator, deleteBusiness);
+router.route("/deleteReview/:id").delete(deleteReview);
+router.route("/getreports").get(getreports);
+router.get("/searchUserByName/:name", searchUserByName);
+router.get("/searchUserByName", searchUserByName);
+router.get("/searchReviewsByContent", searchReviewsByContent);
+router.get("/searchbusinessByName/:businessName", searchbusinessByName);
+router.get("/searchbusinessByName", searchbusinessByName);
 // Define the route to accept or decline business owner requests
 router.put("/managebusinesses/:businessId", async (req, res) => {
   const { businessId } = req.params;
@@ -45,18 +63,6 @@ router.put("/managebusinesses/:businessId", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-
-
-
-router
-  .route("/")
-  .get(getRequests)
-  .get(getreports)
-  .post(createAdminValidator, createAdmin);
-router.route("/delete/:id").delete(deleteAdminValidator, deleteAdmin);
-
-router.route("/deleteReview/:id").delete(deleteReview);
-router.route("/getreports").get(getreports);
 router.get("/activities/:userId", async (req, res) => {
   const { userId } = req.params;
 
@@ -73,15 +79,13 @@ router.get("/activities/:userId", async (req, res) => {
       console.log("Number of activities:", activityCount);
       console.log("Most common action:", mostCommonAction);
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          activityCount,
-          mostCommonAction,
-          activities,
-          userName,
-        });
+      res.status(200).json({
+        success: true,
+        activityCount,
+        mostCommonAction,
+        activities,
+        userName,
+      });
     } else {
       console.log("No activities found for userId:", userId);
       res.status(404).json({ success: false, message: "No activities found" });
@@ -91,10 +95,4 @@ router.get("/activities/:userId", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
-router.get("/searchUserByName/:name", searchUserByName);
-router.get("/searchUserByName", searchUserByName);
-router.get("/searchReviewsByContent", searchReviewsByContent);
-router.get("/searchbusinessByName/:businessName", searchbusinessByName);
-router.get("/searchbusinessByName", searchbusinessByName);
-
 module.exports = router;
