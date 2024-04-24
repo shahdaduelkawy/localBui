@@ -82,7 +82,6 @@ const CustomerService = {
       throw new ApiError("Error sending message", error.statusCode || 500);
     }
   },
-
   async uploadCustomerImage(customerId, file) {
     try {
       const updateResult = await Customer.updateOne(
@@ -101,8 +100,6 @@ const CustomerService = {
       return error.message;
     }
   },
-  //customer can write a review to businessowner
-
   async writeReview(customerId, businessId, review) {
     try {
       const customer = await Customer.findOne({ userId: customerId });
@@ -171,130 +168,171 @@ const CustomerService = {
       throw new ApiError("Internal Server Error", 500);
     }
   },
-};
+  async pincustomerOnMap(customerId, coordinates) {
+    try {
+      const customer = await Customer.findOne({ userId: customerId });
 
-async function createServiceRequest(
-  customerId,
-  businessOwnerId,
-  requestDetails
-) {
-  try {
-    // Check if the customer exists
-    const customer = await Customer.findOne({ userId: customerId });
-    if (!customer) {
-      return { success: false, message: "Customer not found" };
+      if (!customer) {
+        throw new Error("customer not found");
+      }
+
+      customer.customer = {
+        type: "Point",
+        coordinates: coordinates,
+      };
+
+      await customer.save();
+
+      console.log("customer location pinned successfully");
+    } catch (error) {
+      console.error(
+        `Error pinning customer on map  ${customerId}: ${error.message}`
+      );
     }
+  },
+  async rateBusiness(customerId, businessId, starRating) {
+    try {
+      if (starRating < 1 || starRating > 5) {
+        throw new Error("Star rating must be between 1 and 5.");
+      }
 
-    // Check if the business owner exists
-    const business = await BusinessOwner.findById(businessOwnerId);
-    if (!business) {
-      return { success: false, message: "Business not found" };
+      const customer = await Customer.findOne({ userId: customerId });
+
+      if (!customer) {
+        return { success: false, message: "Customer not found" };
+      }
+
+      // Check if the provided businessId exists
+      const business = await BusinessOwner.findById(businessId);
+
+      if (!business) {
+        return { success: false, message: "Business not found" };
+      }
+
+      // Update or add the review
+      const existingReviewIndex = customer.reviews.findIndex(
+        (review) => review.businessId.toString() === businessId
+      );
+
+      if (existingReviewIndex !== -1) {
+        // If the customer already reviewed this business, update the star rating
+        customer.reviews[existingReviewIndex].starRating = starRating;
+      } else {
+        // If the customer hasn't reviewed this business, add a new review
+        customer.reviews.push({
+          businessId,
+          starRating,
+          timestamp: new Date(),
+        });
+      }
+
+      // Save the updated customer document
+      await customer.save();
+
+      // Update or add the starRating in the businessOwnerModel
+      const existingBusinessReviewIndex = business.reviews.findIndex(
+        (review) => review.customerId.toString() === customer._id.toString()
+      );
+
+      if (existingBusinessReviewIndex !== -1) {
+        // If the customer already reviewed this business, update the star rating
+        business.reviews[existingBusinessReviewIndex].starRating = starRating;
+      } else {
+        // If the customer hasn't reviewed this business, add a new review
+        business.reviews.push({
+          customerId: customer._id,
+          starRating,
+          timestamp: new Date(),
+        });
+      }
+
+      // Save the updated businessOwnerModel document
+      await business.save();
+
+      return {
+        status: "success",
+        message: "Business rated successfully.",
+      };
+    } catch (error) {
+      return {
+        status: "error",
+        message: error.message,
+      };
     }
-
-    // Check if a service request already exists with the given details
-    const existingRequest = await ServiceRequest.findOne({
-      customerId,
-      businessOwnerId,
-      requestDetails,
-    });
-
-    if (existingRequest) {
-      return { message: "Service request already exists.", existingRequest };
-    }
-
-    // If no existing request, create a new one
-    const newServiceRequest = new ServiceRequest({
-      customerId,
-      businessOwnerId,
-      requestDetails,
-    });
-
-    await newServiceRequest.save();
-    return {
-      message: "Service request submitted successfully.",
-      newServiceRequest,
-    };
-  } catch (error) {
-    if (error instanceof mongoose.Error.CastError) {
-      // Handle invalid ObjectId error
-      return { success: false, message: "Invalid ID provided" };
-    }
-    // Handle other errors
-    throw new Error(`Error creating service request: ${error.message}`);
-  }
-}
-
-async function rateBusiness(customerId, businessId, starRating) {
-  try {
-    if (starRating < 1 || starRating > 5) {
-      throw new Error("Star rating must be between 1 and 5.");
-    }
-
-    const customer = await Customer.findOne({ userId: customerId });
-
-    if (!customer) {
-      return { success: false, message: "Customer not found" };
-    }
-
-    // Check if the provided businessId exists
-    const business = await BusinessOwner.findById(businessId);
-
-    if (!business) {
-      return { success: false, message: "Business not found" };
-    }
-
-    // Update or add the review
-    const existingReviewIndex = customer.reviews.findIndex(
-      (review) => review.businessId.toString() === businessId
-    );
-
-    if (existingReviewIndex !== -1) {
-      // If the customer already reviewed this business, update the star rating
-      customer.reviews[existingReviewIndex].starRating = starRating;
-    } else {
-      // If the customer hasn't reviewed this business, add a new review
-      customer.reviews.push({
+  },
+  async createServiceRequest(
+    customerId,
+    businessId,
+    requestDetails,
+  ) {
+    try {
+      // Check if the customer exists
+      const customer = await Customer.findOne({ userId: customerId });
+      if (!customer) {
+        return { success: false, message: "Customer not found" };
+      }
+  
+      // Fetch user details to get name and phone
+      const user = await User.findById(customerId);
+      if (!user) {
+        return { success: false, message: "User not found" };
+      }
+  
+      // Extract name and phone from user
+      const { name, phone } = user;
+  
+      // Extract coordinates from the customer object
+      const { coordinates } = customer.customer;
+  
+      // Check if the business owner exists
+      const businessOwner = await BusinessOwner.findById(businessId);
+      if (!businessOwner) {
+        throw new ApiError(
+          `Business owner not found for ID: ${businessId}`,
+          404
+        );
+      }
+  
+      // Check if a service request already exists with the given details
+      const existingRequest = await ServiceRequest.findOne({
+        customerId,
         businessId,
-        starRating,
-        timestamp: new Date(),
+        requestDetails,
+        name,
+        phone,
+        coordinates,
       });
-    }
-
-    // Save the updated customer document
-    await customer.save();
-
-    // Update or add the starRating in the businessOwnerModel
-    const existingBusinessReviewIndex = business.reviews.findIndex(
-      (review) => review.customerId.toString() === customer._id.toString()
-    );
-
-    if (existingBusinessReviewIndex !== -1) {
-      // If the customer already reviewed this business, update the star rating
-      business.reviews[existingBusinessReviewIndex].starRating = starRating;
-    } else {
-      // If the customer hasn't reviewed this business, add a new review
-      business.reviews.push({
-        customerId: customer._id,
-        starRating,
-        timestamp: new Date(),
+  
+      if (existingRequest) {
+        return { message: "Service request already exists.", existingRequest };
+      }
+  
+      // If no existing request, create a new one
+      const newServiceRequest = new ServiceRequest({
+        customerId,
+        businessId,
+        requestDetails,
+        name,
+        phone,
+        coordinates,
       });
+  
+      await newServiceRequest.save();
+      return {
+        message: "Service request submitted successfully.",
+        newServiceRequest,
+      };
+    } catch (error) {
+      if (error instanceof mongoose.Error.CastError) {
+        // Handle invalid ObjectId error
+        return { success: false, message: "Invalid ID provided" };
+      }
+      // Handle other errors
+      throw new Error(`Error creating service request: ${error.message}`);
     }
-
-    // Save the updated businessOwnerModel document
-    await business.save();
-
-    return {
-      status: "success",
-      message: "Business rated successfully.",
-    };
-  } catch (error) {
-    return {
-      status: "error",
-      message: error.message,
-    };
   }
-}
-
+  
+};
 const filterbycategory = async (req, res) => {
   try {
     let { category } = req.params;
@@ -425,7 +463,5 @@ module.exports = {
   searchBusinessesByName,
   CustomerService,
   filterbycategory,
-  rateBusiness,
   countCustomerRatings,
-  createServiceRequest,
 };

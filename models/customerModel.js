@@ -44,8 +44,18 @@ const customerSchema = new mongoose.Schema(
           ref: "businessOwner", // Reference the business owner model
         }
       }
-    ]
-
+    ],
+    customer: {
+      type: {
+        type: String,
+        enum: ["Point"], // Specify the GeoJSON type
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        default: [0, 0], // Default coordinates [longitude, latitude]
+      },
+    },
   },
   { timestamps: true }
 );
