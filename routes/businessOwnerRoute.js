@@ -391,4 +391,23 @@ router.get("/serviceRequests/:businessId", async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
+router.get("/getAllService/:businessId", async (req, res) => {
+  const { businessId } = req.params;
+
+  try {
+    // Call the function to list services by business ID
+    const services = await BusinessOwnerService.listServicesByBusinessId(businessId);
+
+    // Check if services were found
+    if (services.length > 0) {
+      res.status(200).json({ success: true, data: services });
+    } else {
+      res.status(404).json({ success: false, message: "No services found for the business" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+
 module.exports = router;

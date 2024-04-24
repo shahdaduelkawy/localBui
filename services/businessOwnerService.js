@@ -400,7 +400,22 @@ async deleteBusinessById(businessId) {
         console.error(error);
         return { success: false, message: "Internal Server Error" };
     }
+}, 
+async listServicesByBusinessId(businessId) {
+  try {
+    // Find all service requests associated with the specified businessId
+    const services = await service.find({
+      businessId: businessId,
+    }).sort({ createdAt: 1 }); // Sort by createdAt field in ascending order
+
+    // Return the fetched services
+    return services;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error fetching services for the business");
+  }
 }
+
 
 };
 
