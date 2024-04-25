@@ -82,7 +82,61 @@ const CustomerService = {
       throw new ApiError("Error sending message", error.statusCode || 500);
     }
   },
+  async recommendBusinessesToCustomer(customerId) {
+    try {
+        // Find the customer by ID
+        const customer = await Customer.findOne({ userId: customerId });
 
+        if (!customer) {
+            throw new ApiError('Customer not found', 404);
+        }
+
+        // Get the customer's favorite businesses
+        const favoriteBusinessIds = customer.favoriteBusinesses.map(business => business.businessId);
+
+        // Get the customer's past reviews
+        const reviewedBusinessIds = customer.reviews.map(review => review.businessId);
+
+        // Combine favorite businesses and reviewed businesses to avoid recommending the same ones
+        const excludedBusinessIds = [...favoriteBusinessIds, ...reviewedBusinessIds];
+
+        // Initialize array to store recommended businesses
+        let recommendedBusinesses = [];
+
+        // If the customer has interacted with businesses before (favorited or reviewed)
+        if (excludedBusinessIds.length > 0) {
+            // Find all businesses that the customer has interacted with before
+            const interactedBusinesses = await BusinessOwner.find({ _id: { $in: excludedBusinessIds } });
+
+            // Extract categories of the interacted businesses
+            const interactedCategories = interactedBusinesses.map(business => business.category);
+
+            // Find businesses that belong to the same categories as the ones the customer has interacted with
+            recommendedBusinesses = await BusinessOwner.find({ 
+                _id: { $nin: excludedBusinessIds }, // Exclude businesses already interacted with
+                category: { $in: interactedCategories } // Filter by categories of interacted businesses
+            }).sort({ rating: -1 }).limit(5); // Sort by rating in descending order and limit to 5 businesses
+        } else {
+            // If the customer hasn't interacted with any businesses before, recommend all businesses sorted by rating
+            recommendedBusinesses = await BusinessOwner.find().sort({ rating: -1 }).limit(5); // Sort by rating in descending order and limit to 5 businesses
+        }
+
+        // Format the recommended businesses data
+        const formattedRecommendedBusinesses = recommendedBusinesses.map(business => ({
+            businessName: business.businessName,
+            country: business.Country,
+            category: business.category,
+            logo :business.logo,
+            rating: business.rating,
+        }));
+
+        return formattedRecommendedBusinesses;
+    } catch (error) {
+        console.error(`Error recommending businesses: ${error.message}`);
+        throw new ApiError("Error recommending businesses", error.statusCode || 500);
+    }
+}
+,
   async uploadCustomerImage(customerId, file) {
     try {
       const updateResult = await Customer.updateOne(

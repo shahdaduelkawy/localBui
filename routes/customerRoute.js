@@ -184,7 +184,7 @@ router.post('/:customerId/serviceRequest/:businessId', async (req, res) => {
 router.post('/favorites/:customerId/:businessId', async (req, res) => {
   try {
       const { customerId, businessId } = req.params; // Updated to use businessId
-      const customer = await Customer.findById(customerId);
+      const customer = await Customer.findOne({ userId: customerId });
       if (!customer) {
           return res.status(404).send({ error: 'Customer not found' });
       }
@@ -205,7 +205,7 @@ router.post('/favorites/:customerId/:businessId', async (req, res) => {
 router.delete('/favorites/:customerId/:businessId', async (req, res) => {
   try {
       const { customerId, businessId } = req.params;
-      const customer = await Customer.findById(customerId);
+      const customer = await Customer.findOne({ userId: customerId });
       if (!customer) {
           return res.status(404).send({ error: 'Customer not found' });
       }
@@ -226,10 +226,9 @@ router.delete('/favorites/:customerId/:businessId', async (req, res) => {
 
 router.get('/favorites/:customerId', async (req, res) => {
   try {
-      const { customerId } = req.params;
+      const { customerId } = req.params.customerId;
       
-      const customer = await Customer.findById(customerId);
-      
+      const customer = await Customer.findOne({ userId: customerId });      
       if (!customer) {
           return res.status(404).send({ error: 'Customer not found' });
       }
@@ -245,6 +244,16 @@ router.get('/favorites/:customerId', async (req, res) => {
   } catch (error) {
       console.error(error);
       res.status(500).send({ error: 'Internal Server Error' });
+  }
+});
+router.get('/recommend/:customerId', async (req, res) => {
+  try {
+    const customerId = req.params.customerId;
+    const recommendedBusinesses = await CustomerService.recommendBusinessesToCustomer(customerId);
+    res.status(200).json(recommendedBusinesses);
+  } catch (error) {
+    console.error(error);
+    res.status(error.statusCode || 500).json({ message: error.message });
   }
 });
 

@@ -30,14 +30,9 @@ async function reportReview(reviewId, businessOwnerId, customerId, status, reaso
 
         // Fetch the review from the businessOwner's reviews array based on reviewId
         let review;
-<<<<<<< HEAD
-        if (businessOwner) {
-            review = businessOwner.reviews.find(review => review._id.equals(reviewId));
-=======
         if (customer) {
             // eslint-disable-next-line no-shadow
             review = customer.reviews.find(review => review._id.equals(reviewId));
->>>>>>> 0290c7a891977475f7c7d3c3c5f119540e3e145f
         }
 
         if (!review) {

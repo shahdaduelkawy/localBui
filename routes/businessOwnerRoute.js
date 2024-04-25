@@ -1,8 +1,6 @@
 /* eslint-disable prefer-destructuring */
 const express = require("express");
 
-const ServiceRequest = require("../models/serviceRequestModel");
-
 const router = express.Router();
 const {
   upload,
@@ -375,20 +373,5 @@ router.patch("/pinMyBusinessOnMap/:businessId",
     } else {
         res.status(500).json({ message: result.message });
     }
-});
-router.get("/serviceRequests/:businessId", async (req, res) => {
-  const { businessId } = req.params;
-  try {
-    // Fetch all service requests associated with the specified businessId
-    const serviceRequests = await ServiceRequest.find({
-      businessOwnerId: businessId,
-    });
-
-    // Return the fetched service requests
-    res.status(200).json(serviceRequests);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
 });
 module.exports = router;
