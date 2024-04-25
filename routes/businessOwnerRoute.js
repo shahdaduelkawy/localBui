@@ -243,6 +243,8 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
     } else {
       res.status(404).json({ success: false, message: "User not found" });
     }
+   /* const result = await BusinessOwnerService.getTotalRate(businessId);
+    console.log(result);*/
   } catch (error) {
     console.error("Error getting user data by userId:", error);
 

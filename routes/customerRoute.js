@@ -256,42 +256,12 @@ router.get('/recommend/:customerId', async (req, res) => {
     res.status(error.statusCode || 500).json({ message: error.message });
   }
 });
+
 router.get('/totalRate/:businessId', async (req, res) => {
   try {
     const { businessId } = req.params;
-
-    // Find the business by ID
-    const business = await BusinessOwner.findById(businessId);
-
-    if (!business) {
-      return res.status(404).json({ status: 'fail', message: 'Business not found' });
-    }
-
-    // Log the reviews for debugging
-    console.log('Reviews:', business.reviews);
-
-    // Filter out reviews with undefined starRating
-    const ratedReviews = business.reviews.filter(review => typeof review.starRating !== 'undefined');
-
-    // Calculate the average rating
-    const totalRatings = ratedReviews.length;
-
-    if (totalRatings === 0) {
-      return res.status(200).json({ status: 'success', rating: 0, message: 'No reviews yet' });
-    }
-
-    const totalRating = ratedReviews.reduce((sum, review) => {
-      console.log('Star Rating:', review.starRating); // Log each starRating value
-      return sum + review.starRating;
-    }, 0);
-
-    console.log('Total Rating:', totalRating);
-    console.log('Total Ratings:', totalRatings);
-
-    const averageRating = totalRating / totalRatings;
-
-    // Return the average rating
-    return res.status(200).json({ status: 'success', rating: averageRating });
+    const result = await BusinessOwnerService.getTotalRate(businessId);
+    return res.status(200).json(result);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ status: 'error', error: 'Internal Server Error' });

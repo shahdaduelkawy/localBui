@@ -65,6 +65,14 @@ const businessOwnerSchema = new mongoose.Schema(
       type: [String],
       required: false,
     },
+    
+    totalRate: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5 
+      },
+   
     description: {
       type: String,
       required: false,
@@ -117,6 +125,7 @@ const businessOwnerSchema = new mongoose.Schema(
         userName:String
       },
     ],
+    
   },
   { timestamps: true }
 );

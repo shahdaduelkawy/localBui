@@ -127,7 +127,7 @@ const CustomerService = {
             country: business.Country,
             category: business.category,
             logo :business.logo,
-            rating: business.rating,
+            totalRate: business.totalRate,
         }));
 
         return formattedRecommendedBusinesses;
@@ -219,7 +219,9 @@ const CustomerService = {
       if (!business) {
         throw new ApiError("Business not found for the given businessId", 404);
       }
-      return business; // Return the business directly, not inside an object
+    
+
+      return business; 
     } catch (error) {
       console.error("Error retrieving business:", error);
       throw new ApiError("Internal Server Error", 500);
