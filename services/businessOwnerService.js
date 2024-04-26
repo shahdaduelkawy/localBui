@@ -417,6 +417,46 @@ async listServicesByBusinessId(businessId) {
 }
 
 
+},
+async getTotalRate(businessId) {
+  try {
+    // Find the business by ID
+    const business = await BusinessOwner.findById(businessId);
+
+    if (!business) {
+      return { status: 'fail', message: 'Business not found' };
+    }
+
+    // Filter out reviews with undefined starRating
+    const ratedReviews = business.reviews.filter(review => typeof review.starRating !== 'undefined');
+
+    // Calculate the average rating
+    const totalRatings = ratedReviews.length;
+
+    if (totalRatings === 0) {
+      // Set totalRate to 0 if there are no reviews
+      business.totalRate = 0;
+    } else {
+      const totalRating = ratedReviews.reduce((sum, review) => {
+        return sum + review.starRating;
+      }, 0);
+
+      const averageRating = totalRating / totalRatings;
+
+      // Set totalRate to the average rating
+      business.totalRate = averageRating;
+    }
+
+    // Save the updated business document
+    await business.save();
+
+    // Return success response
+    return { status: 'success', message: 'Total rate updated successfully', totalRate: business.totalRate };
+  } catch (error) {
+    console.error(error);
+    return { status: 'error', error: 'Internal Server Error' };
+  }
+}
 };
 
 

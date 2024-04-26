@@ -281,6 +281,31 @@ router.get("/favorites/:customerId", async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 });
+router.get('/recommend/:customerId', async (req, res) => {
+  try {
+    const customerId = req.params.customerId;
+    const recommendedBusinesses = await CustomerService.recommendBusinessesToCustomer(customerId);
+    res.status(200).json(recommendedBusinesses);
+  } catch (error) {
+    console.error(error);
+    res.status(error.statusCode || 500).json({ message: error.message });
+  }
+});
+
+router.get('/totalRate/:businessId', async (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const result = await BusinessOwnerService.getTotalRate(businessId);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: 'error', error: 'Internal Server Error' });
+  }
+});
+
+
+
+
 router.post("/:customerId/serviceRequest/:businessId", async (req, res) => {
   try {
     const { customerId, businessId } = req.params;

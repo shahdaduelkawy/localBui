@@ -1,8 +1,6 @@
 /* eslint-disable prefer-destructuring */
 const express = require("express");
 
-const ServiceRequest = require("../models/serviceRequestModel");
-
 const router = express.Router();
 const {
   upload,
@@ -245,6 +243,8 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
     } else {
       res.status(404).json({ success: false, message: "User not found" });
     }
+   /* const result = await BusinessOwnerService.getTotalRate(businessId);
+    console.log(result);*/
   } catch (error) {
     console.error("Error getting user data by userId:", error);
 
@@ -375,21 +375,6 @@ router.patch("/pinMyBusinessOnMap/:businessId",
     } else {
         res.status(500).json({ message: result.message });
     }
-});
-router.get("/serviceRequests/:businessId", async (req, res) => {
-  const { businessId } = req.params;
-  try {
-    // Fetch all service requests associated with the specified businessId
-    const serviceRequests = await ServiceRequest.find({
-      businessOwnerId: businessId,
-    });
-
-    // Return the fetched service requests
-    res.status(200).json(serviceRequests);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
 });
 router.get("/getAllService/:businessId", async (req, res) => {
   const { businessId } = req.params;
