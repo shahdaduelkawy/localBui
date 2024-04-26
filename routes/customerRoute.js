@@ -283,7 +283,7 @@ router.get("/favorites/:customerId", async (req, res) => {
 });
 router.get('/recommend/:customerId', async (req, res) => {
   try {
-    const customerId = req.params.customerId;
+    const {customerId} = req.params;
     const recommendedBusinesses = await CustomerService.recommendBusinessesToCustomer(customerId);
     res.status(200).json(recommendedBusinesses);
   } catch (error) {

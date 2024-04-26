@@ -434,9 +434,7 @@ async getTotalRate(businessId) {
       // Set totalRate to 0 if there are no reviews
       business.totalRate = 0;
     } else {
-      const totalRating = ratedReviews.reduce((sum, review) => {
-        return sum + review.starRating;
-      }, 0);
+      const totalRating = ratedReviews.reduce((sum, review) => sum + review.starRating, 0);
 
       const averageRating = totalRating / totalRatings;
 
