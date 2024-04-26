@@ -414,9 +414,6 @@ async listServicesByBusinessId(businessId) {
     console.error(error);
     throw new Error("Error fetching services for the business");
   }
-}
-
-
 },
 async getTotalRate(businessId) {
   try {
@@ -457,10 +454,6 @@ async getTotalRate(businessId) {
     return { status: 'error', error: 'Internal Server Error' };
   }
 }
+
 };
-
-
-
-
 module.exports = BusinessOwnerService;
-
