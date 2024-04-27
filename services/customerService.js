@@ -49,12 +49,12 @@ const CustomerService = {
 
         // Format the recommended businesses data
         const formattedRecommendedBusinesses = recommendedBusinesses.map(business => ({
-            businessId: business._id, // Include businessId in the format
+            businessId: business._id,
             businessName: business.businessName,
             country: business.Country,
             category: business.category,
-            logo :business.logo,
             totalRate: business.totalRate,
+            logo: business.logo, // Include the logo
         }));
 
         return formattedRecommendedBusinesses;
@@ -63,6 +63,7 @@ const CustomerService = {
         throw new ApiError("Error recommending businesses", error.statusCode || 500);
     }
 },
+
 
   async uploadCustomerImage(customerId, file) {
     try {
