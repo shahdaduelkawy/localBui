@@ -62,9 +62,7 @@ const CustomerService = {
         console.error(`Error recommending businesses: ${error.message}`);
         throw new ApiError("Error recommending businesses", error.statusCode || 500);
     }
-},
-
-
+  },
   async uploadCustomerImage(customerId, file) {
     try {
       const updateResult = await Customer.updateOne(
@@ -315,8 +313,7 @@ const CustomerService = {
       // Handle other errors
       throw new Error(`Error creating service request: ${error.message}`);
     }
-  }
-  
+  },
 };
 const filterbycategory = async (req, res) => {
   try {

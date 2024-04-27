@@ -283,33 +283,35 @@ router.get("/GetFavorites/:customerId", async (req, res) => {
   try {
     const { customerId } = req.params;
 
-     // Check if the customer exists
-     const customer = await Customer.findOne({ userId: customerId });
-     if (!customer) {
-       return { success: false, message: "Customer not found" };
-     }
- 
-     // Fetch user details to get name and phone
-     const user = await User.findById(customerId);
-     if (!user) {
-       return { success: false, message: "User not found" };
-     }
+    // Check if the customer exists
+    const customer = await Customer.findOne({ userId: customerId });
+    if (!customer) {
+      return res.status(404).send({ success: false, message: "Customer not found" });
+    }
 
-    // Extract business names from favoriteBusinesses array
-    const favoriteBusinessNames = await Promise.all(
-      customer.favoriteBusinesses.map(async (favorite) => {
-        const business = await BusinessOwner.findById(favorite.businessId);
-        return business ? business.businessName : null;
-      })
-    );
+    // Fetch details of all favorite businesses
+    const favoriteBusinessIds = customer.favoriteBusinesses.map(favBusiness => favBusiness.businessId);
 
-    // Filter out null values and send the response
-    res.status(200).send(favoriteBusinessNames.filter((name) => name !== null));
+    const favoriteBusinesses = await BusinessOwner.find({ _id: { $in: favoriteBusinessIds } });
+
+    // Construct the response data
+    const response = favoriteBusinesses.map(business => ({
+      businessId: business._id,
+      businessName: business.businessName,
+      country: business.country,
+      category: business.category,
+      totalRate: business.totalRate,
+      logo: business.logo
+    }));
+
+    res.status(200).send({ favoriteBusinesses: response });
   } catch (error) {
     console.error(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
 });
+
+
 router.get("/recommend/:customerId", async (req, res) => {
   try {
     const { customerId } = req.params;
