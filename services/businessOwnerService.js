@@ -18,7 +18,7 @@ const BusinessOwnerService =
   async sendMessageToCustomer(businessId, customerId, message) {
     try {
         // Check if the business owner exists
-        const businessOwner = await BusinessOwner.findById(businessId); // Remove curly braces around businessId
+        const businessOwner = await BusinessOwner.findById(businessId);
         if (!businessOwner) {
             throw new ApiError(`Business owner not found for ID: ${businessId}`, 404);
         }
@@ -50,7 +50,7 @@ const BusinessOwnerService =
 
         const customerMessage = {
             sender: 'businessOwner',
-            content: message, // Ensure content is set correctly
+            content: message,
             timestamp: new Date(),
             userName: businessOwnerName,
         };
@@ -75,10 +75,9 @@ const BusinessOwnerService =
         };
     } catch (error) {
         console.error(`Error sending message: ${error.message}`);
-        throw new ApiError("Error sending message", error.statusCode || 500);
+        throw new ApiError(error.message, error.statusCode || 500); // Throw the error with its message
     }
-},
-
+   },
   async getUserByUserID(userId) {
     try {
       // Find the user based on the user's ID

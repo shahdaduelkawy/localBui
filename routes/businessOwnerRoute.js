@@ -9,42 +9,49 @@ const {
 const BusinessOwnerService = require("../services/businessOwnerService");
 const ApiError = require("../utils/apiError");
 const { getIO } = require("../services/socket");
-const businessOwnerModel= require("../models/businessOwnerModel")
+const businessOwnerModel = require("../models/businessOwnerModel");
 
-router.post("/sendMessageToCustomer/:businessId/:customerID", async (req, res) => {
-  const { businessId, customerID } = req.params;
-  const { message } = req.body;
+router.post(
+  "/sendMessageToCustomer/:businessId/:customerId",
+  async (req, res) => {
+    const { businessId, customerId } = req.params;
+    const { message } = req.body;
 
-  try {
-    const result = await BusinessOwnerService.sendMessageToCustomer(
-      businessId,
-      customerID,
-      message
-    );
+    try {
+      const result = await BusinessOwnerService.sendMessageToCustomer(
+        businessId,
+        customerId,
+        message
+      );
 
-    if (result.success) {
-      // Emit a message to the business owner and customer indicating new messages
-      const io = getIO(); // Use getIO function to retrieve the io object
-      io.to(businessId).emit("updatedMessages", {
-        /* Update with relevant data based on your implementation */
-      });
-      io.to(customerID).emit("updatedMessages", {
-        /* Update with relevant data based on your implementation */
-      });
+      if (result.success) {
+        // Emit a message to the business owner and customer indicating new messages
+        const io = getIO();
+        io.to(businessId).emit("updatedMessages", {
+          /* Update with relevant data based on your implementation */
+        });
+        io.to(customerId).emit("updatedMessages", {
+          /* Update with relevant data based on your implementation */
+        });
 
+        res
+          .status(200)
+          .json({ success: true, message: "Message sent successfully" });
+      } else {
+        res
+          .status(500)
+          .json({ success: false, message: "Error sending message" });
+      }
+    } catch (error) {
+      console.error("Error in sendMessageToCustomer route:", error);
+      console.log(error);
       res
-        .status(200)
-        .json({ success: true, message: "Message sent successfully" });
-    } else {
-      res
-        .status(500)
-        .json({ success: false, message: "Error sending message" });
+        .status(error.statusCode || 500)
+        .json({ success: false, message: error.message }); // Return the error message
     }
-  } catch (error) {
-    console.error("Error in sendMessageToCustomer route:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
-});
+);
+
 router.put("/updateMyBusinessInfo/:businessId", async (req, res) => {
   const { businessId } = req.params;
   const data = req.body;
@@ -81,7 +88,8 @@ router.put("/profileSetup/:businessId", async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
-router.patch("/updateMyBusinessAttachment/:businessId",
+router.patch(
+  "/updateMyBusinessAttachment/:businessId",
   upload.single("img"),
   async (req, res) => {
     const { file } = req;
@@ -107,7 +115,8 @@ router.patch("/updateMyBusinessAttachment/:businessId",
     }
   }
 );
-router.patch("/updateMyBusinessMedia/:businessId",
+router.patch(
+  "/updateMyBusinessMedia/:businessId",
   upload.array("media", 10),
   async (req, res) => {
     const { files } = req;
@@ -133,7 +142,8 @@ router.patch("/updateMyBusinessMedia/:businessId",
     }
   }
 );
-router.patch("/addLogoToBusiness/:businessId",
+router.patch(
+  "/addLogoToBusiness/:businessId",
   upload.single("logo"),
   async (req, res) => {
     const { file } = req;
@@ -243,7 +253,7 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
     } else {
       res.status(404).json({ success: false, message: "User not found" });
     }
-   /* const result = await BusinessOwnerService.getTotalRate(businessId);
+    /* const result = await BusinessOwnerService.getTotalRate(businessId);
     console.log(result);*/
   } catch (error) {
     console.error("Error getting user data by userId:", error);
@@ -259,7 +269,8 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
     }
   }
 });
-router.patch("/addImageToUserProfile/:userId",
+router.patch(
+  "/addImageToUserProfile/:userId",
   uploadProfilePic.single("userProfile"),
   async (req, res) => {
     const { file } = req;
@@ -286,7 +297,8 @@ router.patch("/addImageToUserProfile/:userId",
   }
 );
 // pinning business on the map
-router.patch("/pinMyBusinessOnMap/:businessId",
+router.patch(
+  "/pinMyBusinessOnMap/:businessId",
   express.json(),
   async (req, res) => {
     const { businessId } = req.params;
@@ -312,82 +324,98 @@ router.patch("/pinMyBusinessOnMap/:businessId",
     }
   }
 );
-  //customer view the total  average Rating
-  router.get('/rating/:businessId', async (req, res) => {
-    try {
-      const { businessId } = req.params;
-  
-      const business = await businessOwnerModel.findById(businessId);
-  
-      if (!business) {
-        return res.status(404).json({ status: 'fail', message: 'Business not found' });
-      }
-  
-      // Filter out reviews without starRating
-      const validReviews = business.reviews.filter(review => typeof review.starRating === 'number');
-  
-      const totalRatings = validReviews.length;
-  
-      if (totalRatings === 0) {
-        return res.status(200).json({ status: 'success', rating: 0, message: 'No reviews yet' });
-      }
-  
-      const totalRating = validReviews.reduce((sum, review) => {
-        const { starRating } = review; // No need for default, as we filter out undefined values
-        return sum + starRating;
-      }, 0);
-  
-      const averageRating = Math.round(totalRating / totalRatings); // Round to the nearest integer
-  
-      // Return the average rating
-      return res.status(200).json({ status: 'success', rating: averageRating });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ status: 'error', error: 'Internal Server Error' });
-    }
-  });
-
-  router.get("/businessReviews/:businessId", async (req, res) => {
+//customer view the total  average Rating
+router.get("/rating/:businessId", async (req, res) => {
+  try {
     const { businessId } = req.params;
-  
-    try {
-      // Call the function to retrieve reviews for the business
-      const reviews = await BusinessOwnerService.getBusinessReviews(businessId);
-      
-      // Count the reviews
-      const reviewCount = reviews.length;
-  
-      res.status(200).json({ success: true, data: { reviews, reviewCount } });
-    } catch (error) {
-      console.error(error.message);
-      res.status(500).json({ success: false, message: "Internal Server Error" });
+
+    const business = await businessOwnerModel.findById(businessId);
+
+    if (!business) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "Business not found" });
     }
-  });
 
-  router.put('/updateStatus/:serviceRequestId', async (req, res) => {
-    const { serviceRequestId } = req.params;
-    const { newStatus, approvalStatus } = req.body;
+    // Filter out reviews without starRating
+    const validReviews = business.reviews.filter(
+      (review) => typeof review.starRating === "number"
+    );
 
-    const result = await BusinessOwnerService.updateServiceRequestStatus(serviceRequestId, newStatus, approvalStatus);
+    const totalRatings = validReviews.length;
 
-    if (result.success) {
-        res.status(200).json({ message: result.message });
-    } else {
-        res.status(500).json({ message: result.message });
+    if (totalRatings === 0) {
+      return res
+        .status(200)
+        .json({ status: "success", rating: 0, message: "No reviews yet" });
     }
+
+    const totalRating = validReviews.reduce((sum, review) => {
+      const { starRating } = review; // No need for default, as we filter out undefined values
+      return sum + starRating;
+    }, 0);
+
+    const averageRating = Math.round(totalRating / totalRatings); // Round to the nearest integer
+
+    // Return the average rating
+    return res.status(200).json({ status: "success", rating: averageRating });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ status: "error", error: "Internal Server Error" });
+  }
+});
+
+router.get("/businessReviews/:businessId", async (req, res) => {
+  const { businessId } = req.params;
+
+  try {
+    // Call the function to retrieve reviews for the business
+    const reviews = await BusinessOwnerService.getBusinessReviews(businessId);
+
+    // Count the reviews
+    const reviewCount = reviews.length;
+
+    res.status(200).json({ success: true, data: { reviews, reviewCount } });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+
+router.put("/updateStatus/:serviceRequestId", async (req, res) => {
+  const { serviceRequestId } = req.params;
+  const { newStatus, approvalStatus } = req.body;
+
+  const result = await BusinessOwnerService.updateServiceRequestStatus(
+    serviceRequestId,
+    newStatus,
+    approvalStatus
+  );
+
+  if (result.success) {
+    res.status(200).json({ message: result.message });
+  } else {
+    res.status(500).json({ message: result.message });
+  }
 });
 router.get("/getAllService/:businessId", async (req, res) => {
   const { businessId } = req.params;
 
   try {
     // Call the function to list services by business ID
-    const services = await BusinessOwnerService.listServicesByBusinessId(businessId);
+    const services =
+      await BusinessOwnerService.listServicesByBusinessId(businessId);
 
     // Check if services were found
     if (services.length > 0) {
       res.status(200).json({ success: true, data: services });
     } else {
-      res.status(404).json({ success: false, message: "No services found for the business" });
+      res.status(404).json({
+        success: false,
+        message: "No services found for the business",
+      });
     }
   } catch (error) {
     console.error(error);
