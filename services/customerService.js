@@ -8,6 +8,80 @@ const User = require("../models/userModel");
 const ServiceRequest = require("../models/serviceRequestModel");
 
 const CustomerService = {
+  async sendMessageToBusinessOwner(customerId, businessId, message) {
+    try {
+      // Check if the customer exists
+      const customer = await Customer.findOne({ userId: customerId });
+      if (!customer) {
+        throw new ApiError(`Customer not found for ID: ${customerId}`, 404);
+      }
+
+      // Check if the business owner exists
+      const businessOwner = await BusinessOwner.findById(businessId); // Remove curly braces
+      if (!businessOwner) {
+        throw new ApiError(
+          `Business owner not found for ID: ${businessId}`,
+          404
+        );
+      }
+
+      const user = await User.findById(customer.userId);
+      if (!user) {
+        return { success: false, message: "User not found" };
+      }
+
+      // Ensure `messages` arrays exist and are not empty
+      customer.messages = Array.isArray(customer.messages)
+        ? customer.messages
+        : [];
+      businessOwner.messages = Array.isArray(businessOwner.messages)
+        ? businessOwner.messages
+        : [];
+
+      const customerName = user.name;
+
+      // Create the message objects consistently
+      const customerMessage = {
+        sender: "customer",
+        content: message,
+        userName: customerName,
+        timestamp: new Date(),
+      };
+
+      const businessOwnerMessage = {
+        sender: "customer",
+        content: message, // Ensure content is set correctly
+        timestamp: new Date(),
+        userName: customerName,
+      };
+
+      // Push messages into the arrays
+      customer.messages.push(customerMessage);
+      businessOwner.messages.push(businessOwnerMessage);
+
+      // Ensure data is saved to the database
+      await customer.save();
+      await businessOwner.save();
+
+      // Log activity after saving for consistency
+      await logActivity(
+        customerId,
+        "sendMessageToBusinessOwner",
+        "Message sent successfully"
+      );
+
+      // Return the updated messages and status
+      return {
+        success: true,
+        message: "Message sent successfully",
+        customerMessages: customer.messages,
+        businessOwnerMessages: businessOwner.messages,
+      };
+    } catch (error) {
+      console.error(`Error sending message: ${error.message}`);
+      throw new ApiError("Error sending message", error.statusCode || 500);
+    }
+  },
   async recommendBusinessesToCustomer(customerId) {
     try {
         // Find the customer by ID
