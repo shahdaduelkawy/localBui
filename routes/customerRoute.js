@@ -4,6 +4,7 @@ const { getIO } = require("../services/socket");
 const BusinessOwnerService = require("../services/businessOwnerService");
 const Customer = require("../models/customerModel");
 const BusinessOwner = require("../models/businessOwnerModel");
+const User = require("../models/userModel");
 
 const router = express.Router();
 const {
@@ -17,7 +18,9 @@ router.get("/searchBusinesses/:businessName", searchBusinessesByName);
 router.get("/searchBusinesses/", searchBusinessesByName);
 router.get("/filterbycategory/:category", filterbycategory);
 router.get("/filterbycategory/", filterbycategory);
-router.post("/sendMessageToBusinessOwner/:customerId/:businessId",async (req, res) => {
+router.post(
+  "/sendMessageToBusinessOwner/:customerId/:businessId",
+  async (req, res) => {
     const { customerId, businessId } = req.params;
     const { message } = req.body;
 
@@ -52,8 +55,10 @@ router.post("/sendMessageToBusinessOwner/:customerId/:businessId",async (req, re
         .status(500)
         .json({ success: false, message: "Internal Server Error" });
     }
-});
-router.patch("/updateCustomerProfileImage/:customerId",
+  }
+);
+router.patch(
+  "/updateCustomerProfileImage/:customerId",
   uploadProfilePic.single("profileImg"),
   async (req, res) => {
     const { file } = req;
@@ -78,7 +83,8 @@ router.patch("/updateCustomerProfileImage/:customerId",
         .status(500)
         .json({ success: false, message: "Internal Server Error" });
     }
-});
+  }
+);
 router.get("/getBusinessesNearby", async (req, res) => {
   const { longitude, latitude, minDistance, maxDistance } = req.query;
 
@@ -182,7 +188,8 @@ router.get("/getBusinessById/:businessId", async (req, res) => {
     });
   }
 });
-router.patch("/pincustomerOnMap/:customerId",
+router.patch(
+  "/pincustomerOnMap/:customerId",
   express.json(),
   async (req, res) => {
     const { customerId } = req.params;
@@ -206,13 +213,22 @@ router.patch("/pincustomerOnMap/:customerId",
           .json({ success: false, message: "Internal Server Error" });
       }
     }
-});
+  }
+);
 router.post("/favorites/:customerId/:businessId", async (req, res) => {
   try {
     const { customerId, businessId } = req.params; // Updated to use businessId
-    const customer = await Customer.findById(customerId);
+
+    // Check if the customer exists
+    const customer = await Customer.findOne({ userId: customerId });
     if (!customer) {
-      return res.status(404).send({ error: "Customer not found" });
+      return { success: false, message: "Customer not found" };
+    }
+
+    // Fetch user details to get name and phone
+    const user = await User.findById(customerId);
+    if (!user) {
+      return { success: false, message: "User not found" };
     }
     // Check if the business is already a favorite
     const isFavorite = customer.favoriteBusinesses.some((business) =>
@@ -229,13 +245,20 @@ router.post("/favorites/:customerId/:businessId", async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 });
-router.delete("/favorites/:customerId/:businessId", async (req, res) => {
+router.delete("/DeleteFavorites/:customerId/:businessId", async (req, res) => {
   try {
     const { customerId, businessId } = req.params;
-    const customer = await Customer.findById(customerId);
-    if (!customer) {
-      return res.status(404).send({ error: "Customer not found" });
-    }
+     // Check if the customer exists
+     const customer = await Customer.findOne({ userId: customerId });
+     if (!customer) {
+       return { success: false, message: "Customer not found" };
+     }
+ 
+     // Fetch user details to get name and phone
+     const user = await User.findById(customerId);
+     if (!user) {
+       return { success: false, message: "User not found" };
+     }
     // Check if the business is favorited
     const isFavorite = customer.favoriteBusinesses.some((business) =>
       business.businessId.equals(businessId)
@@ -256,15 +279,21 @@ router.delete("/favorites/:customerId/:businessId", async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 });
-router.get("/favorites/:customerId", async (req, res) => {
+router.get("/GetFavorites/:customerId", async (req, res) => {
   try {
     const { customerId } = req.params;
 
-    const customer = await Customer.findById(customerId);
-
-    if (!customer) {
-      return res.status(404).send({ error: "Customer not found" });
-    }
+     // Check if the customer exists
+     const customer = await Customer.findOne({ userId: customerId });
+     if (!customer) {
+       return { success: false, message: "Customer not found" };
+     }
+ 
+     // Fetch user details to get name and phone
+     const user = await User.findById(customerId);
+     if (!user) {
+       return { success: false, message: "User not found" };
+     }
 
     // Extract business names from favoriteBusinesses array
     const favoriteBusinessNames = await Promise.all(
@@ -281,10 +310,11 @@ router.get("/favorites/:customerId", async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 });
-router.get('/recommend/:customerId', async (req, res) => {
+router.get("/recommend/:customerId", async (req, res) => {
   try {
-    const {customerId} = req.params;
-    const recommendedBusinesses = await CustomerService.recommendBusinessesToCustomer(customerId);
+    const { customerId } = req.params;
+    const recommendedBusinesses =
+      await CustomerService.recommendBusinessesToCustomer(customerId);
     res.status(200).json(recommendedBusinesses);
   } catch (error) {
     console.error(error);
@@ -292,19 +322,18 @@ router.get('/recommend/:customerId', async (req, res) => {
   }
 });
 
-router.get('/totalRate/:businessId', async (req, res) => {
+router.get("/totalRate/:businessId", async (req, res) => {
   try {
     const { businessId } = req.params;
     const result = await BusinessOwnerService.getTotalRate(businessId);
     return res.status(200).json(result);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ status: 'error', error: 'Internal Server Error' });
+    return res
+      .status(500)
+      .json({ status: "error", error: "Internal Server Error" });
   }
 });
-
-
-
 
 router.post("/:customerId/serviceRequest/:businessId", async (req, res) => {
   try {

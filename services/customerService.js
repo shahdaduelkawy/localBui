@@ -123,6 +123,7 @@ const CustomerService = {
 
         // Format the recommended businesses data
         const formattedRecommendedBusinesses = recommendedBusinesses.map(business => ({
+          businessId:business.businessId,
             businessName: business.businessName,
             country: business.Country,
             category: business.category,
