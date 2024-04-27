@@ -41,10 +41,10 @@ const CustomerService = {
             recommendedBusinesses = await BusinessOwner.find({ 
                 _id: { $nin: excludedBusinessIds }, // Exclude businesses already interacted with
                 category: { $in: interactedCategories } // Filter by categories of interacted businesses
-            }).sort({ rating: -1 }).limit(5); // Sort by rating in descending order and limit to 5 businesses
+            }).sort({ rating: -1 }).limit(12); // Sort by rating in descending order and limit to 5 businesses
         } else {
             // If the customer hasn't interacted with any businesses before, recommend all businesses sorted by rating
-            recommendedBusinesses = await BusinessOwner.find().sort({ rating: -1 }).limit(5); // Sort by rating in descending order and limit to 5 businesses
+            recommendedBusinesses = await BusinessOwner.find().sort({ rating: -1 }).limit(10); // Sort by rating in descending order and limit to 5 businesses
         }
 
         // Format the recommended businesses data
