@@ -19,45 +19,41 @@ router.get("/searchBusinesses/:businessName", searchBusinessesByName);
 router.get("/searchBusinesses/", searchBusinessesByName);
 router.get("/filterbycategory/:category", filterbycategory);
 router.get("/filterbycategory/", filterbycategory);
-router.post(
-  "/sendMessageToBusinessOwner/:customerId/:businessId",
-  async (req, res) => {
-    const { customerId, businessId } = req.params;
-    const { message } = req.body;
+router.post("/sendMessageToBusinessOwner/:customerId/:businessId", async (req, res) => {
+  const { customerId, businessId } = req.params;
+  const { message } = req.body;
 
-    try {
-      const result = await CustomerService.sendMessageToBusinessOwner(
-        customerId,
-        businessId,
-        message
-      );
+  try {
+    const result = await CustomerService.sendMessageToBusinessOwner(
+      customerId,
+      businessId,
+      message
+    );
 
-      if (result.success) {
-        // Emit a message to the customer and business owner indicating new messages
-        const io = getIO();
-        io.to(customerId).emit("updatedMessages", {
-          /* Update with relevant data based on your implementation */
-        });
-        io.to(businessId).emit("updatedMessages", {
-          /* Update with relevant data based on your implementation */
-        });
+    if (result.success) {
+      // Emit a message to the customer and business owner indicating new messages
+      const io = getIO();
+      io.to(customerId).emit("updatedMessages", {
+        /* Update with relevant data based on your implementation */
+      });
+      io.to(businessId).emit("updatedMessages", {
+        /* Update with relevant data based on your implementation */
+      });
 
-        res
-          .status(200)
-          .json({ success: true, message: "Message sent successfully" });
-      } else {
-        res
-          .status(500)
-          .json({ success: false, message: "Error sending message" });
-      }
-    } catch (error) {
-      console.error("Error in sendMessageToBusinessOwner route:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Internal Server Error" });
+      res.status(200).json({
+        success: true,
+        message: "Message sent successfully",
+        messageContent: result.messageContent // Include the message content in the response
+      });
+    } else {
+      res.status(500).json({ success: false, message: "Error sending message" });
     }
+  } catch (error) {
+    console.error("Error in sendMessageToBusinessOwner route:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
-);
+});
+
 router.patch(
   "/updateCustomerProfileImage/:customerId",
   uploadProfilePic.single("profileImg"),

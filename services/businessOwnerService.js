@@ -72,12 +72,14 @@ const BusinessOwnerService =
             message: "Message sent successfully",
             businessOwnerMessages: businessOwner.messages,
             customerMessages: customer.messages,
+            messageContent: message // Include the message content in the response
         };
     } catch (error) {
         console.error(`Error sending message: ${error.message}`);
         throw new ApiError(error.message, error.statusCode || 500); // Throw the error with its message
     }
-   },
+},
+
   async getUserByUserID(userId) {
     try {
       // Find the user based on the user's ID

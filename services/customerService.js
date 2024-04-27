@@ -15,21 +15,21 @@ const CustomerService = {
       if (!customer) {
         throw new ApiError(`Customer not found for ID: ${customerId}`, 404);
       }
-
+  
       // Check if the business owner exists
-      const businessOwner = await BusinessOwner.findById(businessId); // Remove curly braces
+      const businessOwner = await BusinessOwner.findById(businessId);
       if (!businessOwner) {
         throw new ApiError(
           `Business owner not found for ID: ${businessId}`,
           404
         );
       }
-
+  
       const user = await User.findById(customer.userId);
       if (!user) {
         return { success: false, message: "User not found" };
       }
-
+  
       // Ensure `messages` arrays exist and are not empty
       customer.messages = Array.isArray(customer.messages)
         ? customer.messages
@@ -37,9 +37,9 @@ const CustomerService = {
       businessOwner.messages = Array.isArray(businessOwner.messages)
         ? businessOwner.messages
         : [];
-
+  
       const customerName = user.name;
-
+  
       // Create the message objects consistently
       const customerMessage = {
         sender: "customer",
@@ -47,41 +47,44 @@ const CustomerService = {
         userName: customerName,
         timestamp: new Date(),
       };
-
+  
       const businessOwnerMessage = {
         sender: "customer",
-        content: message, // Ensure content is set correctly
+        content: message,
         timestamp: new Date(),
         userName: customerName,
       };
-
+  
       // Push messages into the arrays
       customer.messages.push(customerMessage);
       businessOwner.messages.push(businessOwnerMessage);
-
+  
       // Ensure data is saved to the database
       await customer.save();
       await businessOwner.save();
-
+  
       // Log activity after saving for consistency
       await logActivity(
         customerId,
         "sendMessageToBusinessOwner",
         "Message sent successfully"
       );
-
-      // Return the updated messages and status
+  
+      // Return the updated messages and status along with the message content
       return {
         success: true,
         message: "Message sent successfully",
-        customerMessages: customer.messages,
-        businessOwnerMessages: businessOwner.messages,
+        customerMessages: customer.messages.map(msg => msg.content), // Extract content from customer messages
+        businessOwnerMessages: businessOwner.messages.map(msg => msg.content), // Extract content from business owner messages
+        messageContent: message, // Include the message content in the response
       };
     } catch (error) {
       console.error(`Error sending message: ${error.message}`);
       throw new ApiError("Error sending message", error.statusCode || 500);
     }
   },
+  
+  
   async recommendBusinessesToCustomer(customerId) {
     try {
         // Find the customer by ID
