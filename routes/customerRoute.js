@@ -8,6 +8,7 @@ const User = require("../models/userModel");
 
 const router = express.Router();
 const {
+  isBusinessAlreadyFavorite,
   searchBusinessesByName,
   CustomerService,
   filterbycategory,
@@ -215,7 +216,7 @@ router.patch(
     }
   }
 );
-router.post("/favorites/:customerId/:businessId", async (req, res) => {
+router.post("/addtofavorites/:customerId/:businessId", async (req, res) => {
   try {
     const { customerId, businessId } = req.params; // Updated to use businessId
 
@@ -357,5 +358,25 @@ router.post("/:customerId/serviceRequest/:businessId", async (req, res) => {
     res.status(500).json({ status: "error", message: "Internal Server Error" });
   }
 });
+
+router.get("/isBusinessAlreadyFavorite/:customerId/:businessId", async (req, res) => {
+  try {
+    const { customerId, businessId } = req.params; // Updated to use businessId
+
+    // Check if the business is already a favorite
+    const isFavorite = await isBusinessAlreadyFavorite(customerId, businessId);
+    if (isFavorite.success === false) {
+      return res.status(404).send({ error: isFavorite.message });
+    }
+
+    // Return whether the business is already a favorite
+    res.status(200).send({ isFavorite });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+
 
 module.exports = router;

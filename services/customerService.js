@@ -314,6 +314,8 @@ const CustomerService = {
       throw new Error(`Error creating service request: ${error.message}`);
     }
   },
+
+
 };
 const filterbycategory = async (req, res) => {
   try {
@@ -440,8 +442,27 @@ const countCustomerRatings = async (businessId) => {
     );
   }
 };
+const isBusinessAlreadyFavorite = async (customerId, businessId) => {
+  try {
+    // Check if the customer exists
+    const customer = await Customer.findOne({ userId: customerId });
+    if (!customer) {
+      return { success: false, message: "Customer not found" };
+    }
+
+    // Check if the business is already a favorite
+    const isFavorite = customer.favoriteBusinesses.some((business) =>
+      business.businessId.equals(businessId)
+    );
+    return isFavorite;
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Internal Server Error" };
+  }
+};
 
 module.exports = {
+  isBusinessAlreadyFavorite,
   searchBusinessesByName,
   CustomerService,
   filterbycategory,
