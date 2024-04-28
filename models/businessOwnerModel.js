@@ -65,14 +65,14 @@ const businessOwnerSchema = new mongoose.Schema(
       type: [String],
       required: false,
     },
-    
+
     totalRate: {
-        type: Number,
-        default: 0,
-        min: 0,
-        max: 5 
-      },
-   
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+
     description: {
       type: String,
       required: false,
@@ -94,19 +94,25 @@ const businessOwnerSchema = new mongoose.Schema(
         type: String,
         required: false,
       },
-     
     },
     days: {
       type: [String],
-      enum: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday","Friday","Saturday" ],
+      enum: [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ],
     },
     messages: [
       {
         sender: String,
         content: String,
         timestamp: Date,
-        userName:String
-
+        userName: String,
       },
     ],
     reviews: [
@@ -122,10 +128,20 @@ const businessOwnerSchema = new mongoose.Schema(
           enum: [1, 2, 3, 4, 5],
         },
         timestamp: Date,
-        userName:String
+        userName: String,
       },
     ],
-    
+    expirationDate:
+      {
+        type: Date,
+        required: false,
+      },
+    eventOrNot:
+      {
+        type: String,
+        enum: "Event" || "notEvent",
+        required: false,
+      },
   },
   { timestamps: true }
 );

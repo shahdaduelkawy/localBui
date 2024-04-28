@@ -2,91 +2,99 @@
 /* eslint-disable no-useless-catch */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
+const cron = require("node-cron");
 const BusinessOwner = require("../models/businessOwnerModel");
 const Customer = require("../models/customerModel");
 
 const User = require("../models/userModel");
-const ApiError = require('../utils/apiError');
-const service=require('../models/serviceRequestModel');
+const ApiError = require("../utils/apiError");
+const service = require("../models/serviceRequestModel");
 const { logActivity } = require("./activityLogService");
 
-
-
-
-const BusinessOwnerService = 
-{
+const BusinessOwnerService = {
   async sendMessageToCustomer(businessId, customerId, message) {
     try {
-        // Check if the business owner exists
-        const businessOwner = await BusinessOwner.findById(businessId);
-        if (!businessOwner) {
-            throw new ApiError(`Business owner not found for ID: ${businessId}`, 404);
-        }
+      // Check if the business owner exists
+      const businessOwner = await BusinessOwner.findById(businessId);
+      if (!businessOwner) {
+        throw new ApiError(
+          `Business owner not found for ID: ${businessId}`,
+          404
+        );
+      }
 
-        // Check if the customer exists
-        const customer = await Customer.findOne({ userId: customerId });
-        if (!customer) {
-            throw new ApiError(`Customer not found for ID: ${customerId}`, 404);
-        }
+      // Check if the customer exists
+      const customer = await Customer.findOne({ userId: customerId });
+      if (!customer) {
+        throw new ApiError(`Customer not found for ID: ${customerId}`, 404);
+      }
 
-        const user = await User.findById(businessOwner.userId);
-        if (!user) {
-            return { success: false, message: "User not found" };
-        }
+      const user = await User.findById(businessOwner.userId);
+      if (!user) {
+        return { success: false, message: "User not found" };
+      }
 
-        const businessOwnerName = user.name;
+      const businessOwnerName = user.name;
 
-        // Ensure `messages` arrays exist and are not empty
-        businessOwner.messages = Array.isArray(businessOwner.messages) ? businessOwner.messages : [];
-        customer.messages = Array.isArray(customer.messages) ? customer.messages : [];
+      // Ensure `messages` arrays exist and are not empty
+      businessOwner.messages = Array.isArray(businessOwner.messages)
+        ? businessOwner.messages
+        : [];
+      customer.messages = Array.isArray(customer.messages)
+        ? customer.messages
+        : [];
 
-        // Create the message objects consistently
-        const businessOwnerMessage = {
-            sender: 'businessOwner',
-            content: message,
-            timestamp: new Date(),
-            userName: businessOwnerName,
-        };
+      // Create the message objects consistently
+      const businessOwnerMessage = {
+        sender: "businessOwner",
+        content: message,
+        timestamp: new Date(),
+        userName: businessOwnerName,
+      };
 
-        const customerMessage = {
-            sender: 'businessOwner',
-            content: message,
-            timestamp: new Date(),
-            userName: businessOwnerName,
-        };
+      const customerMessage = {
+        sender: "businessOwner",
+        content: message,
+        timestamp: new Date(),
+        userName: businessOwnerName,
+      };
 
-        // Push messages into the arrays
-        businessOwner.messages.push(businessOwnerMessage);
-        customer.messages.push(customerMessage);
+      // Push messages into the arrays
+      businessOwner.messages.push(businessOwnerMessage);
+      customer.messages.push(customerMessage);
 
-        // Ensure data is saved to the database
-        await businessOwner.save();
-        await customer.save();
+      // Ensure data is saved to the database
+      await businessOwner.save();
+      await customer.save();
 
-        // Log activity after saving for consistency
-        await logActivity(businessId, "sendMessageToCustomer", "Message sent successfully");
+      // Log activity after saving for consistency
+      await logActivity(
+        businessId,
+        "sendMessageToCustomer",
+        "Message sent successfully"
+      );
 
-        // Return the updated messages and status
-        return {
-            success: true,
-            message: "Message sent successfully",
-            businessOwnerMessages: businessOwner.messages,
-            customerMessages: customer.messages,
-        };
+      // Return the updated messages and status
+      return {
+        success: true,
+        message: "Message sent successfully",
+        businessOwnerMessages: businessOwner.messages,
+        customerMessages: customer.messages,
+      };
     } catch (error) {
-        console.error(`Error sending message: ${error.message}`);
-        throw new ApiError(error.message, error.statusCode || 500); // Throw the error with its message
+      console.error(`Error sending message: ${error.message}`);
+      throw new ApiError(error.message, error.statusCode || 500); // Throw the error with its message
     }
-   },
+  },
   async getUserByUserID(userId) {
     try {
       // Find the user based on the user's ID
       const user = await User.findOne({ _id: userId });
-  
+
       if (!user) {
-        throw new ApiError('User not found for the given userId', 404);
+        throw new ApiError("User not found for the given userId", 404);
       }
-  
+
       // Include the `userProfile` field in the sanitized user object
       const sanitizedUser = {
         _id: user._id,
@@ -98,11 +106,11 @@ const BusinessOwnerService =
         phone: user.phone,
         userProfile: user.userProfile, // Include the userProfile field
       };
-  
+
       return sanitizedUser;
     } catch (error) {
       console.error("Error getting user data by userId:", error);
-  
+
       if (error instanceof ApiError) {
         throw error;
       } else {
@@ -121,7 +129,11 @@ const BusinessOwnerService =
           return updateResult;
         })
       );
-      await logActivity(businessId, "uploadedmedia", "Media uploaded successfully");
+      await logActivity(
+        businessId,
+        "uploadedmedia",
+        "Media uploaded successfully"
+      );
 
       return updateResults;
     } catch (error) {
@@ -135,17 +147,21 @@ const BusinessOwnerService =
           _id: businessId,
         },
         updateCriteria,
-        {new: true, upsert: true  } // Return the modified document
+        { new: true, upsert: true } // Return the modified document
       );
-  
+
       if (!profileSetup) {
         // If profileSetup is null, the business with the given ID was not found
         console.error("Business not found with ID:", businessId);
         return null;
       }
-  
-      await logActivity(businessId, "profileSetup", "Profile setup completed successfully");
-  
+
+      await logActivity(
+        businessId,
+        "profileSetup",
+        "Profile setup completed successfully"
+      );
+
       return profileSetup;
     } catch (error) {
       console.error("Error updating user business:", error);
@@ -156,7 +172,7 @@ const BusinessOwnerService =
     try {
       // Check if a business for the given userId already exists
       const existingBusiness = await BusinessOwner.findOne({ _id: businessId });
-  
+
       if (existingBusiness) {
         // If a business exists, update the existing document
         const updatedOwner = await BusinessOwner.findOneAndUpdate(
@@ -164,19 +180,26 @@ const BusinessOwnerService =
           updateCriteria,
           { new: true, upsert: true } // Update the existing document
         );
-        await logActivity(businessId, "updateUserBusiness", "New user business created successfully");
+        await logActivity(
+          businessId,
+          "updateUserBusiness",
+          "New user business created successfully"
+        );
         return updatedOwner;
-      } 
-        // If no business exists, create a new document
-        const newBusiness = await BusinessOwner.create({
-          _id: businessId,
-          ...updateCriteria,
-        });
+      }
+      // If no business exists, create a new document
+      const newBusiness = await BusinessOwner.create({
+        _id: businessId,
+        ...updateCriteria,
+      });
 
-        await logActivity(businessId, "updateUserBusiness", "New user business created successfully");
+      await logActivity(
+        businessId,
+        "updateUserBusiness",
+        "New user business created successfully"
+      );
 
-        return newBusiness;
-      
+      return newBusiness;
     } catch (error) {
       console.error("Error updating user business:", error);
       return null;
@@ -185,11 +208,13 @@ const BusinessOwnerService =
   async addMultipleBusinesses(ownerID, businessesData) {
     try {
       // If it's not an array, convert it to an array with a single element
-      const businessesArray = Array.isArray(businessesData) ? businessesData : [businessesData];
-  
+      const businessesArray = Array.isArray(businessesData)
+        ? businessesData
+        : [businessesData];
+
       // Create an array to store the created businesses
       const createdBusinesses = [];
-  
+
       // Iterate over the array of businesses and create each one
       // eslint-disable-next-line no-restricted-syntax
       for (const businessData of businessesArray) {
@@ -198,10 +223,14 @@ const BusinessOwnerService =
           userId: ownerID,
           ...businessData,
         });
-  
+
         createdBusinesses.push(newBusiness);
       }
-      await logActivity(ownerID, "addMultipleBusinesses", "Multiple businesses added successfully");
+      await logActivity(
+        ownerID,
+        "addMultipleBusinesses",
+        "Multiple businesses added successfully"
+      );
 
       return createdBusinesses;
     } catch (error) {
@@ -209,17 +238,19 @@ const BusinessOwnerService =
       return null;
     }
   },
-async getAllUserBusinesses(ownerID) {
-  try {
-    const businesses = await BusinessOwner.find({ userId: ownerID });
-    const numberOfBusinesses = await BusinessOwner.countDocuments({ userId: ownerID });
-    return { numberOfBusinesses, businesses };
-  } catch (error) {
-    console.error("Error retrieving user businesses:", error);
-    return null;
-  }
-  }, 
-async deleteBusinessById(businessId) {
+  async getAllUserBusinesses(ownerID) {
+    try {
+      const businesses = await BusinessOwner.find({ userId: ownerID });
+      const numberOfBusinesses = await BusinessOwner.countDocuments({
+        userId: ownerID,
+      });
+      return { numberOfBusinesses, businesses };
+    } catch (error) {
+      console.error("Error retrieving user businesses:", error);
+      return null;
+    }
+  },
+  async deleteBusinessById(businessId) {
     try {
       const deletionResult = await BusinessOwner.deleteOne({ _id: businessId });
 
@@ -239,21 +270,25 @@ async deleteBusinessById(businessId) {
           attachment: file.path,
         }
       );
-      await logActivity(businessId, "uploadImage", "Image uploaded successfully");
+      await logActivity(
+        businessId,
+        "uploadImage",
+        "Image uploaded successfully"
+      );
 
       return updateResult;
     } catch (error) {
       return error.message;
     }
   },
-  async addImageToUserProfile(userId, file ) {
+  async addImageToUserProfile(userId, file) {
     try {
       const updateResult = await User.updateOne(
         {
-           _id: userId
-           },
-        { 
-          userProfile: file.path,  
+          _id: userId,
+        },
+        {
+          userProfile: file.path,
         }
       );
       await logActivity(userId, "uploadImage", "Image uploaded successfully");
@@ -325,21 +360,23 @@ async deleteBusinessById(businessId) {
     try {
       // Find the business owner by ID
       const business = await BusinessOwner.findOne({ _id: businessId });
-  
+
       if (!business) {
         throw new Error("Business not found");
       }
-  
+
       // Get the reviews associated with the business
-      const {reviews} = business;
-      
+      const { reviews } = business;
+
       // Count the reviews
       const reviewCount = reviews.length;
-  
+
       // Return an object containing reviews and their count
       return { reviews, reviewCount };
     } catch (error) {
-      throw new Error(`Error retrieving reviews for business: ${error.message}`);
+      throw new Error(
+        `Error retrieving reviews for business: ${error.message}`
+      );
     }
   },
   async addLogo(businessId, file) {
@@ -360,97 +397,140 @@ async deleteBusinessById(businessId) {
     }
   },
 
-  async updateServiceRequestStatus(serviceRequestId, newStatus, approvalStatus) {
+  async updateServiceRequestStatus(
+    serviceRequestId,
+    newStatus,
+    approvalStatus
+  ) {
     try {
-        // Validate newStatus
-        if (!['Pending', 'In Progress', 'Completed'].includes(newStatus)) {
-            return { success: false, message: "Invalid status value" };
-        }
+      // Validate newStatus
+      if (!["Pending", "In Progress", "Completed"].includes(newStatus)) {
+        return { success: false, message: "Invalid status value" };
+      }
 
-        // Validate approvalStatus
-        if (!['Pending', 'Accepted', 'Declined'].includes(approvalStatus)) {
-            return { success: false, message: "Invalid approval status value" };
-        }
+      // Validate approvalStatus
+      if (!["Pending", "Accepted", "Declined"].includes(approvalStatus)) {
+        return { success: false, message: "Invalid approval status value" };
+      }
 
-        // Find the service request by ID
-        const serviceRequest = await service.findById(serviceRequestId);
+      // Find the service request by ID
+      const serviceRequest = await service.findById(serviceRequestId);
 
-        // Check if the service request exists
-        if (!serviceRequest) {
-            return { success: false, message: "Service request not found" };
-        }
+      // Check if the service request exists
+      if (!serviceRequest) {
+        return { success: false, message: "Service request not found" };
+      }
 
-        // Update the approval status
-        serviceRequest.approvalStatus = approvalStatus;
-        console.log(`New approval status set: ${serviceRequest.approvalStatus}`);
+      // Update the approval status
+      serviceRequest.approvalStatus = approvalStatus;
+      console.log(`New approval status set: ${serviceRequest.approvalStatus}`);
 
-        // If approvalStatus is 'Accepted', then update the status
-        if (approvalStatus === 'Accepted') {
-            serviceRequest.status = newStatus;
-            console.log(`New status set: ${serviceRequest.status}`);
-        }
+      // If approvalStatus is 'Accepted', then update the status
+      if (approvalStatus === "Accepted") {
+        serviceRequest.status = newStatus;
+        console.log(`New status set: ${serviceRequest.status}`);
+      }
 
-        // Save the updated service request
-        await serviceRequest.save();
-        console.log(`Service request updated: ${serviceRequest}`);
+      // Save the updated service request
+      await serviceRequest.save();
+      console.log(`Service request updated: ${serviceRequest}`);
 
-        return { success: true, message: "Service request status updated successfully" };
+      return {
+        success: true,
+        message: "Service request status updated successfully",
+      };
     } catch (error) {
-        console.error(error);
-        return { success: false, message: "Internal Server Error" };
+      console.error(error);
+      return { success: false, message: "Internal Server Error" };
     }
-}, 
-async listServicesByBusinessId(businessId) {
-  try {
-    // Find all service requests associated with the specified businessId
-    const services = await service.find({
-      businessId: businessId,
-    }).sort({ createdAt: 1 }); // Sort by createdAt field in ascending order
+  },
+  async listServicesByBusinessId(businessId) {
+    try {
+      // Find all service requests associated with the specified businessId
+      const services = await service
+        .find({
+          businessId: businessId,
+        })
+        .sort({ createdAt: 1 }); // Sort by createdAt field in ascending order
 
-    // Return the fetched services
-    return services;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Error fetching services for the business");
-  }
-},
-async getTotalRate(businessId) {
-  try {
-    // Find the business by ID
-    const business = await BusinessOwner.findById(businessId);
-
-    if (!business) {
-      return { status: 'fail', message: 'Business not found' };
+      // Return the fetched services
+      return services;
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error fetching services for the business");
     }
+  },
+  async getTotalRate(businessId) {
+    try {
+      // Find the business by ID
+      const business = await BusinessOwner.findById(businessId);
 
-    // Filter out reviews with undefined starRating
-    const ratedReviews = business.reviews.filter(review => typeof review.starRating !== 'undefined');
+      if (!business) {
+        return { status: "fail", message: "Business not found" };
+      }
 
-    // Calculate the average rating
-    const totalRatings = ratedReviews.length;
+      // Filter out reviews with undefined starRating
+      const ratedReviews = business.reviews.filter(
+        (review) => typeof review.starRating !== "undefined"
+      );
 
-    if (totalRatings === 0) {
-      // Set totalRate to 0 if there are no reviews
-      business.totalRate = 0;
-    } else {
-      const totalRating = ratedReviews.reduce((sum, review) => sum + review.starRating, 0);
+      // Calculate the average rating
+      const totalRatings = ratedReviews.length;
 
-      const averageRating = totalRating / totalRatings;
+      if (totalRatings === 0) {
+        // Set totalRate to 0 if there are no reviews
+        business.totalRate = 0;
+      } else {
+        const totalRating = ratedReviews.reduce(
+          (sum, review) => sum + review.starRating,
+          0
+        );
 
-      // Set totalRate to the average rating
-      business.totalRate = averageRating;
+        const averageRating = totalRating / totalRatings;
+
+        // Set totalRate to the average rating
+        business.totalRate = averageRating;
+      }
+
+      // Save the updated business document
+      await business.save();
+
+      // Return success response
+      return {
+        status: "success",
+        message: "Total rate updated successfully",
+        totalRate: business.totalRate,
+      };
+    } catch (error) {
+      console.error(error);
+      return { status: "error", error: "Internal Server Error" };
     }
+  },
+  async handleBusinessExpiration() {
+    try {
+      // Get the current date
+      const currentDate = new Date();
 
-    // Save the updated business document
-    await business.save();
+      // Find businesses with expirationDate less than or equal to the current date
+      const expiredBusinesses = await BusinessOwner.find({
+        expirationDate: { $lte: currentDate },
+      });
 
-    // Return success response
-    return { status: 'success', message: 'Total rate updated successfully', totalRate: business.totalRate };
-  } catch (error) {
-    console.error(error);
-    return { status: 'error', error: 'Internal Server Error' };
-  }
-}
+      // Iterate through expired businesses
+      for (const business of expiredBusinesses) {
+        // Delete the business
+        await BusinessOwnerService.deleteBusinessById(business._id);
 
+        console.log(`Expired business deleted: ${business.businessName}`);
+      }
+    } catch (error) {
+      console.error("Error handling business expiration:", error);
+    }
+  },
 };
 module.exports = BusinessOwnerService;
+
+cron.schedule("*/3 * * * *", () => {
+  console.log("Running cron job to handle business expiration...");
+  BusinessOwnerService.handleBusinessExpiration();
+});
