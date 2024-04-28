@@ -11,8 +11,7 @@ const ApiError = require("../utils/apiError");
 const { getIO } = require("../services/socket");
 const businessOwnerModel = require("../models/businessOwnerModel");
 
-router.post(
-  "/sendMessageToCustomer/:businessId/:customerId",
+router.post("/sendMessageToCustomer/:businessId/:customerId",
   async (req, res) => {
     const { businessId, customerId } = req.params;
     const { message } = req.body;
@@ -36,7 +35,11 @@ router.post(
 
         res
           .status(200)
-          .json({ success: true, message: "Message sent successfully" });
+          .json({
+            success: true,
+            message: "Message sent successfully",
+            content: message 
+          });
       } else {
         res
           .status(500)
@@ -51,6 +54,7 @@ router.post(
     }
   }
 );
+
 
 router.put("/updateMyBusinessInfo/:businessId", async (req, res) => {
   const { businessId } = req.params;

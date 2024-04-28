@@ -15,21 +15,18 @@ const CustomerService = {
       if (!customer) {
         throw new ApiError(`Customer not found for ID: ${customerId}`, 404);
       }
-
+  
       // Check if the business owner exists
-      const businessOwner = await BusinessOwner.findById(businessId); // Remove curly braces
+      const businessOwner = await BusinessOwner.findById(businessId);
       if (!businessOwner) {
-        throw new ApiError(
-          `Business owner not found for ID: ${businessId}`,
-          404
-        );
+        throw new ApiError(`Business owner not found for ID: ${businessId}`, 404);
       }
-
+  
       const user = await User.findById(customer.userId);
       if (!user) {
         return { success: false, message: "User not found" };
       }
-
+  
       // Ensure `messages` arrays exist and are not empty
       customer.messages = Array.isArray(customer.messages)
         ? customer.messages
@@ -37,9 +34,9 @@ const CustomerService = {
       businessOwner.messages = Array.isArray(businessOwner.messages)
         ? businessOwner.messages
         : [];
-
+  
       const customerName = user.name;
-
+  
       // Create the message objects consistently
       const customerMessage = {
         sender: "customer",
@@ -47,41 +44,83 @@ const CustomerService = {
         userName: customerName,
         timestamp: new Date(),
       };
-
+  
       const businessOwnerMessage = {
         sender: "customer",
-        content: message, // Ensure content is set correctly
+        content: message,
         timestamp: new Date(),
         userName: customerName,
       };
-
+  
       // Push messages into the arrays
       customer.messages.push(customerMessage);
       businessOwner.messages.push(businessOwnerMessage);
-
+  
       // Ensure data is saved to the database
       await customer.save();
       await businessOwner.save();
-
+  
       // Log activity after saving for consistency
       await logActivity(
         customerId,
         "sendMessageToBusinessOwner",
         "Message sent successfully"
       );
-
-      // Return the updated messages and status
+  
+      // Return the updated messages and status along with the message content
       return {
         success: true,
         message: "Message sent successfully",
-        customerMessages: customer.messages,
-        businessOwnerMessages: businessOwner.messages,
+        customerMessages: customer.messages.map(msg => msg.content), 
+        businessOwnerMessages: businessOwner.messages.map(msg => msg.content), 
+        messageContent: message, 
       };
     } catch (error) {
       console.error(`Error sending message: ${error.message}`);
       throw new ApiError("Error sending message", error.statusCode || 500);
     }
   },
+  
+
+  async getAllMessages(customerId, businessId) {
+    try {
+      // Find the customer by userId
+      const customer = await Customer.findOne({ userId: customerId });
+      if (!customer) {
+        throw new Error('Customer not found');
+      }
+  
+      // Find the business owner by ID
+      const businessOwner = await BusinessOwner.findById(businessId);
+      if (!businessOwner) {
+        throw new Error('Business owner not found');
+      }
+  
+      // Get all messages sent by the customer to the business owner
+      const customerToBusinessMessages = customer.messages.filter(message =>
+        message.sender === 'customer' && message.userName === businessOwner.businessName
+      );
+  
+      // Get all messages sent by the business owner to the customer
+      const businessToCustomerMessages = businessOwner.messages.filter(message =>
+        message.sender === 'businessOwner' && message.userName === customer.userName
+      );
+  
+      // Concatenate both sets of messages
+      const allMessages = customerToBusinessMessages.concat(businessToCustomerMessages);
+  
+      // Sort messages by timestamp
+      allMessages.sort((a, b) => a.timestamp - b.timestamp);
+  
+      return allMessages;
+    } catch (error) {
+      console.error('Error fetching messages:', error.message);
+      throw error;
+    }
+  }
+  
+  
+,  
   async recommendBusinessesToCustomer(customerId) {
     try {
         // Find the customer by ID
@@ -115,19 +154,20 @@ const CustomerService = {
             recommendedBusinesses = await BusinessOwner.find({ 
                 _id: { $nin: excludedBusinessIds }, // Exclude businesses already interacted with
                 category: { $in: interactedCategories } // Filter by categories of interacted businesses
-            }).sort({ rating: -1 }).limit(5); // Sort by rating in descending order and limit to 5 businesses
+            }).sort({ rating: -1 }).limit(12); // Sort by rating in descending order and limit to 5 businesses
         } else {
             // If the customer hasn't interacted with any businesses before, recommend all businesses sorted by rating
-            recommendedBusinesses = await BusinessOwner.find().sort({ rating: -1 }).limit(5); // Sort by rating in descending order and limit to 5 businesses
+            recommendedBusinesses = await BusinessOwner.find().sort({ rating: -1 }).limit(10); // Sort by rating in descending order and limit to 5 businesses
         }
 
         // Format the recommended businesses data
         const formattedRecommendedBusinesses = recommendedBusinesses.map(business => ({
+            businessId: business._id,
             businessName: business.businessName,
             country: business.Country,
             category: business.category,
-            logo :business.logo,
             totalRate: business.totalRate,
+            logo: business.logo, // Include the logo
         }));
 
         return formattedRecommendedBusinesses;
@@ -135,8 +175,7 @@ const CustomerService = {
         console.error(`Error recommending businesses: ${error.message}`);
         throw new ApiError("Error recommending businesses", error.statusCode || 500);
     }
-}
-,
+  },
   async uploadCustomerImage(customerId, file) {
     try {
       const updateResult = await Customer.updateOne(
@@ -387,8 +426,9 @@ const CustomerService = {
       // Handle other errors
       throw new Error(`Error creating service request: ${error.message}`);
     }
-  }
-  
+  },
+
+
 };
 const filterbycategory = async (req, res) => {
   try {
@@ -515,8 +555,27 @@ const countCustomerRatings = async (businessId) => {
     );
   }
 };
+const isBusinessAlreadyFavorite = async (customerId, businessId) => {
+  try {
+    // Check if the customer exists
+    const customer = await Customer.findOne({ userId: customerId });
+    if (!customer) {
+      return { success: false, message: "Customer not found" };
+    }
+
+    // Check if the business is already a favorite
+    const isFavorite = customer.favoriteBusinesses.some((business) =>
+      business.businessId.equals(businessId)
+    );
+    return isFavorite;
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Internal Server Error" };
+  }
+};
 
 module.exports = {
+  isBusinessAlreadyFavorite,
   searchBusinessesByName,
   CustomerService,
   filterbycategory,

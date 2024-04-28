@@ -82,7 +82,7 @@ const businessOwnerSchema = new mongoose.Schema(
       required: false,
     },
     logo: {
-      type: String,
+      type: [String],
       required: false,
     },
     workTime: {
