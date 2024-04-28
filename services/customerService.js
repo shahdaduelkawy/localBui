@@ -19,10 +19,7 @@ const CustomerService = {
       // Check if the business owner exists
       const businessOwner = await BusinessOwner.findById(businessId);
       if (!businessOwner) {
-        throw new ApiError(
-          `Business owner not found for ID: ${businessId}`,
-          404
-        );
+        throw new ApiError(`Business owner not found for ID: ${businessId}`, 404);
       }
   
       const user = await User.findById(customer.userId);
@@ -74,9 +71,9 @@ const CustomerService = {
       return {
         success: true,
         message: "Message sent successfully",
-        customerMessages: customer.messages.map(msg => msg.content), // Extract content from customer messages
-        businessOwnerMessages: businessOwner.messages.map(msg => msg.content), // Extract content from business owner messages
-        messageContent: message, // Include the message content in the response
+        customerMessages: customer.messages.map(msg => msg.content), 
+        businessOwnerMessages: businessOwner.messages.map(msg => msg.content), 
+        messageContent: message, 
       };
     } catch (error) {
       console.error(`Error sending message: ${error.message}`);
@@ -84,7 +81,46 @@ const CustomerService = {
     }
   },
   
+
+  async getAllMessages(customerId, businessId) {
+    try {
+      // Find the customer by userId
+      const customer = await Customer.findOne({ userId: customerId });
+      if (!customer) {
+        throw new Error('Customer not found');
+      }
   
+      // Find the business owner by ID
+      const businessOwner = await BusinessOwner.findById(businessId);
+      if (!businessOwner) {
+        throw new Error('Business owner not found');
+      }
+  
+      // Get all messages sent by the customer to the business owner
+      const customerToBusinessMessages = customer.messages.filter(message =>
+        message.sender === 'customer' && message.userName === businessOwner.businessName
+      );
+  
+      // Get all messages sent by the business owner to the customer
+      const businessToCustomerMessages = businessOwner.messages.filter(message =>
+        message.sender === 'businessOwner' && message.userName === customer.userName
+      );
+  
+      // Concatenate both sets of messages
+      const allMessages = customerToBusinessMessages.concat(businessToCustomerMessages);
+  
+      // Sort messages by timestamp
+      allMessages.sort((a, b) => a.timestamp - b.timestamp);
+  
+      return allMessages;
+    } catch (error) {
+      console.error('Error fetching messages:', error.message);
+      throw error;
+    }
+  }
+  
+  
+,  
   async recommendBusinessesToCustomer(customerId) {
     try {
         // Find the customer by ID

@@ -38,7 +38,7 @@ router.post("/sendMessageToCustomer/:businessId/:customerId",
           .json({
             success: true,
             message: "Message sent successfully",
-            content: message // Include the message content in the response
+            content: message 
           });
       } else {
         res

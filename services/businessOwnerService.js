@@ -72,7 +72,7 @@ const BusinessOwnerService =
             message: "Message sent successfully",
             businessOwnerMessages: businessOwner.messages,
             customerMessages: customer.messages,
-            messageContent: message // Include the message content in the response
+            messageContent: message 
         };
     } catch (error) {
         console.error(`Error sending message: ${error.message}`);

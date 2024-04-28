@@ -43,7 +43,7 @@ router.post("/sendMessageToBusinessOwner/:customerId/:businessId", async (req, r
       res.status(200).json({
         success: true,
         message: "Message sent successfully",
-        messageContent: result.messageContent // Include the message content in the response
+        messageContent: result.messageContent 
       });
     } else {
       res.status(500).json({ success: false, message: "Error sending message" });
@@ -53,6 +53,21 @@ router.post("/sendMessageToBusinessOwner/:customerId/:businessId", async (req, r
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
+router.get('/getAllMessages/:customerId/:businessId', async (req, res) => {
+  const { customerId, businessId } = req.params;
+
+  try {
+    // Call the service function to retrieve all messages
+    const messages = await CustomerService.getAllMessages(customerId, businessId);
+    
+    // Return the messages in the response
+    res.status(200).json({ success: true, messages });
+  } catch (error) {
+    console.error('Error fetching messages:', error.message);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
+
 
 router.patch(
   "/updateCustomerProfileImage/:customerId",
