@@ -1,8 +1,9 @@
+/* eslint-disable node/no-missing-require */
+/* eslint-disable import/no-unresolved */
 /* eslint-disable radix */
 /* eslint-disable no-useless-catch */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-const cron = require("node-cron");
 const BusinessOwner = require("../models/businessOwnerModel");
 const Customer = require("../models/customerModel");
 
@@ -12,30 +13,32 @@ const service = require("../models/serviceRequestModel");
 const { logActivity } = require("./activityLogService");
 
 const BusinessOwnerService = {
-  async sendMessageToCustomer(businessId, customerId, message) {
+  async  sendMessageToCustomer(businessId, customerId, message) {
     try {
+      console.log("sendMessageToCustomer: Starting function...");
+  
       // Check if the business owner exists
       const businessOwner = await BusinessOwner.findById(businessId);
       if (!businessOwner) {
-        throw new ApiError(
-          `Business owner not found for ID: ${businessId}`,
-          404
-        );
+        throw new ApiError(`Business owner not found for ID: ${businessId}`, 404);
       }
-
+      console.log("sendMessageToCustomer: Business owner found");
+  
       // Check if the customer exists
       const customer = await Customer.findOne({ userId: customerId });
       if (!customer) {
         throw new ApiError(`Customer not found for ID: ${customerId}`, 404);
       }
-
-      const user = await User.findById(businessOwner.userId);
+      console.log("sendMessageToCustomer: Customer found");
+  
+      const user = await User.findById(customer.userId);
       if (!user) {
+        console.log("sendMessageToCustomer: User not found");
         return { success: false, message: "User not found" };
       }
-
-      const businessOwnerName = user.name;
-
+  
+      console.log("sendMessageToCustomer: User found");
+  
       // Ensure `messages` arrays exist and are not empty
       businessOwner.messages = Array.isArray(businessOwner.messages)
         ? businessOwner.messages
@@ -43,50 +46,67 @@ const BusinessOwnerService = {
       customer.messages = Array.isArray(customer.messages)
         ? customer.messages
         : [];
-
+  
+      console.log("sendMessageToCustomer: Messages arrays initialized");
+  
+      const businessOwnerName = user.name;
+  
       // Create the message objects consistently
-      const businessOwnerMessage = {
-        sender: "businessOwner",
-        content: message,
-        timestamp: new Date(),
-        userName: businessOwnerName,
-      };
-
       const customerMessage = {
+        businessId: businessId,
+        customerId: customerId,
         sender: "businessOwner",
+        content: message,
+        userName: businessOwnerName,
+        timestamp: new Date(),
+      };
+  
+      const businessOwnerMessage = {
+        businessId: businessId,
+        customerId: customerId,
+        sender: "businessOwner", // Corrected sender field
         content: message,
         timestamp: new Date(),
         userName: businessOwnerName,
       };
-
+  
       // Push messages into the arrays
-      businessOwner.messages.push(businessOwnerMessage);
       customer.messages.push(customerMessage);
-
+      businessOwner.messages.push(businessOwnerMessage);
+  
+      console.log("sendMessageToCustomer: Messages pushed into arrays");
+  
       // Ensure data is saved to the database
-      await businessOwner.save();
       await customer.save();
-
+      await businessOwner.save();
+  
+      console.log("sendMessageToCustomer: Data saved successfully");
+  
       // Log activity after saving for consistency
       await logActivity(
         businessId,
         "sendMessageToCustomer",
         "Message sent successfully"
       );
-
-        // Return the updated messages and status
-        return {
-            success: true,
-            message: "Message sent successfully",
-            businessOwnerMessages: businessOwner.messages,
-            customerMessages: customer.messages,
-            messageContent: message 
-        };
+  
+      console.log("sendMessageToCustomer: Activity logged");
+  
+      // Return the updated messages and status
+      return {
+        success: true,
+        message: "Message sent successfully",
+        businessOwnerMessages: businessOwner.messages,
+        businessId: businessId,
+        customerId: customerId,
+        customerMessages: customer.messages,
+        messageContent: message,
+      };
     } catch (error) {
       console.error(`Error sending message: ${error.message}`);
       throw new ApiError(error.message, error.statusCode || 500); // Throw the error with its message
     }
-},
+  },
+  
 
   async getUserByUserID(userId) {
     try {
@@ -508,31 +528,31 @@ const BusinessOwnerService = {
       return { status: "error", error: "Internal Server Error" };
     }
   },
-  async handleBusinessExpiration() {
-    try {
-      // Get the current date
-      const currentDate = new Date();
+  // async handleBusinessExpiration() {
+  //   try {
+  //     // Get the current date
+  //     const currentDate = new Date();
 
-      // Find businesses with expirationDate less than or equal to the current date
-      const expiredBusinesses = await BusinessOwner.find({
-        expirationDate: { $lte: currentDate },
-      });
+  //     // Find businesses with expirationDate less than or equal to the current date
+  //     const expiredBusinesses = await BusinessOwner.find({
+  //       expirationDate: { $lte: currentDate },
+  //     });
 
-      // Iterate through expired businesses
-      for (const business of expiredBusinesses) {
-        // Delete the business
-        await BusinessOwnerService.deleteBusinessById(business._id);
+  //     // Iterate through expired businesses
+  //     for (const business of expiredBusinesses) {
+  //       // Delete the business
+  //       await BusinessOwnerService.deleteBusinessById(business._id);
 
-        console.log(`Expired business deleted: ${business.businessName}`);
-      }
-    } catch (error) {
-      console.error("Error handling business expiration:", error);
-    }
-  },
+  //       console.log(`Expired business deleted: ${business.businessName}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error handling business expiration:", error);
+  //   }
+  // },
 };
 module.exports = BusinessOwnerService;
 
-cron.schedule("*/3 * * * *", () => {
-  console.log("Running cron job to handle business expiration...");
-  BusinessOwnerService.handleBusinessExpiration();
-});
+// cron.schedule("*/3 * * * *", () => {
+//   console.log("Running cron job to handle business expiration...");
+//   BusinessOwnerService.handleBusinessExpiration();
+// });

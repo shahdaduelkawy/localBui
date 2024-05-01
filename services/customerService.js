@@ -39,19 +39,25 @@ const CustomerService = {
   
       // Create the message objects consistently
       const customerMessage = {
+        businessId: businessId,
+        customerId: customerId,
         sender: "customer",
         content: message,
         userName: customerName,
         timestamp: new Date(),
-      };
-  
-      const businessOwnerMessage = {
-        sender: "customer",
+    };
+    
+    const businessOwnerMessage = {
+        businessId: businessId,
+        customerId: customerId,
+        sender: "customer", // Corrected sender field
         content: message,
         timestamp: new Date(),
         userName: customerName,
-      };
-  
+    };
+    
+
+      
       // Push messages into the arrays
       customer.messages.push(customerMessage);
       businessOwner.messages.push(businessOwnerMessage);
@@ -67,19 +73,26 @@ const CustomerService = {
         "Message sent successfully"
       );
   
-      // Return the updated messages and status along with the message content
+      // Return the updated messages, IDs of customer and business, and message content
       return {
         success: true,
         message: "Message sent successfully",
-        customerMessages: customer.messages.map(msg => msg.content), 
-        businessOwnerMessages: businessOwner.messages.map(msg => msg.content), 
-        messageContent: message, 
+        customerId: customerId,
+        businessId: businessId,
+        customerMessages: customer.messages.map(msg => msg.content),
+        businessOwnerMessages: businessOwner.messages.map(msg => msg.content),
+        messageContent: message,
       };
     } catch (error) {
       console.error(`Error sending message: ${error.message}`);
       throw new ApiError("Error sending message", error.statusCode || 500);
     }
-  },
+  }
+  
+  
+  
+  ,
+  
   
 
   async getAllMessages(customerId, businessId) {
@@ -90,34 +103,25 @@ const CustomerService = {
         throw new Error('Customer not found');
       }
   
-      // Find the business owner by ID
-      const businessOwner = await BusinessOwner.findById(businessId);
-      if (!businessOwner) {
-        throw new Error('Business owner not found');
-      }
+      // Filter messages exchanged between the customer and the business owner
+      const filteredMessages = customer.messages.filter(message => (
+        message.customerId.toString() === customerId && 
+        message.businessId.toString() === businessId
+      ));
   
-      // Get all messages sent by the customer to the business owner
-      const customerToBusinessMessages = customer.messages.filter(message =>
-        message.sender === 'customer' && message.userName === businessOwner.businessName
-      );
+      // Sort filtered messages by timestamp
+      filteredMessages.sort((a, b) => a.timestamp - b.timestamp);
   
-      // Get all messages sent by the business owner to the customer
-      const businessToCustomerMessages = businessOwner.messages.filter(message =>
-        message.sender === 'businessOwner' && message.userName === customer.userName
-      );
-  
-      // Concatenate both sets of messages
-      const allMessages = customerToBusinessMessages.concat(businessToCustomerMessages);
-  
-      // Sort messages by timestamp
-      allMessages.sort((a, b) => a.timestamp - b.timestamp);
-  
-      return allMessages;
+      return filteredMessages;
     } catch (error) {
       console.error('Error fetching messages:', error.message);
       throw error;
     }
   }
+  
+  
+  
+  
   
   
 ,  

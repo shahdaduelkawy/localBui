@@ -1,7 +1,8 @@
 const express = require("express");
 const { uploadProfilePic } = require("../middleware/fileUpload.middleware");
 const { getIO } = require("../services/socket");
-const BusinessOwnerService = require("../services/businessOwnerService");
+const BusinessOwnerService =
+  require("../services/businessOwnerService").default;
 const Customer = require("../models/customerModel");
 const BusinessOwner = require("../models/businessOwnerModel");
 const User = require("../models/userModel");
@@ -19,52 +20,61 @@ router.get("/searchBusinesses/:businessName", searchBusinessesByName);
 router.get("/searchBusinesses/", searchBusinessesByName);
 router.get("/filterbycategory/:category", filterbycategory);
 router.get("/filterbycategory/", filterbycategory);
-router.post("/sendMessageToBusinessOwner/:customerId/:businessId", async (req, res) => {
-  const { customerId, businessId } = req.params;
-  const { message } = req.body;
+router.post("/sendMessageToBusinessOwner/:customerId/:businessId",
+  async (req, res) => {
+    const { customerId, businessId } = req.params;
+    const { message } = req.body;
 
-  try {
-    const result = await CustomerService.sendMessageToBusinessOwner(
-      customerId,
-      businessId,
-      message
-    );
+    try {
+      const result = await CustomerService.sendMessageToBusinessOwner(
+        customerId,
+        businessId,
+        message
+      );
 
-    if (result.success) {
-      // Emit a message to the customer and business owner indicating new messages
-      const io = getIO();
-      io.to(customerId).emit("updatedMessages", {
-        /* Update with relevant data based on your implementation */
-      });
-      io.to(businessId).emit("updatedMessages", {
-        /* Update with relevant data based on your implementation */
-      });
+      if (result.success) {
+        // Emit a message to the customer and business owner indicating new messages
+        const io = getIO();
+        io.to(customerId).emit("updatedMessages", {
+          /* Update with relevant data based on your implementation */
+        });
+        io.to(businessId).emit("updatedMessages", {
+          /* Update with relevant data based on your implementation */
+        });
 
-      res.status(200).json({
-        success: true,
-        message: "Message sent successfully",
-        messageContent: result.messageContent 
-      });
-    } else {
-      res.status(500).json({ success: false, message: "Error sending message" });
+        res.status(200).json({
+          success: true,
+          message: "Message sent successfully",
+          messageContent: result.messageContent,
+        });
+      } else {
+        res
+          .status(500)
+          .json({ success: false, message: "Error sending message" });
+      }
+    } catch (error) {
+      console.error("Error in sendMessageToBusinessOwner route:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
     }
-  } catch (error) {
-    console.error("Error in sendMessageToBusinessOwner route:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
-});
-router.get('/getAllMessages/:customerId/:businessId', async (req, res) => {
+);
+router.get("/getAllMessages/:customerId/:businessId", async (req, res) => {
   const { customerId, businessId } = req.params;
 
   try {
     // Call the service function to retrieve all messages
-    const messages = await CustomerService.getAllMessages(customerId, businessId);
-    
+    const messages = await CustomerService.getAllMessages(
+      customerId,
+      businessId
+    );
+
     // Return the messages in the response
     res.status(200).json({ success: true, messages });
   } catch (error) {
-    console.error('Error fetching messages:', error.message);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
+    console.error("Error fetching messages:", error.message);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
 
@@ -260,17 +270,17 @@ router.post("/addtofavorites/:customerId/:businessId", async (req, res) => {
 router.delete("/DeleteFavorites/:customerId/:businessId", async (req, res) => {
   try {
     const { customerId, businessId } = req.params;
-     // Check if the customer exists
-     const customer = await Customer.findOne({ userId: customerId });
-     if (!customer) {
-       return { success: false, message: "Customer not found" };
-     }
- 
-     // Fetch user details to get name and phone
-     const user = await User.findById(customerId);
-     if (!user) {
-       return { success: false, message: "User not found" };
-     }
+    // Check if the customer exists
+    const customer = await Customer.findOne({ userId: customerId });
+    if (!customer) {
+      return { success: false, message: "Customer not found" };
+    }
+
+    // Fetch user details to get name and phone
+    const user = await User.findById(customerId);
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
     // Check if the business is favorited
     const isFavorite = customer.favoriteBusinesses.some((business) =>
       business.businessId.equals(businessId)
@@ -298,22 +308,28 @@ router.get("/GetFavorites/:customerId", async (req, res) => {
     // Check if the customer exists
     const customer = await Customer.findOne({ userId: customerId });
     if (!customer) {
-      return res.status(404).send({ success: false, message: "Customer not found" });
+      return res
+        .status(404)
+        .send({ success: false, message: "Customer not found" });
     }
 
     // Fetch details of all favorite businesses
-    const favoriteBusinessIds = customer.favoriteBusinesses.map(favBusiness => favBusiness.businessId);
+    const favoriteBusinessIds = customer.favoriteBusinesses.map(
+      (favBusiness) => favBusiness.businessId
+    );
 
-    const favoriteBusinesses = await BusinessOwner.find({ _id: { $in: favoriteBusinessIds } });
+    const favoriteBusinesses = await BusinessOwner.find({
+      _id: { $in: favoriteBusinessIds },
+    });
 
     // Construct the response data
-    const response = favoriteBusinesses.map(business => ({
+    const response = favoriteBusinesses.map((business) => ({
       businessId: business._id,
       businessName: business.businessName,
       country: business.country,
       category: business.category,
       totalRate: business.totalRate,
-      logo: business.logo
+      logo: business.logo,
     }));
 
     res.status(200).send({ favoriteBusinesses: response });
@@ -322,7 +338,6 @@ router.get("/GetFavorites/:customerId", async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 });
-
 
 router.get("/recommend/:customerId", async (req, res) => {
   try {
@@ -370,24 +385,28 @@ router.post("/:customerId/serviceRequest/:businessId", async (req, res) => {
   }
 });
 
-router.get("/isBusinessAlreadyFavorite/:customerId/:businessId", async (req, res) => {
-  try {
-    const { customerId, businessId } = req.params; // Updated to use businessId
+router.get(
+  "/isBusinessAlreadyFavorite/:customerId/:businessId",
+  async (req, res) => {
+    try {
+      const { customerId, businessId } = req.params; // Updated to use businessId
 
-    // Check if the business is already a favorite
-    const isFavorite = await isBusinessAlreadyFavorite(customerId, businessId);
-    if (isFavorite.success === false) {
-      return res.status(404).send({ error: isFavorite.message });
+      // Check if the business is already a favorite
+      const isFavorite = await isBusinessAlreadyFavorite(
+        customerId,
+        businessId
+      );
+      if (isFavorite.success === false) {
+        return res.status(404).send({ error: isFavorite.message });
+      }
+
+      // Return whether the business is already a favorite
+      res.status(200).send({ isFavorite });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: "Internal Server Error" });
     }
-
-    // Return whether the business is already a favorite
-    res.status(200).send({ isFavorite });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: "Internal Server Error" });
   }
-});
-
-
+);
 
 module.exports = router;
