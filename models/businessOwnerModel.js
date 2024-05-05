@@ -131,17 +131,16 @@ const businessOwnerSchema = new mongoose.Schema(
         userName: String,
       },
     ],
-    expirationDate:
-      {
-        type: Date,
-        required: false,
-      },
-    eventOrNot:
-      {
-        type: String,
-        enum: "Event" || "notEvent",
-        required: false,
-      },
+    expirationDate: {
+      type: Date,
+      required: false,
+    },
+    eventOrNot: {
+      type: String,
+      enum: "Event" || "notEvent",
+      required: false,
+      default: "notEvent",
+    },
   },
   { timestamps: true }
 );

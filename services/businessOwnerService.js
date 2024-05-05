@@ -2,7 +2,6 @@
 /* eslint-disable no-useless-catch */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-const cron = require("node-cron");
 const BusinessOwner = require("../models/businessOwnerModel");
 const Customer = require("../models/customerModel");
 
@@ -74,19 +73,19 @@ const BusinessOwnerService = {
         "Message sent successfully"
       );
 
-        // Return the updated messages and status
-        return {
-            success: true,
-            message: "Message sent successfully",
-            businessOwnerMessages: businessOwner.messages,
-            customerMessages: customer.messages,
-            messageContent: message 
-        };
+      // Return the updated messages and status
+      return {
+        success: true,
+        message: "Message sent successfully",
+        businessOwnerMessages: businessOwner.messages,
+        customerMessages: customer.messages,
+        messageContent: message,
+      };
     } catch (error) {
       console.error(`Error sending message: ${error.message}`);
       throw new ApiError(error.message, error.statusCode || 500); // Throw the error with its message
     }
-},
+  },
 
   async getUserByUserID(userId) {
     try {
@@ -518,21 +517,13 @@ const BusinessOwnerService = {
         expirationDate: { $lte: currentDate },
       });
 
-      // Iterate through expired businesses
-      for (const business of expiredBusinesses) {
-        // Delete the business
-        await BusinessOwnerService.deleteBusinessById(business._id);
-
-        console.log(`Expired business deleted: ${business.businessName}`);
-      }
+      return {
+        status: "success",
+        expiredBusinesses: expiredBusinesses,
+      };
     } catch (error) {
       console.error("Error handling business expiration:", error);
     }
   },
 };
 module.exports = BusinessOwnerService;
-
-cron.schedule("*/3 * * * *", () => {
-  console.log("Running cron job to handle business expiration...");
-  BusinessOwnerService.handleBusinessExpiration();
-});

@@ -11,7 +11,8 @@ const ApiError = require("../utils/apiError");
 const { getIO } = require("../services/socket");
 const businessOwnerModel = require("../models/businessOwnerModel");
 
-router.post("/sendMessageToCustomer/:businessId/:customerId",
+router.post(
+  "/sendMessageToCustomer/:businessId/:customerId",
   async (req, res) => {
     const { businessId, customerId } = req.params;
     const { message } = req.body;
@@ -33,13 +34,11 @@ router.post("/sendMessageToCustomer/:businessId/:customerId",
           /* Update with relevant data based on your implementation */
         });
 
-        res
-          .status(200)
-          .json({
-            success: true,
-            message: "Message sent successfully",
-            content: message 
-          });
+        res.status(200).json({
+          success: true,
+          message: "Message sent successfully",
+          content: message,
+        });
       } else {
         res
           .status(500)
@@ -54,7 +53,6 @@ router.post("/sendMessageToCustomer/:businessId/:customerId",
     }
   }
 );
-
 
 router.put("/updateMyBusinessInfo/:businessId", async (req, res) => {
   const { businessId } = req.params;
@@ -423,6 +421,15 @@ router.get("/getAllService/:businessId", async (req, res) => {
     }
   } catch (error) {
     console.error(error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+router.get("/handleBusinessExpiration", async (req, res) => {
+  try {
+    const result = await BusinessOwnerService.handleBusinessExpiration();
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error handling business expiration:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
