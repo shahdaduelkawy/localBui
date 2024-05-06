@@ -87,14 +87,7 @@ const CustomerService = {
       console.error(`Error sending message: ${error.message}`);
       throw new ApiError("Error sending message", error.statusCode || 500);
     }
-  }
-  
-  
-  
-  ,
-  
-  
-
+  },
   async getAllMessages(customerId, businessId) {
     try {
       // Find the customer by userId
@@ -117,14 +110,7 @@ const CustomerService = {
       console.error('Error fetching messages:', error.message);
       throw error;
     }
-  }
-  
-  
-  
-  
-  
-  
-,  
+  },  
   async recommendBusinessesToCustomer(customerId) {
     try {
         // Find the customer by ID
@@ -478,10 +464,13 @@ const searchBusinessesByName = async (req, res) => {
     // Use a case-insensitive regex for the search
     const regex = new RegExp(businessName, "i");
 
-    // Search for businesses with names matching the provided term
-    const businesses = await BusinessOwner.find(
-      businessName ? { businessName: regex } : {} // Return all businesses when no specific businessName is provided
-    );
+    // Search for businesses with names or descriptions matching the provided term
+    const businesses = await BusinessOwner.find({
+      $or: [
+        { description: regex }, // Match description
+        { businessName: regex }, // Match businessName
+      ]
+    });
 
     // Check if businesses were found
     if (businesses.length === 0) {
@@ -502,6 +491,7 @@ const searchBusinessesByName = async (req, res) => {
       .json({ status: "error", error: "Internal Server Error" });
   }
 };
+
 const countCustomerRatings = async (businessId) => {
   try {
     // Find the business owner document by ID
