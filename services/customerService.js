@@ -457,20 +457,30 @@ const filterbycategory = async (req, res) => {
 const searchBusinessesByName = async (req, res) => {
   try {
     let { businessName } = req.params;
-
-    // If businessName is not provided, set it to an empty string to retrieve all businesses
+    let { page } = req.query; 
     businessName = businessName || "";
 
-    // Use a case-insensitive regex for the search
-    const regex = new RegExp(businessName, "i");
+    page = parseInt(page, 10) || 1; 
 
-    // Search for businesses with names or descriptions matching the provided term
+    const skip = (page - 1) * 2; 
+    const regex = new RegExp(businessName, "i");
     const businesses = await BusinessOwner.find({
       $or: [
-        { description: regex }, // Match description
-        { businessName: regex }, // Match businessName
+        { description: regex }, 
+        { businessName: regex },
+      ]
+    })
+    .skip(skip)
+    .limit(3); 
+    const totalCount = await BusinessOwner.countDocuments({
+      $or: [
+        { description: regex }, 
+        { businessName: regex }, 
       ]
     });
+
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(totalCount / 2); // Assuming 2 businesses per page
 
     // Check if businesses were found
     if (businesses.length === 0) {
@@ -483,7 +493,13 @@ const searchBusinessesByName = async (req, res) => {
     // Return the number of businesses found along with the list of businesses
     return res
       .status(200)
-      .json({ status: "success", count: businesses.length, businesses });
+      .json({ 
+        status: "success", 
+        count: businesses.length, 
+        businesses,
+        totalPages,
+        currentPage: page
+      });
   } catch (error) {
     console.error(error);
     return res
@@ -491,6 +507,8 @@ const searchBusinessesByName = async (req, res) => {
       .json({ status: "error", error: "Internal Server Error" });
   }
 };
+
+
 
 const countCustomerRatings = async (businessId) => {
   try {
