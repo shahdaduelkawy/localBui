@@ -260,18 +260,7 @@ const BusinessOwnerService = {
       return null;
     }
   },
-  async getAllUserBusinesses(ownerID) {
-    try {
-      const businesses = await BusinessOwner.find({ userId: ownerID });
-      const numberOfBusinesses = await BusinessOwner.countDocuments({
-        userId: ownerID,
-      });
-      return { numberOfBusinesses, businesses };
-    } catch (error) {
-      console.error("Error retrieving user businesses:", error);
-      return null;
-    }
-  },
+
   async deleteBusinessById(businessId) {
     try {
       const deletionResult = await BusinessOwner.deleteOne({ _id: businessId });
@@ -549,6 +538,33 @@ const BusinessOwnerService = {
   //     console.error("Error handling business expiration:", error);
   //   }
   // },
+
+
+  async getAllUserBusinesses(ownerID) {
+    try {
+      const businesses = await BusinessOwner.find({ userId: ownerID });
+      const numberOfBusinesses = await BusinessOwner.countDocuments({
+        userId: ownerID,
+      });
+  
+      // Sort the businesses based on status
+      const sortedBusinesses = businesses.sort((a, b) => {
+        if (a.status === 'accepted') return -1;
+        if (b.status === 'accepted') return 1;
+        if (a.status === 'pending') return -1;
+        if (b.status === 'pending') return 1;
+        if (a.status === 'rejected') return -1;
+        if (b.status === 'rejected') return 1;
+        return 0;
+      });
+  
+      return { numberOfBusinesses, businesses: sortedBusinesses };
+    } catch (error) {
+      console.error("Error retrieving user businesses:", error);
+      return null;
+    }
+  },
+  
 };
 module.exports = BusinessOwnerService;
 

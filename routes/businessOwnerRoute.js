@@ -92,8 +92,7 @@ router.put("/profileSetup/:businessId", async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
-router.patch(
-  "/updateMyBusinessAttachment/:businessId",
+router.patch("/updateMyBusinessAttachment/:businessId",
   upload.single("img"),
   async (req, res) => {
     const { file } = req;
@@ -119,8 +118,7 @@ router.patch(
     }
   }
 );
-router.patch(
-  "/updateMyBusinessMedia/:businessId",
+router.patch("/updateMyBusinessMedia/:businessId",
   upload.array("media", 10),
   async (req, res) => {
     const { files } = req;
@@ -146,8 +144,7 @@ router.patch(
     }
   }
 );
-router.patch(
-  "/addLogoToBusiness/:businessId",
+router.patch( "/addLogoToBusiness/:businessId",
   upload.single("logo"),
   async (req, res) => {
     const { file } = req;
@@ -224,28 +221,7 @@ router.delete("/deleteBusiness/:businessId", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
-//get all the Businesses that the owner have
-router.get("/getAllUserBusinesses/:ownerID", async (req, res) => {
-  const { ownerID } = req.params;
 
-  try {
-    const businesses = await BusinessOwnerService.getAllUserBusinesses(ownerID);
-
-    if (businesses !== null) {
-      res.status(200).json({ success: true, data: businesses });
-    } else {
-      res.status(404).json({ success: false, message: "No businesses found" });
-    }
-  } catch (error) {
-    console.error("Error retrieving user businesses:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-      error: error.message,
-    });
-  }
-});
-//get all the user information
 router.get("/getUserByUserID/:userId", async (req, res) => {
   const { userId } = req.params;
 
@@ -273,8 +249,7 @@ router.get("/getUserByUserID/:userId", async (req, res) => {
     }
   }
 });
-router.patch(
-  "/addImageToUserProfile/:userId",
+router.patch( "/addImageToUserProfile/:userId",
   uploadProfilePic.single("userProfile"),
   async (req, res) => {
     const { file } = req;
@@ -301,8 +276,7 @@ router.patch(
   }
 );
 // pinning business on the map
-router.patch(
-  "/pinMyBusinessOnMap/:businessId",
+router.patch("/pinMyBusinessOnMap/:businessId",
   express.json(),
   async (req, res) => {
     const { businessId } = req.params;
@@ -424,6 +398,29 @@ router.get("/getAllService/:businessId", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+
+
+
+router.get("/getAllUserBusinesses/:ownerID", async (req, res) => {
+  const { ownerID } = req.params;
+
+  try {
+    const { numberOfBusinesses, businesses } = await BusinessOwnerService.getAllUserBusinesses(ownerID);
+
+    if (businesses !== null) {
+      res.status(200).json({ success: true, data: { numberOfBusinesses, businesses } });
+    } else {
+      res.status(404).json({ success: false, message: "No businesses found" });
+    }
+  } catch (error) {
+    console.error("Error retrieving user businesses:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 });
 
