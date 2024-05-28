@@ -457,56 +457,74 @@ const filterbycategory = async (req, res) => {
 const searchBusinessesByName = async (req, res) => {
   try {
     let { businessName } = req.params;
-    let { page } = req.query; 
-    businessName = businessName || "";
+    let { page = 1, limit = 50, category } = req.query;
 
-    page = parseInt(page, 10) || 1; 
+    // Sanitize and parse input
+    businessName = businessName ? businessName.trim() : "";
+    category = category ? category.trim() : "";
+    page = parseInt(page, 10) || 1;
+    limit = parseInt(limit, 10) || 50;
 
-    const skip = (page - 1) * 2; 
-    const regex = new RegExp(businessName, "i");
-    const businesses = await BusinessOwner.find({
-      $or: [
-        { description: regex }, 
-        { businessName: regex },
+    // Ensure limit does not exceed 50
+    if (limit > 50) {
+      limit = 50;
+    }
+
+    const skip = (page - 1) * limit;
+    const nameRegex = new RegExp(businessName, "i");
+    const categoryRegex = new RegExp(category, "i");
+
+    // Build the query object
+    const query = {
+      $and: [
+        { $or: [{ description: nameRegex }, { businessName: nameRegex }] },
+        category ? { category: categoryRegex } : {},
       ]
-    })
-    .skip(skip)
-    .limit(3); 
-    const totalCount = await BusinessOwner.countDocuments({
-      $or: [
-        { description: regex }, 
-        { businessName: regex }, 
-      ]
-    });
+    };
+
+    const [businesses, totalCount] = await Promise.all([
+      BusinessOwner.find(query).skip(skip).limit(limit),
+      BusinessOwner.countDocuments(query),
+    ]);
 
     // Calculate the total number of pages
-    const totalPages = Math.ceil(totalCount / 2); // Assuming 2 businesses per page
+    const totalPages = Math.ceil(totalCount / limit);
 
     // Check if businesses were found
-    if (businesses.length === 0) {
+    if (businesses.length === 0 && page > totalPages) {
       return res.status(404).json({
         status: "fail",
-        message: "No businesses found for the given search term",
+        message: "No businesses found for the given search term and category",
       });
     }
 
-    // Return the number of businesses found along with the list of businesses
-    return res
-      .status(200)
-      .json({ 
-        status: "success", 
-        count: businesses.length, 
-        businesses,
-        totalPages,
-        currentPage: page
-      });
+    // Return the list of businesses, pagination details, and the total count
+    return res.status(200).json({
+      status: "success",
+      count: businesses.length,
+      businesses,
+      totalPages,
+      currentPage: page,
+      totalCount,
+    });
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ status: "error", error: "Internal Server Error" });
+    console.error('Error occurred:', error.message);
+    console.error(error.stack);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal Server Error",
+    });
   }
 };
+
+
+
+
+module.exports = { searchBusinessesByName };
+
+
+
+
 
 
 
