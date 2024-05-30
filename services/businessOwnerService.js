@@ -559,10 +559,6 @@ const BusinessOwnerService = {
       });
   
       return { numberOfBusinesses, businesses: sortedBusinesses };
-      return {
-        status: "success",
-        expiredBusinesses: expiredBusinesses,
-      };
     } catch (error) {
       console.error("Error retrieving user businesses:", error);
       return null;
