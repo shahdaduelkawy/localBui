@@ -517,28 +517,24 @@ const BusinessOwnerService = {
       return { status: "error", error: "Internal Server Error" };
     }
   },
-  // async handleBusinessExpiration() {
-  //   try {
-  //     // Get the current date
-  //     const currentDate = new Date();
+  async handleBusinessExpiration() {
+    try {
+      // Get the current date
+      const currentDate = new Date();
 
-  //     // Find businesses with expirationDate less than or equal to the current date
-  //     const expiredBusinesses = await BusinessOwner.find({
-  //       expirationDate: { $lte: currentDate },
-  //     });
+      // Find businesses with expirationDate less than or equal to the current date
+      const expiredBusinesses = await BusinessOwner.find({
+        expirationDate: { $lte: currentDate },
+      });
 
-  //     // Iterate through expired businesses
-  //     for (const business of expiredBusinesses) {
-  //       // Delete the business
-  //       await BusinessOwnerService.deleteBusinessById(business._id);
-
-  //       console.log(`Expired business deleted: ${business.businessName}`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error handling business expiration:", error);
-  //   }
-  // },
-
+      return {
+        status: "success",
+        expiredBusinesses: expiredBusinesses,
+      };
+    } catch (error) {
+      console.error("Error handling business expiration:", error);
+    }
+  },
 
   async getAllUserBusinesses(ownerID) {
     try {
