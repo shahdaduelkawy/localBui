@@ -52,7 +52,7 @@
     "uuid": "^9.0.1"
   },
   "keywords": [],
-  "description": "\"# localBui\" \r # localBui",
+  "description": "A server application for localBui",
   "devDependencies": {
     "@types/express": "^4.17.21"
   }

@@ -39,19 +39,25 @@ const CustomerService = {
   
       // Create the message objects consistently
       const customerMessage = {
+        businessId: businessId,
+        customerId: customerId,
         sender: "customer",
         content: message,
         userName: customerName,
         timestamp: new Date(),
-      };
-  
-      const businessOwnerMessage = {
-        sender: "customer",
+    };
+    
+    const businessOwnerMessage = {
+        businessId: businessId,
+        customerId: customerId,
+        sender: "customer", // Corrected sender field
         content: message,
         timestamp: new Date(),
         userName: customerName,
-      };
-  
+    };
+    
+
+      
       // Push messages into the arrays
       customer.messages.push(customerMessage);
       businessOwner.messages.push(businessOwnerMessage);
@@ -67,21 +73,21 @@ const CustomerService = {
         "Message sent successfully"
       );
   
-      // Return the updated messages and status along with the message content
+      // Return the updated messages, IDs of customer and business, and message content
       return {
         success: true,
         message: "Message sent successfully",
-        customerMessages: customer.messages.map(msg => msg.content), 
-        businessOwnerMessages: businessOwner.messages.map(msg => msg.content), 
-        messageContent: message, 
+        customerId: customerId,
+        businessId: businessId,
+        customerMessages: customer.messages.map(msg => msg.content),
+        businessOwnerMessages: businessOwner.messages.map(msg => msg.content),
+        messageContent: message,
       };
     } catch (error) {
       console.error(`Error sending message: ${error.message}`);
       throw new ApiError("Error sending message", error.statusCode || 500);
     }
   },
-  
-
   async getAllMessages(customerId, businessId) {
     try {
       // Find the customer by userId
@@ -90,37 +96,21 @@ const CustomerService = {
         throw new Error('Customer not found');
       }
   
-      // Find the business owner by ID
-      const businessOwner = await BusinessOwner.findById(businessId);
-      if (!businessOwner) {
-        throw new Error('Business owner not found');
-      }
+      // Filter messages exchanged between the customer and the business owner
+      const filteredMessages = customer.messages.filter(message => (
+        message.customerId.toString() === customerId && 
+        message.businessId.toString() === businessId
+      ));
   
-      // Get all messages sent by the customer to the business owner
-      const customerToBusinessMessages = customer.messages.filter(message =>
-        message.sender === 'customer' && message.userName === businessOwner.businessName
-      );
+      // Sort filtered messages by timestamp
+      filteredMessages.sort((a, b) => a.timestamp - b.timestamp);
   
-      // Get all messages sent by the business owner to the customer
-      const businessToCustomerMessages = businessOwner.messages.filter(message =>
-        message.sender === 'businessOwner' && message.userName === customer.userName
-      );
-  
-      // Concatenate both sets of messages
-      const allMessages = customerToBusinessMessages.concat(businessToCustomerMessages);
-  
-      // Sort messages by timestamp
-      allMessages.sort((a, b) => a.timestamp - b.timestamp);
-  
-      return allMessages;
+      return filteredMessages;
     } catch (error) {
       console.error('Error fetching messages:', error.message);
       throw error;
     }
-  }
-  
-  
-,  
+  },  
   async recommendBusinessesToCustomer(customerId) {
     try {
         // Find the customer by ID
@@ -467,37 +457,77 @@ const filterbycategory = async (req, res) => {
 const searchBusinessesByName = async (req, res) => {
   try {
     let { businessName } = req.params;
+    let { page = 1, limit = 50, category } = req.query;
 
-    // If businessName is not provided, set it to an empty string to retrieve all businesses
-    businessName = businessName || "";
+    // Sanitize and parse input
+    businessName = businessName ? businessName.trim() : "";
+    category = category ? category.trim() : "";
+    page = parseInt(page, 10) || 1;
+    limit = parseInt(limit, 10) || 50;
 
-    // Use a case-insensitive regex for the search
-    const regex = new RegExp(businessName, "i");
+    // Ensure limit does not exceed 50
+    if (limit > 50) {
+      limit = 50;
+    }
 
-    // Search for businesses with names matching the provided term
-    const businesses = await BusinessOwner.find(
-      businessName ? { businessName: regex } : {} // Return all businesses when no specific businessName is provided
-    );
+    const skip = (page - 1) * limit;
+    const nameRegex = new RegExp(businessName, "i");
+    const categoryRegex = new RegExp(category, "i");
+
+    // Build the query object
+    const query = {
+      $and: [
+        { $or: [{ description: nameRegex }, { businessName: nameRegex }] },
+        category ? { category: categoryRegex } : {},
+      ]
+    };
+
+    const [businesses, totalCount] = await Promise.all([
+      BusinessOwner.find(query).skip(skip).limit(limit),
+      BusinessOwner.countDocuments(query),
+    ]);
+
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(totalCount / limit);
 
     // Check if businesses were found
-    if (businesses.length === 0) {
+    if (businesses.length === 0 && page > totalPages) {
       return res.status(404).json({
         status: "fail",
-        message: "No businesses found for the given search term",
+        message: "No businesses found for the given search term and category",
       });
     }
 
-    // Return the number of businesses found along with the list of businesses
-    return res
-      .status(200)
-      .json({ status: "success", count: businesses.length, businesses });
+    // Return the list of businesses, pagination details, and the total count
+    return res.status(200).json({
+      status: "success",
+      count: businesses.length,
+      businesses,
+      totalPages,
+      currentPage: page,
+      totalCount,
+    });
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ status: "error", error: "Internal Server Error" });
+    console.error('Error occurred:', error.message);
+    console.error(error.stack);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal Server Error",
+    });
   }
 };
+
+
+
+
+module.exports = { searchBusinessesByName };
+
+
+
+
+
+
+
 const countCustomerRatings = async (businessId) => {
   try {
     // Find the business owner document by ID

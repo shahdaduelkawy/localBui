@@ -109,10 +109,21 @@ const businessOwnerSchema = new mongoose.Schema(
     },
     messages: [
       {
-        sender: String,
+        businessId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "businessOwner", // Change this to match the model name
+          required: true,
+        },
+        customerId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Customer",
+          required: true,
+        },       
+         sender: String,
         content: String,
         timestamp: Date,
-        userName: String,
+        userName:String
+
       },
     ],
     reviews: [
