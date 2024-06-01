@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const factory = require("./handlersFactory");
+const sendEmail = require('../utils/sendEmail');
 
 const User = require("../models/userModel");
 const businessOwner = require("../models/businessOwnerModel");
@@ -28,26 +29,7 @@ exports.searchUserByName = asyncHandler(async (req, res, next) => {
     // Return the number of users found along with the list of users
     res.status(200).json({ success: true, count: users.length, users });
   });
-exports.updateBusinessOwnerStatus = asyncHandler( async (businessId, newStatus) => {
-    try {
-      // Find the business owner document by ID
-      const BusinessOwner = await businessOwner.findById(businessId);
-  
-      if (!businessOwner) {
-        throw new Error('Business owner not found');
-      }
-  
-      // Update the status
-      BusinessOwner.status = newStatus;
-  
-      // Save the updated document
-      await BusinessOwner.save();
-  
-      return BusinessOwner; // Return the updated business owner document
-    } catch (error) {
-      throw new Error(`Failed to update business owner status: ${error.message}`);
-    }
-  });
+
   exports.searchReviewsByContent = asyncHandler(async (req, res, next) => {
     const { content } = req.query;
   
@@ -132,3 +114,39 @@ exports.getbusinesses = asyncHandler(async (req, res, next) => {
   }
 });
 
+
+exports.updateBusinessOwnerStatus = asyncHandler(async (businessId, newStatus, rejectionReason) => {
+    try {
+        // Find the business owner document by ID
+        const BusinessOwner = await businessOwner.findById(businessId);
+
+        if (!BusinessOwner) {
+            throw new Error('Business owner not found');
+        }
+
+        // Update the status
+        BusinessOwner.status = newStatus;
+
+        // Save the updated document
+        await BusinessOwner.save();
+
+        if (newStatus === 'rejected') {
+            // If status is rejected, send rejection email
+            const user = await User.findById(BusinessOwner.userId); // Assuming BusinessOwner has userId field
+            if (!user) {
+                throw new Error('User not found');
+            }
+
+            const rejectionMessage = `Your business has been rejected because: ${rejectionReason}`;
+            await sendEmail({
+                email: user.email,
+                subject: 'Business Rejection Notification',
+                message: rejectionMessage,
+            });
+        }
+
+        return BusinessOwner; // Return the updated business owner document
+    } catch (error) {
+        throw new Error(`Failed to update business owner status: ${error.message}`);
+    }
+});

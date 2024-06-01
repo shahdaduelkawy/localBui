@@ -51,12 +51,13 @@ router.get("/searchbusinessByName", searchbusinessByName);
 // Define the route to accept or decline business owner requests
 router.put("/managebusinesses/:businessId", async (req, res) => {
   const { businessId } = req.params;
-  const { status } = req.body;
+  const { status, rejectionMessage } = req.body;
 
   try {
     const updatedBusinessOwner = await updateBusinessOwnerStatus(
       businessId,
-      status
+      status,
+      rejectionMessage
     );
     res.json(updatedBusinessOwner);
   } catch (error) {

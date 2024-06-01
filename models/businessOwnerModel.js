@@ -148,7 +148,7 @@ const businessOwnerSchema = new mongoose.Schema(
     },
     eventOrNot: {
       type: String,
-      enum: "Event" || "notEvent",
+      enum: ["Event", "notEvent"],
       required: false,
       default: "notEvent",
     },
