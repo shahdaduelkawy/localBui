@@ -381,8 +381,7 @@ router.get("/getAllService/:businessId", async (req, res) => {
 
   try {
     // Call the function to list services by business ID
-    const services =
-      await BusinessOwnerService.listServicesByBusinessId(businessId);
+    const services = await BusinessOwnerService.listServicesByBusinessId(businessId);
 
     // Check if services were found
     if (services.length > 0) {
@@ -398,6 +397,7 @@ router.get("/getAllService/:businessId", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
+
 router.get("/handleBusinessExpiration", async (req, res) => {
   try {
     const result = await BusinessOwnerService.handleBusinessExpiration();

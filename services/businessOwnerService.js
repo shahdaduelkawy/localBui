@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 /* eslint-disable node/no-missing-require */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable radix */
@@ -13,32 +14,35 @@ const service = require("../models/serviceRequestModel");
 const { logActivity } = require("./activityLogService");
 
 const BusinessOwnerService = {
-  async  sendMessageToCustomer(businessId, customerId, message) {
+  async sendMessageToCustomer(businessId, customerId, message) {
     try {
       console.log("sendMessageToCustomer: Starting function...");
-  
+
       // Check if the business owner exists
       const businessOwner = await BusinessOwner.findById(businessId);
       if (!businessOwner) {
-        throw new ApiError(`Business owner not found for ID: ${businessId}`, 404);
+        throw new ApiError(
+          `Business owner not found for ID: ${businessId}`,
+          404
+        );
       }
       console.log("sendMessageToCustomer: Business owner found");
-  
+
       // Check if the customer exists
       const customer = await Customer.findOne({ userId: customerId });
       if (!customer) {
         throw new ApiError(`Customer not found for ID: ${customerId}`, 404);
       }
       console.log("sendMessageToCustomer: Customer found");
-  
+
       const user = await User.findById(customer.userId);
       if (!user) {
         console.log("sendMessageToCustomer: User not found");
         return { success: false, message: "User not found" };
       }
-  
+
       console.log("sendMessageToCustomer: User found");
-  
+
       // Ensure `messages` arrays exist and are not empty
       businessOwner.messages = Array.isArray(businessOwner.messages)
         ? businessOwner.messages
@@ -46,11 +50,11 @@ const BusinessOwnerService = {
       customer.messages = Array.isArray(customer.messages)
         ? customer.messages
         : [];
-  
+
       console.log("sendMessageToCustomer: Messages arrays initialized");
-  
+
       const businessOwnerName = user.name;
-  
+
       // Create the message objects consistently
       const customerMessage = {
         businessId: businessId,
@@ -60,7 +64,7 @@ const BusinessOwnerService = {
         userName: businessOwnerName,
         timestamp: new Date(),
       };
-  
+
       const businessOwnerMessage = {
         businessId: businessId,
         customerId: customerId,
@@ -69,28 +73,28 @@ const BusinessOwnerService = {
         timestamp: new Date(),
         userName: businessOwnerName,
       };
-  
+
       // Push messages into the arrays
       customer.messages.push(customerMessage);
       businessOwner.messages.push(businessOwnerMessage);
-  
+
       console.log("sendMessageToCustomer: Messages pushed into arrays");
-  
+
       // Ensure data is saved to the database
       await customer.save();
       await businessOwner.save();
-  
+
       console.log("sendMessageToCustomer: Data saved successfully");
-  
+
       // Log activity after saving for consistency
       await logActivity(
         businessId,
         "sendMessageToCustomer",
         "Message sent successfully"
       );
-  
+
       console.log("sendMessageToCustomer: Activity logged");
-  
+
       // Return the updated messages and status
       return {
         success: true,
@@ -106,7 +110,6 @@ const BusinessOwnerService = {
       throw new ApiError(error.message, error.statusCode || 500); // Throw the error with its message
     }
   },
-  
 
   async getUserByUserID(userId) {
     try {
@@ -457,20 +460,44 @@ const BusinessOwnerService = {
   },
   async listServicesByBusinessId(businessId) {
     try {
-      // Find all service requests associated with the specified businessId
       const services = await service
         .find({
           businessId: businessId,
         })
-        .sort({ createdAt: 1 }); // Sort by createdAt field in ascending order
-
-      // Return the fetched services
-      return services;
+        .sort({ createdAt: 1 });
+  
+      // Filter services based on the specified criteria
+      const filteredServices = services.filter(service => 
+        (service.status === 'In Progress' && service.approvalStatus === 'Accepted') ||
+        (service.status === 'Pending' && service.approvalStatus === 'Pending')
+      );
+  
+      // Sort the filtered services
+      const sortedServices = filteredServices.sort((a, b) => {
+        const getStatusOrder = (service) => {
+          if (service.status === 'In Progress' && service.approvalStatus === 'Accepted') return 1;
+          if (service.status === 'Pending' && service.approvalStatus === 'Pending') return 2;
+          return 3;
+        };
+  
+        const orderA = getStatusOrder(a);
+        const orderB = getStatusOrder(b);
+  
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        } 
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        
+      });
+  
+      return sortedServices;
     } catch (error) {
       console.error(error);
       throw new Error("Error fetching services for the business");
     }
   },
+  
+  
   async getTotalRate(businessId) {
     try {
       // Find the business by ID
@@ -542,24 +569,23 @@ const BusinessOwnerService = {
       const numberOfBusinesses = await BusinessOwner.countDocuments({
         userId: ownerID,
       });
-  
+
       // Sort the businesses based on status
       const sortedBusinesses = businesses.sort((a, b) => {
-        if (a.status === 'accepted') return -1;
-        if (b.status === 'accepted') return 1;
-        if (a.status === 'pending') return -1;
-        if (b.status === 'pending') return 1;
-        if (a.status === 'rejected') return -1;
-        if (b.status === 'rejected') return 1;
+        if (a.status === "accepted") return -1;
+        if (b.status === "accepted") return 1;
+        if (a.status === "pending") return -1;
+        if (b.status === "pending") return 1;
+        if (a.status === "rejected") return -1;
+        if (b.status === "rejected") return 1;
         return 0;
       });
-  
+
       return { numberOfBusinesses, businesses: sortedBusinesses };
     } catch (error) {
       console.error("Error retrieving user businesses:", error);
       return null;
     }
   },
-  
 };
 module.exports = BusinessOwnerService;
