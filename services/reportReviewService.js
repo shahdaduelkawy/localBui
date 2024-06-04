@@ -1,46 +1,46 @@
-
+/* eslint-disable new-cap */
+/* eslint-disable no-shadow */
 const reportReviewModel = require("../models/reportReviewModel");
 const Customer = require("../models/customerModel");
 const BusinessOwner = require("../models/businessOwnerModel");
 const User = require("../models/userModel"); // Import the User model
 
-async function reportReview(reviewId, businessOwnerId, customerId, status, reason) {
+async function reportReview(reviewId, ownerID, customerId, status, reason) {
     try {
-        // Fetch the business owner and customer details
-        const businessOwner = await BusinessOwner.findById(businessOwnerId);
-       // const customer = await Customer.findById(customerId);
+        console.log(`Fetching business owner with ID: ${ownerID}`);
+        const businessOwner = await BusinessOwner.find({ userId: ownerID });
+
+        if (!businessOwner) {
+            console.error(`Business owner with ID ${ownerID} not found.`);
+            return { success: false, message: `Business owner with ID ${ownerID} not found.` };
+        }
+
+        console.log(`Fetching customer with user ID: ${customerId}`);
         const customer = await Customer.findOne({ userId: customerId });
+        
         if (!customer) {
+            console.error(`Customer with user ID ${customerId} not found.`);
             return { success: false, message: "Customer not found" };
         }
-        if (!businessOwner) {
-            throw new Error(`Business owner with ID ${businessOwnerId} not found.`);
-        }
 
-        if (!customer) {
-            throw new Error(`Customer with ID ${customerId} not found.`);
-        }
-
-        // Fetch the user details to get the customer's name
+        console.log(`Fetching user with ID: ${customer.userId}`);
         const user = await User.findById(customer.userId);
-
+        
         if (!user) {
-            throw new Error(`User with ID ${customer.userId} not found.`);
+            console.error(`User with ID ${customer.userId} not found.`);
+            return { success: false, message: `User with ID ${customer.userId} not found.` };
         }
 
-        // Fetch the review from the businessOwner's reviews array based on reviewId
-        let review;
-        if (customer) {
-            // eslint-disable-next-line no-shadow
-            review = customer.reviews.find(review => review._id.equals(reviewId));
-        }
-
+        // Fetch the review from the customer's reviews array based on reviewId
+        const review = customer.reviews.find(review => review._id.equals(reviewId));
+        
         if (!review) {
-            throw new Error(`Review with ID ${reviewId} not found.`);
+            console.error(`Review with ID ${reviewId} not found.`);
+            return { success: false, message: `Review with ID ${reviewId} not found.` };
         }
 
-        // Check if a report already exists for the given reviewId and businessOwnerId
-        const existingReport = await reportReviewModel.findOne({ reviewId, businessOwnerId });
+        // Check if a report already exists for the given reviewId and ownerID
+        const existingReport = await reportReviewModel.findOne({ reviewId, ownerID });
 
         if (existingReport) {
             return { message: 'Report already submitted for this review.', existingReport };
@@ -49,7 +49,7 @@ async function reportReview(reviewId, businessOwnerId, customerId, status, reaso
         // If no existing report, create a new one
         const newReport = new reportReviewModel({
             reviewId,
-            businessOwnerId,
+            ownerID,
             customerId,
             businessName: businessOwner.businessName,
             customerName: user.name, // Use the name field from the User schema
@@ -61,11 +61,11 @@ async function reportReview(reviewId, businessOwnerId, customerId, status, reaso
         await newReport.save();
         return { message: 'Report submitted successfully.', newReport };
     } catch (error) {
-        throw new Error(`Error reporting review: ${error.message}`);
+        console.error(`Error reporting review: ${error.message}`);
+        return { success: false, message: `Error reporting review: ${error.message}` };
     }
 }
 
 module.exports = {
     reportReview,
 };
-

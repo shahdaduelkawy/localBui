@@ -7,7 +7,7 @@ const reportReviewSchema = new mongoose.Schema({
         ref: 'Review',
         required: true,
     },
-    businessOwnerId: {
+    ownerID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'BusinessOwner',
         required: true,
@@ -19,15 +19,15 @@ const reportReviewSchema = new mongoose.Schema({
     },
     businessName: {
         type: String,
-        required: true,
+        required: false,
     },
     customerName: {
         type: String,
-        required: true,
+        required: false,
     },
     review: {
         type: String,
-        required: true,
+        required: false,
     },
     status: {
         type: String,
@@ -36,7 +36,7 @@ const reportReviewSchema = new mongoose.Schema({
     },
     reason: { // Add the reason field
         type: String,
-        required: true,
+        required: false,
     },
 }, {
     timestamps: true,
