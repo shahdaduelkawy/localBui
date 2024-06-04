@@ -8,6 +8,7 @@
 /* eslint-disable no-restricted-syntax */
 const BusinessOwner = require("../models/businessOwnerModel");
 const Customer = require("../models/customerModel");
+const Category = require('../models/categorySchema '); 
 const User = require("../models/userModel");
 const ApiError = require("../utils/apiError");
 const service = require("../models/serviceRequestModel");
@@ -204,6 +205,20 @@ const BusinessOwnerService = {
                 continue;
             }
 
+            // Check if all categories are valid
+            const invalidCategories = [];
+            for (const category of businessData.category) {
+                const existingCategory = await Category.findOne({ name: category });
+                if (!existingCategory) {
+                    invalidCategories.push(category);
+                }
+            }
+
+            if (invalidCategories.length > 0) {
+                console.error(`Skipping addition of business. Invalid categories: ${invalidCategories.join(', ')}`);
+                continue;
+            }
+
             // Use the category names directly
             const newBusiness = await BusinessOwner.create({
                 userId: ownerID,
@@ -241,6 +256,19 @@ async updateUserBusiness(businessId, updateCriteria) {
             throw new Error("Business not found.");
         }
 
+        // Check if all categories are valid
+        const invalidCategories = [];
+        for (const category of updateCategories) {
+            const existingCategory = await Category.findOne({ name: category });
+            if (!existingCategory) {
+                invalidCategories.push(category);
+            }
+        }
+
+        if (invalidCategories.length > 0) {
+            throw new Error(`Invalid categories: ${invalidCategories.join(', ')}`);
+        }
+
         // Update category names directly
         existingBusiness.category = updateCategories;
 
@@ -261,8 +289,6 @@ async updateUserBusiness(businessId, updateCriteria) {
         throw new Error(error.message);
     }
 },
-
-
   async deleteBusinessById(businessId) {
     try {
       const deletionResult = await BusinessOwner.deleteOne({ _id: businessId });

@@ -1,6 +1,5 @@
 const express = require("express");
 const {
-  deleteAllCategories,
   deleteCategory,
   listCategories,
   addCategory ,
@@ -114,31 +113,26 @@ router.post("/addCategory", async (req, res) => {
 });
 router.get("/listCategories", async (req, res) => {
   try {
-    // Call the listCategories function to get all categories with categoryPic
-    const categoriesWithPics = await listCategories();
+    // Call the listCategories function to get all categories
+    const categories = await listCategories();
 
-    res.status(200).json({ success: true, categories: categoriesWithPics });
+    res.status(200).json({ success: true, categories: categories });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
 });
-router.delete("/deleteCategory/:categoryName", async (req, res) => {
-  const {categoryName} = req.params;
+router.delete("/deleteCategory/:categoryId", async (req, res) => {
+  const { categoryId } = req.params;
 
   try {
-    const result = await deleteCategory(categoryName);
+    // Call the deleteCategoryById function to delete the category by ID
+    const result = await deleteCategory(categoryId);
     res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
 });
-// Add the new route here
-router.delete("/deleteAllCategories", async (req, res) => {
-  try {
-    const result = await deleteAllCategories();
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
+
+
+
 module.exports = router;
