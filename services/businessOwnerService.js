@@ -8,7 +8,6 @@
 /* eslint-disable no-restricted-syntax */
 const BusinessOwner = require("../models/businessOwnerModel");
 const Customer = require("../models/customerModel");
-const Category = require('../models/categorySchema '); 
 const User = require("../models/userModel");
 const ApiError = require("../utils/apiError");
 const service = require("../models/serviceRequestModel");
