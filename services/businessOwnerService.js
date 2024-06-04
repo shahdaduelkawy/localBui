@@ -8,7 +8,7 @@
 /* eslint-disable no-restricted-syntax */
 const BusinessOwner = require("../models/businessOwnerModel");
 const Customer = require("../models/customerModel");
-
+const Category = require('../models/categorySchema '); 
 const User = require("../models/userModel");
 const ApiError = require("../utils/apiError");
 const service = require("../models/serviceRequestModel");
@@ -194,161 +194,76 @@ const BusinessOwnerService = {
       return null;
     }
   },
-  async updateUserBusiness(businessId, updateCriteria) {
-    try {
-      // Get all unique categories from updateCriteria
-      const updateCategories = updateCriteria.categories || [];
-  
-      // Find all existing businesses that contain any of the provided categories
-      const existingBusinesses = await BusinessOwner.find({
-        categories: { $in: updateCategories },
-      });
-  
-      // Create a map to store existing categories and their corresponding business IDs
-      const categoryBusinessMap = new Map();
-      existingBusinesses.forEach((business) => {
-        business.categories.forEach((category) => {
-          if (!categoryBusinessMap.has(category)) {
-            categoryBusinessMap.set(category, business._id);
-          }
-        });
-      });
-  
-      // Check if any of the categories do not exist in the BusinessOwner model
-      const missingCategories = updateCategories.filter(
-        (category) => !categoryBusinessMap.has(category)
-      );
-  
-      // If any category is missing, throw an error with a custom message
-      if (missingCategories.length > 0) {
-        throw new Error(
-          `Cannot update business. The following categories do not exist: ${missingCategories.join(", ")}`
-        );
-      }
-  
-      // Check if a business for the given userId already exists
-      const existingBusiness = await BusinessOwner.findOne({ _id: businessId });
-  
-      if (existingBusiness) {
-        // If a business exists, update the existing document
-        const updatedOwner = await BusinessOwner.findOneAndUpdate(
-          { _id: businessId },
-          { $set: { ...updateCriteria } }, // Fix: Add or update categories
-          { new: true, upsert: true } // Update the existing document
-        );
-        await logActivity(
-          businessId,
-          "updateUserBusiness",
-          "User business updated successfully"
-        );
-        return updatedOwner;
-      }
-      // If no business exists, create a new document
-      const newBusiness = await BusinessOwner.create({
-        _id: businessId,
-        ...updateCriteria,
-      });
-  
-      await logActivity(
-        businessId,
-        "updateUserBusiness",
-        "New user business created successfully"
-      );
-  
-      return newBusiness;
-    } catch (error) {
-      console.error("Error updating user business:", error);
-  
-      // Return a standardized error message
-      if (error.message.includes("Cannot update business")) {
-        return { message: error.message };
-      } 
-        return { message: "Business not found" };
-      
-    }
-  }
-  
-  ,
-  
   async addMultipleBusinesses(ownerID, businessesData) {
     try {
-      // If it's not an array, convert it to an array with a single element
-      const businessesArray = Array.isArray(businessesData)
-        ? businessesData
-        : [businessesData];
-  
-      // Create an array to store the created businesses
-      const createdBusinesses = [];
-  
-      // Get all unique categories from all businesses
-      const allCategories = Array.from(
-        new Set(businessesArray.flatMap((business) => business.categories))
-      );
-  
-      // Find all existing businesses that contain any of the provided categories
-      const existingBusinesses = await BusinessOwner.find({
-        categories: { $in: allCategories },
-      });
-  
-      // Create a map to store existing categories and their corresponding business IDs
-      const categoryBusinessMap = new Map();
-      existingBusinesses.forEach((business) => {
-        business.categories.forEach((category) => {
-          if (!categoryBusinessMap.has(category)) {
-            categoryBusinessMap.set(category, business._id);
-          }
-        });
-      });
-  
-      // Iterate over the array of businesses and create each one
-      for (const businessData of businessesArray) {
-        // Check if any of the categories do not exist in the BusinessOwner model
-        const missingCategories = businessData.categories.filter(
-          (category) => !categoryBusinessMap.has(category)
-        );
-  
-        // If any category is missing, return an error message
-        if (missingCategories.length > 0) {
-          console.error(
-            `Skipping addition of business with categories ${missingCategories.join(
-              ", "
-            )}. At least one category does not exist.`
-          );
-          continue;
+        const businessesArray = Array.isArray(businessesData) ? businessesData : [businessesData];
+        const createdBusinesses = [];
+
+        for (const businessData of businessesArray) {
+            if (!Array.isArray(businessData.category)) {
+                console.error(`Skipping addition of business. Invalid category format: ${JSON.stringify(businessData)}`);
+                continue;
+            }
+
+            // Use the category names directly
+            const newBusiness = await BusinessOwner.create({
+                userId: ownerID,
+                category: businessData.category, // Use category names directly
+                ...businessData,
+            });
+
+            createdBusinesses.push(newBusiness);
         }
-  
-        // Create the new business if all categories exist
-        const newBusiness = await BusinessOwner.create({
-          userId: ownerID,
-          ...businessData,
-        });
-  
-        createdBusinesses.push(newBusiness);
-      }
-  
-      if (createdBusinesses.length === 0) {
-        console.error("No businesses were added. None of the categories exist.");
-        return null;
-      }
-  
-      await logActivity(
-        ownerID,
-        "addMultipleBusinesses",
-        "Multiple businesses added successfully"
-      );
-  
-      return createdBusinesses;
+
+        if (createdBusinesses.length === 0) {
+            console.error("No valid businesses were added.");
+            return null;
+        }
+
+        await logActivity(
+            ownerID,
+            "addMultipleBusinesses",
+            "Multiple businesses added successfully"
+        );
+
+        return createdBusinesses;
     } catch (error) {
-      console.error("Error adding businesses:", error);
-      return null;
+        console.error("Error adding businesses:", error);
+        return null;
     }
-  }
-  
-  
-  
-  
-  
-,
+},
+
+async updateUserBusiness(businessId, updateCriteria) {
+    try {
+        const updateCategories = updateCriteria.category || [];
+        const existingBusiness = await BusinessOwner.findOne({ _id: businessId });
+
+        if (!existingBusiness) {
+            throw new Error("Business not found.");
+        }
+
+        // Update category names directly
+        existingBusiness.category = updateCategories;
+
+        // Update other fields
+        Object.assign(existingBusiness, updateCriteria);
+
+        const updatedOwner = await existingBusiness.save();
+
+        await logActivity(
+            businessId,
+            "updateUserBusiness",
+            "User business updated successfully"
+        );
+
+        return updatedOwner;
+    } catch (error) {
+        console.error("Error updating user business:", error);
+        throw new Error(error.message);
+    }
+},
+
+
   async deleteBusinessById(businessId) {
     try {
       const deletionResult = await BusinessOwner.deleteOne({ _id: businessId });

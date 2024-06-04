@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const factory = require("./handlersFactory");
 const sendEmail = require('../utils/sendEmail');
-
+const Category = require('../models/categorySchema '); 
 const User = require("../models/userModel");
 const businessOwner = require("../models/businessOwnerModel");
 const reportReviewModel = require("../models/reportReviewModel");
@@ -150,30 +150,20 @@ exports.updateBusinessOwnerStatus = asyncHandler(async (businessId, newStatus, r
         throw new Error(`Failed to update business owner status: ${error.message}`);
     }
 });
-exports.addCategory = async (category) => {
+exports.addCategory = async (categoryName) => {
   try {
-    // Find all existing business owners
-    const allBusinessOwners = await businessOwner.find();
+    // Check if the category already exists
+    let category = await Category.findOne({ name: categoryName });
 
-    // Iterate through each business owner and add the new category
-    await Promise.all(
-      allBusinessOwners.map(async (owner) => {
-        if (!owner.categories.includes(category)) {
-          owner.categories.push(category);
-          await owner.save();
-        }
-      })
-    );
+    if (!category) {
+      // If not, create a new category
+      category = new Category({ name: categoryName });
+      await category.save();
+    }
 
     // Return the updated list of categories
-    return allBusinessOwners.reduce((categories, owner) => {
-      owner.categories.forEach((cat) => {
-        if (!categories.includes(cat)) {
-          categories.push(cat);
-        }
-      });
-      return categories;
-    }, []);
+    const categories = await Category.find();
+    return categories.map(cat => cat.name);
   } catch (error) {
     throw new Error(`Failed to add category: ${error.message}`);
   }

@@ -27,12 +27,12 @@ const businessOwnerSchema = new mongoose.Schema(
       type: String,
       required: [true, "Country required"],
     },
+    category: [String],
+    // categories: [{
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: 'Category'
+    // }],
 
-    categories: {
-      type: [String],
-      required: false,
-      default: [], // Default to an empty array
-    },
     attachment: {
       type: String,
       required: false,
