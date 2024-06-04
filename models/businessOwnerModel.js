@@ -28,24 +28,10 @@ const businessOwnerSchema = new mongoose.Schema(
       required: [true, "Country required"],
     },
 
-    category: {
-      type: String,
-      required: [true, "category required"],
-      enum: [
-        "Restaurants and Cafés",
-        "Retail Stores",
-        "Health and Beauty Services",
-        "Medical and Healthcare Services",
-        "Tourism and Hospitality",
-        "Education and Training Centers:",
-        "Real Estate and Construction",
-        "Real Estate and Construction",
-        "Arts and Entertainment",
-        "Home Services",
-        "Auto Services",
-        "BookStore",
-        "Other",
-      ],
+    categories: {
+      type: [String],
+      required: false,
+      default: [], // Default to an empty array
     },
     attachment: {
       type: String,
@@ -95,18 +81,18 @@ const businessOwnerSchema = new mongoose.Schema(
         required: false,
       },
     },
-    days: {
-      type: [String],
-      enum: [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ],
-    },
+    // days: {
+    //   type: [String],
+    //   enum: [
+    //     "Sunday",
+    //     "Monday",
+    //     "Tuesday",
+    //     "Wednesday", // Corrected spelling here
+    //     "Thursday",
+    //     "Friday",
+    //     "Saturday",
+    //   ],
+    // },
     messages: [
       {
         businessId: {

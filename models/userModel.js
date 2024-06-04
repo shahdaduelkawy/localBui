@@ -97,7 +97,7 @@ userSchema.post("save", async (doc, next) => {
         userId: doc._id,
         attachment: "null", //this is default values
         Country: "Egypt",
-        category: "Other",
+        categories: "Other",
         eventOrNot: "notEvent",
       });
     } catch (err) {

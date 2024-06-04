@@ -150,3 +150,86 @@ exports.updateBusinessOwnerStatus = asyncHandler(async (businessId, newStatus, r
         throw new Error(`Failed to update business owner status: ${error.message}`);
     }
 });
+exports.addCategory = async (category) => {
+  try {
+    // Find all existing business owners
+    const allBusinessOwners = await businessOwner.find();
+
+    // Iterate through each business owner and add the new category
+    await Promise.all(
+      allBusinessOwners.map(async (owner) => {
+        if (!owner.categories.includes(category)) {
+          owner.categories.push(category);
+          await owner.save();
+        }
+      })
+    );
+
+    // Return the updated list of categories
+    return allBusinessOwners.reduce((categories, owner) => {
+      owner.categories.forEach((cat) => {
+        if (!categories.includes(cat)) {
+          categories.push(cat);
+        }
+      });
+      return categories;
+    }, []);
+  } catch (error) {
+    throw new Error(`Failed to add category: ${error.message}`);
+  }
+};
+exports.deleteCategory = async (categoryName) => {
+  try {
+    // Find all business owners that have the specified category
+    const businessOwners = await businessOwner.find({ categories: categoryName });
+
+    // Update each business owner to remove the category
+    await Promise.all(businessOwners.map(async (owner) => {
+      owner.categories = owner.categories.filter(category => category !== categoryName);
+      await owner.save();
+    }));
+
+    return { success: true, message: `Category "${categoryName}" deleted successfully` };
+  } catch (error) {
+    throw new Error(`Failed to delete category: ${error.message}`);
+  }
+};
+exports.listCategories = async () => {
+  try {
+    // Find all business owners
+    const allBusinessOwners = await businessOwner.find();
+
+    // Extract unique categories with their categoryPic from all business owners
+    const categoriesWithPics = [];
+    allBusinessOwners.forEach((owner) => {
+      owner.categories.forEach((category) => {
+        const categoryObj = categoriesWithPics.find(cat => cat.name === category);
+        if (!categoryObj) {
+          categoriesWithPics.push({ name: category, categoryPic: owner.categoryPic });
+        }
+      });
+    });
+
+    return categoriesWithPics;
+  } catch (error) {
+    throw new Error(`Failed to list categories: ${error.message}`);
+  }
+};
+exports.deleteAllCategories = async () => {
+  try {
+    // Find all business owners
+    const allBusinessOwners = await businessOwner.find();
+
+    // Iterate through each business owner and clear their categories
+    await Promise.all(
+      allBusinessOwners.map(async (owner) => {
+        owner.categories = [];
+        await owner.save();
+      })
+    );
+
+    return { success: true, message: "All categories have been deleted successfully" };
+  } catch (error) {
+    throw new Error(`Failed to delete all categories: ${error.message}`);
+  }
+};

@@ -1,5 +1,9 @@
 const express = require("express");
 const {
+  deleteAllCategories,
+  deleteCategory,
+  listCategories,
+  addCategory ,
   searchUserByName,
   updateBusinessOwnerStatus,
   searchReviewsByContent,
@@ -94,6 +98,47 @@ router.get("/activities/:userId", async (req, res) => {
   } catch (err) {
     console.error("Error retrieving activities:", err);
     res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+router.post("/addCategory", async (req, res) => {
+  const { category } = req.body;
+
+  try {
+    // Call the addCategory function to add the new category
+    const updatedCategories = await addCategory(category);
+
+    res.status(200).json({ success: true, categories: updatedCategories });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+router.get("/listCategories", async (req, res) => {
+  try {
+    // Call the listCategories function to get all categories with categoryPic
+    const categoriesWithPics = await listCategories();
+
+    res.status(200).json({ success: true, categories: categoriesWithPics });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+router.delete("/deleteCategory/:categoryName", async (req, res) => {
+  const {categoryName} = req.params;
+
+  try {
+    const result = await deleteCategory(categoryName);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+// Add the new route here
+router.delete("/deleteAllCategories", async (req, res) => {
+  try {
+    const result = await deleteAllCategories();
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
   }
 });
 module.exports = router;

@@ -53,7 +53,38 @@ router.post(
     }
   }
 );
+router.post("/addMultipleBusinesses/:ownerID", async (req, res) => {
+  const { ownerID } = req.params;
+  const businessesData = req.body;
 
+  try {
+    // Check if businessesData is an array, if not, convert it to an array
+    const businessesArray = Array.isArray(businessesData)
+      ? businessesData
+      : [businessesData];
+
+    // Call the function to add multiple businesses
+    const createdBusinesses = await BusinessOwnerService.addMultipleBusinesses(
+      ownerID,
+      businessesArray
+    );
+
+    if (createdBusinesses) {
+      res.status(201).json({ success: true, data: createdBusinesses });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: "Failed to add businesses. Internal Server Error",
+      });
+    }
+  } catch (error) {
+    console.error("Error adding multiple businesses:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
 router.put("/updateMyBusinessInfo/:businessId", async (req, res) => {
   const { businessId } = req.params;
   const data = req.body;
@@ -168,38 +199,7 @@ router.patch( "/addLogoToBusiness/:businessId",
     }
   }
 );
-router.post("/addMultipleBusinesses/:ownerID", async (req, res) => {
-  const { ownerID } = req.params;
-  const businessesData = req.body;
 
-  try {
-    // Check if businessesData is an array, if not, convert it to an array
-    const businessesArray = Array.isArray(businessesData)
-      ? businessesData
-      : [businessesData];
-
-    // Call the function to add multiple businesses
-    const createdBusinesses = await BusinessOwnerService.addMultipleBusinesses(
-      ownerID,
-      businessesArray
-    );
-
-    if (createdBusinesses) {
-      res.status(201).json({ success: true, data: createdBusinesses });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Failed to add businesses. Internal Server Error",
-      });
-    }
-  } catch (error) {
-    console.error("Error adding multiple businesses:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
-  }
-});
 router.delete("/deleteBusiness/:businessId", async (req, res) => {
   const { businessId } = req.params;
 
