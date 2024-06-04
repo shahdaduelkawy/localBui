@@ -92,5 +92,20 @@ router.put('/status/:userId', async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to update user status' });
   }
 });
+router.post("/logout", async (req, res) => {
+  try {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Error destroying session:", err);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+      res.status(200).json({ message: "Logout successful" });
+    });
+  } catch (err) {
+    console.error("Error in logout route:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
 module.exports = router;

@@ -465,39 +465,47 @@ const BusinessOwnerService = {
           businessId: businessId,
         })
         .sort({ createdAt: 1 });
-  
+
       // Filter services based on the specified criteria
-      const filteredServices = services.filter(service => 
-        (service.status === 'In Progress' && service.approvalStatus === 'Accepted') ||
-        (service.status === 'Pending' && service.approvalStatus === 'Pending')
+      const filteredServices = services.filter(
+        (service) =>
+          (service.status === "In Progress" &&
+            service.approvalStatus === "Accepted") ||
+          (service.status === "Pending" && service.approvalStatus === "Pending")
       );
-  
+
       // Sort the filtered services
       const sortedServices = filteredServices.sort((a, b) => {
         const getStatusOrder = (service) => {
-          if (service.status === 'In Progress' && service.approvalStatus === 'Accepted') return 1;
-          if (service.status === 'Pending' && service.approvalStatus === 'Pending') return 2;
+          if (
+            service.status === "In Progress" &&
+            service.approvalStatus === "Accepted"
+          )
+            return 1;
+          if (
+            service.status === "Pending" &&
+            service.approvalStatus === "Pending"
+          )
+            return 2;
           return 3;
         };
-  
+
         const orderA = getStatusOrder(a);
         const orderB = getStatusOrder(b);
-  
+
         if (orderA !== orderB) {
           return orderA - orderB;
-        } 
-          return new Date(a.createdAt) - new Date(b.createdAt);
-        
+        }
+        return new Date(a.createdAt) - new Date(b.createdAt);
       });
-  
+
       return sortedServices;
     } catch (error) {
       console.error(error);
       throw new Error("Error fetching services for the business");
     }
   },
-  
-  
+
   async getTotalRate(businessId) {
     try {
       // Find the business by ID
