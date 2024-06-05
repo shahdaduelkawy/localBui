@@ -17,7 +17,12 @@ const {
 
 const authService = require("../services/authService");
 
-router.get("/searchBusinesses/:businessName", searchBusinessesByName);
+router.get(
+  "/searchBusinesses/:businessName",
+  authService.protect,
+  authService.allowedTo("customer"),
+  searchBusinessesByName
+);
 
 module.exports = router;
 router.get(

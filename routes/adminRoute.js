@@ -32,14 +32,17 @@ const router = express.Router();
 
 router.use(authService.protect);
 
+
+router.use(authService.allowedTo("admin"));
+router.route("/createAdmin").post(createAdminValidator, createAdmin);
+router.route("/deleteUsers/:id").delete(deleteUsersValidator, deleteUsers);
+
 // Admin
 router.use(authService.allowedTo("admin", "subAdmin"));
 router
   .route("/")
   .get(getRequests)
   .get(getreports)
-  .post(createAdminValidator, createAdmin);
-router.route("/deleteUsers/:id").delete(deleteUsersValidator, deleteUsers);
 router.route("/getallbusinesses").get(getbusinesses);
 router
   .route("/deleteBusiness/:id")
@@ -107,7 +110,7 @@ router.get(
         .json({ success: false, message: "Internal Server Error" });
     }
   }
-});
+);
 router.post("/addCategory", async (req, res) => {
   const { category } = req.body;
 
