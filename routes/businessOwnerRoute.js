@@ -364,7 +364,7 @@ router.patch("/pinMyBusinessOnMap/:businessId",
 );
 router.get("/rating/:businessId",
   authService.protect,
-  authService.allowedTo("businessOwner"),
+  authService.allowedTo("businessOwner","customer"),
   async (req, res) => {
     try {
       const { businessId } = req.params;
