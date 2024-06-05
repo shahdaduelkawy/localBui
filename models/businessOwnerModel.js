@@ -28,10 +28,7 @@ const businessOwnerSchema = new mongoose.Schema(
       required: [true, "Country required"],
     },
     category: [String],
-    // categories: [{
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: 'Category'
-    // }],
+   
 
     attachment: {
       type: String,
@@ -81,18 +78,18 @@ const businessOwnerSchema = new mongoose.Schema(
         required: false,
       },
     },
-    // days: {
-    //   type: [String],
-    //   enum: [
-    //     "Sunday",
-    //     "Monday",
-    //     "Tuesday",
-    //     "Wednesday", // Corrected spelling here
-    //     "Thursday",
-    //     "Friday",
-    //     "Saturday",
-    //   ],
-    // },
+    days: {
+      type: [String],
+      enum: [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday", // Corrected spelling here
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ],
+    },
     messages: [
       {
         businessId: {
