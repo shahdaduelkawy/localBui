@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const path = require("path");
 require("dotenv").config({ path: "./config.env" });
 const express = require("express");
