@@ -65,6 +65,8 @@ exports.login = asyncHandler(async (req, res, next) => {
   // Log activity
   await logActivity(userId, "login", "User login successfully");
 });
+
+
 exports.protect = asyncHandler(async (req, res, next) => {
   // 1) Check if token exist, if exist get
   let token;

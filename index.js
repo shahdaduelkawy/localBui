@@ -1,8 +1,11 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const path = require("path");
 require("dotenv").config({ path: "./config.env" });
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
+
+const session = require("express-session");
 
 const ApiError = require("./utils/apiError");
 const globalError = require("./middleware/errorMiddleware");
@@ -19,6 +22,17 @@ const reportReviewRoute = require("./routes/reportReviewRoute");
 
 // Express app
 const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Create session
+app.use(session({
+  secret: 'yOur to-do-app sessions',
+  cookie: { maxAge: 24 * 60 * 60 * 1000 },
+  resave: true,
+  saveUninitialized: true
+}));
 
 // Middlewares
 if (process.env.NODE_ENV === "development") {

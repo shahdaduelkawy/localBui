@@ -2,9 +2,11 @@ const express = require("express");
 
 const router = express.Router();
 const reportReviewService = require("../services/reportReviewService");
+const authService = require("../services/authService");
 
 // Route to report a review
-router.post("/:reviewId/:ownerID/:customerId", async (req, res) => {
+router.post("/:reviewId/:ownerID/:customerId",authService.protect,
+authService.allowedTo("businessOwner"), async (req, res) => {
   const { reviewId, ownerID, customerId } = req.params;
   const { status, reason } = req.body; // Extract reason from request body
 
