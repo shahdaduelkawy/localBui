@@ -6,6 +6,7 @@
 /* eslint-disable no-useless-catch */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
+const mongoose = require('mongoose');
 const BusinessOwner = require("../models/businessOwnerModel");
 const Customer = require("../models/customerModel");
 const Category = require('../models/categorySchema '); 
@@ -111,7 +112,39 @@ const BusinessOwnerService = {
       throw new ApiError(error.message, error.statusCode || 500); // Throw the error with its message
     }
   },
-
+  async getCustomerMessages (businessId) {
+    try {
+      const results = await BusinessOwner.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(businessId) } },
+        { $unwind: "$messages" },
+        { $match: { "messages.businessId": new mongoose.Types.ObjectId(businessId) } },
+        { $sort: { "messages.timestamp": -1 } },
+        {
+          $group: {
+            _id: "$messages.customerId",
+            lastMessage: { $first: "$messages" }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            customerId: "$_id",
+            lastMessage: {
+              content: "$lastMessage.content",
+              timestamp: "$lastMessage.timestamp",
+              sender: "$lastMessage.sender",
+              userName: "$lastMessage.userName"
+            }
+          }
+        }
+      ]);
+  
+      return results;
+    } catch (error) {
+      console.error("Error in getCustomerMessages:", error);
+      throw new Error("Error retrieving customers and their last message.");
+    }
+  },
   async getUserByUserID(userId) {
     try {
       // Find the user based on the user's ID

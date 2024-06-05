@@ -57,6 +57,29 @@ router.post("/sendMessageToCustomer/:businessId/:customerId",
     }
   }
 );
+router.get("/getCustomerMessages/:businessId",
+  authService.protect,
+  authService.allowedTo("businessOwner"),
+  async (req, res) => {
+    const { businessId } = req.params;
+
+    try {
+      const results = await BusinessOwnerService.getCustomerMessages(businessId);
+
+      res.status(200).json({
+        success: true,
+        data: results,
+      });
+    } catch (error) {
+      console.error("Error in getCustomerMessages route:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error retrieving customer last messages",
+      });
+    }
+  }
+);
+
 router.post("/addMultipleBusinesses/:ownerID", authService.protect,
 authService.allowedTo("businessOwner"),
 authService.protect,
