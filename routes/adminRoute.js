@@ -31,7 +31,20 @@ const authService = require("../services/authService");
 const router = express.Router();
 
 router.use(authService.protect);
+router.get("/listCategories",
+authService.protect,
+authService.allowedTo("businessOwner" ,"customer", "businessOwner", "admin", "subAdmin"),
+authService.protect,
+authService.allowedTo("businessOwner" ,"customer", "businessOwner", "admin", "subAdmin"), async (req, res) => {
+  try {
+    // Call the listCategories function to get all categories
+    const categories = await listCategories();
 
+    res.status(200).json({ success: true, categories: categories });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
 
 router.use(authService.allowedTo("admin"));
 router.route("/createAdmin").post(createAdminValidator, createAdmin);
@@ -70,8 +83,7 @@ router.put("/managebusinesses/:businessId", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-router.get(
-  "/activities/:userId",
+router.get("/activities/:userId",
   authService.protect,
   authService.allowedTo("admin", "subAdmin"),
   async (req, res) => {

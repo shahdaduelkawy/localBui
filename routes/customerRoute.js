@@ -89,7 +89,7 @@ router.post(
 router.get(
   "/getAllMessages/:customerId/:businessId",
   authService.protect,
-  authService.allowedTo("customer"),
+  authService.allowedTo("customer","businessOwner"),
   async (req, res) => {
     const { customerId, businessId } = req.params;
 

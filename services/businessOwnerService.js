@@ -200,29 +200,22 @@ const BusinessOwnerService = {
         const createdBusinesses = [];
 
         for (const businessData of businessesArray) {
-            if (!Array.isArray(businessData.category)) {
+            if (typeof businessData.category !== 'string') {
                 console.error(`Skipping addition of business. Invalid category format: ${JSON.stringify(businessData)}`);
                 continue;
             }
 
-            // Check if all categories are valid
-            const invalidCategories = [];
-            for (const category of businessData.category) {
-                const existingCategory = await Category.findOne({ name: category });
-                if (!existingCategory) {
-                    invalidCategories.push(category);
-                }
-            }
-
-            if (invalidCategories.length > 0) {
-                console.error(`Skipping addition of business. Invalid categories: ${invalidCategories.join(', ')}`);
+            // Check if the category is valid
+            const existingCategory = await Category.findOne({ name: businessData.category });
+            if (!existingCategory) {
+                console.error(`Skipping addition of business. Invalid category: ${businessData.category}`);
                 continue;
             }
 
-            // Use the category names directly
+            // Use the category name directly
             const newBusiness = await BusinessOwner.create({
                 userId: ownerID,
-                category: businessData.category, // Use category names directly
+                category: businessData.category, // Use category name directly
                 ...businessData,
             });
 
@@ -249,28 +242,23 @@ const BusinessOwnerService = {
 
 async updateUserBusiness(businessId, updateCriteria) {
     try {
-        const updateCategories = updateCriteria.category || [];
+        const updateCategory = updateCriteria.category;
         const existingBusiness = await BusinessOwner.findOne({ _id: businessId });
 
         if (!existingBusiness) {
             throw new Error("Business not found.");
         }
 
-        // Check if all categories are valid
-        const invalidCategories = [];
-        for (const category of updateCategories) {
-            const existingCategory = await Category.findOne({ name: category });
+        // Check if the category is valid
+        if (updateCategory) {
+            const existingCategory = await Category.findOne({ name: updateCategory });
             if (!existingCategory) {
-                invalidCategories.push(category);
+                throw new Error(`Invalid category: ${updateCategory}`);
             }
-        }
 
-        if (invalidCategories.length > 0) {
-            throw new Error(`Invalid categories: ${invalidCategories.join(', ')}`);
+            // Update category name directly
+            existingBusiness.category = updateCategory;
         }
-
-        // Update category names directly
-        existingBusiness.category = updateCategories;
 
         // Update other fields
         Object.assign(existingBusiness, updateCriteria);
@@ -289,6 +277,7 @@ async updateUserBusiness(businessId, updateCriteria) {
         throw new Error(error.message);
     }
 },
+
   async deleteBusinessById(businessId) {
     try {
       const deletionResult = await BusinessOwner.deleteOne({ _id: businessId });

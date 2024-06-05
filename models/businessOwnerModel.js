@@ -27,7 +27,7 @@ const businessOwnerSchema = new mongoose.Schema(
       type: String,
       required: [true, "Country required"],
     },
-    category: [String],
+    category: String,
    
 
     attachment: {

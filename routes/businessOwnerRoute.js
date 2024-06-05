@@ -12,8 +12,7 @@ const { getIO } = require("../services/socket");
 const businessOwnerModel = require("../models/businessOwnerModel");
 const authService = require("../services/authService");
 
-router.post(
-  "/sendMessageToCustomer/:businessId/:customerId",
+router.post("/sendMessageToCustomer/:businessId/:customerId",
   authService.protect,
   authService.allowedTo("businessOwner"),
   authService.protect,
@@ -118,8 +117,7 @@ authService.allowedTo("businessOwner"),async (req, res) => {
     }
   }
 );
-router.put(
-  "/profileSetup/:businessId",
+router.put("/profileSetup/:businessId",
   authService.protect,
   authService.allowedTo("businessOwner"),
   authService.protect,
@@ -142,8 +140,7 @@ router.put(
     }
   }
 );
-router.patch(
-  "/updateMyBusinessAttachment/:businessId",
+router.patch("/updateMyBusinessAttachment/:businessId",
   upload.single("img"),
   authService.protect,
   authService.allowedTo("businessOwner"),
@@ -173,8 +170,7 @@ router.patch(
     }
   }
 );
-router.patch(
-  "/updateMyBusinessMedia/:businessId",
+router.patch("/updateMyBusinessMedia/:businessId",
   upload.array("media", 10),
   authService.protect,
   authService.allowedTo("businessOwner"),
@@ -204,8 +200,7 @@ router.patch(
     }
   }
 );
-router.patch(
-  "/addLogoToBusiness/:businessId",
+router.patch("/addLogoToBusiness/:businessId",
   upload.single("logo"),
   authService.protect,
   authService.allowedTo("businessOwner"),
@@ -235,7 +230,6 @@ router.patch(
     }
   }
 );
-
 router.delete("/deleteBusiness/:businessId", async (req, res) => {
   const { businessId } = req.params;
 
@@ -258,9 +252,7 @@ router.delete("/deleteBusiness/:businessId", async (req, res) => {
     }
   }
 );
-
-router.get(
-  "/getUserByUserID/:userId",
+router.get("/getUserByUserID/:userId",
   authService.protect,
   authService.allowedTo("businessOwner"),
   async (req, res) => {
@@ -291,8 +283,7 @@ router.get(
     }
   }
 );
-router.patch(
-  "/addImageToUserProfile/:userId",
+router.patch("/addImageToUserProfile/:userId",
   uploadProfilePic.single("userProfile"),
   authService.protect,
   authService.allowedTo("businessOwner"),
@@ -320,9 +311,7 @@ router.patch(
     }
   }
 );
-// pinning business on the map
-router.patch(
-  "/pinMyBusinessOnMap/:businessId",
+router.patch("/pinMyBusinessOnMap/:businessId",
   express.json(),
   authService.protect,
   authService.allowedTo("businessOwner"),
@@ -350,9 +339,7 @@ router.patch(
     }
   }
 );
-//customer view the total  average Rating
-router.get(
-  "/rating/:businessId",
+router.get("/rating/:businessId",
   authService.protect,
   authService.allowedTo("businessOwner"),
   async (req, res) => {
@@ -397,9 +384,7 @@ router.get(
     }
   }
 );
-
-router.get(
-  "/businessReviews/:businessId",
+router.get("/businessReviews/:businessId",
   authService.protect,
   authService.allowedTo("businessOwner"),
   async (req, res) => {
@@ -421,9 +406,7 @@ router.get(
     }
   }
 );
-
-router.put(
-  "/updateStatus/:serviceRequestId",
+router.put("/updateStatus/:serviceRequestId",
   authService.protect,
   authService.allowedTo("businessOwner", "admin", "subAdmin"),
   async (req, res) => {
@@ -443,8 +426,7 @@ router.put(
     }
   }
 );
-router.get(
-  "/getAllService/:businessId",
+router.get("/getAllService/:businessId",
   authService.protect,
   authService.allowedTo("businessOwner"),
   async (req, res) => {
@@ -472,9 +454,7 @@ router.get(
     }
   }
 );
-
-router.get(
-  "/handleBusinessExpiration",
+router.get("/handleBusinessExpiration",
   authService.protect,
   authService.allowedTo("businessOwner"),
   async (req, res) => {
@@ -489,9 +469,7 @@ router.get(
     }
   }
 );
-
-router.get(
-  "/getAllUserBusinesses/:ownerID",
+router.get("/getAllUserBusinesses/:ownerID",
   authService.protect,
   authService.allowedTo("businessOwner"),
   async (req, res) => {
