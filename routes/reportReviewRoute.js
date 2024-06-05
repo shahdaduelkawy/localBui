@@ -5,8 +5,7 @@ const reportReviewService = require("../services/reportReviewService");
 const authService = require("../services/authService");
 
 // Route to report a review
-router.post("/:reviewId/:ownerID/:customerId",authService.protect,
-authService.allowedTo("businessOwner"), async (req, res) => {
+router.post("/:reviewId/:ownerID/:customerId", authService.protect, authService.allowedTo("businessOwner"), async (req, res) => {
   const { reviewId, ownerID, customerId } = req.params;
   const { status, reason } = req.body; // Extract reason from request body
 
@@ -16,12 +15,12 @@ authService.allowedTo("businessOwner"), async (req, res) => {
       ownerID,
       customerId,
       status,
-      reason // Pass reason to reportReview service function
+      reason 
     );
 
     // Check the result and send appropriate response
     if (!result.success) {
-      return res.status(400).json({ error: result.message });
+      return res.status(200).json({ msg: result.message });
     }
 
     if (result.message === "Report already submitted for this review.") {

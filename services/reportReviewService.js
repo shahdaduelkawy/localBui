@@ -1,5 +1,6 @@
 /* eslint-disable new-cap */
 /* eslint-disable no-shadow */
+const mongoose = require('mongoose'); // Ensure mongoose is required
 const reportReviewModel = require("../models/reportReviewModel");
 const Customer = require("../models/customerModel");
 const BusinessOwner = require("../models/businessOwnerModel");
@@ -8,7 +9,7 @@ const User = require("../models/userModel"); // Import the User model
 async function reportReview(reviewId, ownerID, customerId, status, reason) {
     try {
         console.log(`Fetching business owner with ID: ${ownerID}`);
-        const businessOwner = await BusinessOwner.find({ userId: ownerID });
+        const businessOwner = await BusinessOwner.findOne({ userId: ownerID });
 
         if (!businessOwner) {
             console.error(`Business owner with ID ${ownerID} not found.`);
@@ -31,8 +32,13 @@ async function reportReview(reviewId, ownerID, customerId, status, reason) {
             return { success: false, message: `User with ID ${customer.userId} not found.` };
         }
 
-        // Fetch the review from the customer's reviews array based on reviewId
-        const review = customer.reviews.find(review => review._id.equals(reviewId));
+        console.log(`Business owner reviews: ${JSON.stringify(businessOwner.reviews)}`);
+
+        // Convert reviewId to ObjectId for comparison
+        const reviewObjectId = new mongoose.Types.ObjectId(reviewId);
+
+        // Fetch the review from the business owner's reviews array based on reviewId
+        const review = businessOwner.reviews.find(review => review._id.equals(reviewObjectId));
         
         if (!review) {
             console.error(`Review with ID ${reviewId} not found.`);
