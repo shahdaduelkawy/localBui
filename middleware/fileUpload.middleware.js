@@ -74,9 +74,9 @@ const categorystorage = multer.diskStorage({
       }
     }
   });
-  const iconeStorage = multer.diskStorage({
+  const iconStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, "img/categoryicones/");
+      cb(null, "img/categoryicons/");
     },
     filename: (req, file, cb) => {
       const ext = path.extname(file.originalname);
@@ -85,8 +85,8 @@ const categorystorage = multer.diskStorage({
     }
   });
   
-  const iconeUpload = multer({
-    storage: iconeStorage,
+  const iconUpload = multer({
+    storage: iconStorage,
     limits: { fileSize: 2000000 }, // 2MB limit
     fileFilter: (req, file, cb) => {
       if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") {
@@ -101,7 +101,7 @@ module.exports = {
     upload,
     uploadProfilePic,
     categoryupload,
-    iconeUpload,
+    iconUpload,
 };
 
 

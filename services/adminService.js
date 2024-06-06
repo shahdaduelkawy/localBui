@@ -182,10 +182,8 @@ exports.deleteCategory = async (categoryId) => {
 };
 exports.listCategories = async () => {
   try {
-    // Find all categories from the Category collection
-    const allCategories = await Category.find({}, 'name image');
+    const allCategories = await Category.find({}, 'name image icon');
 
-    // Return the list of categories with only the name and image fields
     return allCategories;
   } catch (error) {
     throw new Error(`Failed to list categories: ${error.message}`);
@@ -208,11 +206,11 @@ exports.uploadCategoryImage = async (categoryId, imagePath) => {
     throw new Error(`Failed to upload category image: ${error.message}`);
   }
 };
-exports.uploadIconeImage = async (categoryId, iconePath) => {
+exports.uploadIconImage = async (categoryId, iconPath) => {
   try {
     const category = await Category.findByIdAndUpdate(
       categoryId,
-      { icone: iconePath },
+      { icon: iconPath },
       { new: true }
     );
 
@@ -222,6 +220,6 @@ exports.uploadIconeImage = async (categoryId, iconePath) => {
 
     return category;
   } catch (error) {
-    throw new Error(`Failed to upload category icone: ${error.message}`);
+    throw new Error(`Failed to upload category icon: ${error.message}`);
   }
 };
