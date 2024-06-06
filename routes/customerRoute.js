@@ -437,7 +437,7 @@ router.get(
 router.get(
   "/totalRate/:businessId",
   authService.protect,
-  authService.allowedTo("customer"),
+  authService.allowedTo("customer","admin","subAdmin","businessOwner"),
   async (req, res) => {
     try {
       const { businessId } = req.params;
