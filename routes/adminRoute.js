@@ -1,5 +1,9 @@
 const express = require("express");
+
+const { categoryupload } = require("../middleware/fileUpload.middleware");
+
 const {
+  uploadCategoryImage,
   deleteCategory,
   listCategories,
   addCategory ,
@@ -152,6 +156,23 @@ router.delete("/deleteCategory/:categoryId", async (req, res) => {
     // Call the deleteCategoryById function to delete the category by ID
     const result = await deleteCategory(categoryId);
     res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+router.post("/uploadCategoryImage/:categoryId", categoryupload.single('image'), async (req, res) => {
+  const { categoryId } = req.params;
+
+  try {
+    if (!req.file) {
+      throw new Error('File upload failed or no file provided');
+    }
+
+    const imagePath = req.file.path; // The path of the uploaded image
+    console.log('Image Path:', imagePath);
+
+    const updatedCategory = await uploadCategoryImage(categoryId, imagePath);
+    res.status(200).json({ success: true, category: updatedCategory });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }

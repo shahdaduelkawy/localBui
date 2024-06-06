@@ -97,7 +97,6 @@ exports.getRequests = asyncHandler(async (req, res, next) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
-
 exports.getbusinesses = asyncHandler(async (req, res, next) => {
   try {
     // Fetch all businesses
@@ -113,8 +112,6 @@ exports.getbusinesses = asyncHandler(async (req, res, next) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
-
-
 exports.updateBusinessOwnerStatus = asyncHandler(async (businessId, newStatus, rejectionReason) => {
     try {
         // Find the business owner document by ID
@@ -192,5 +189,22 @@ exports.listCategories = async () => {
     return allCategories;
   } catch (error) {
     throw new Error(`Failed to list categories: ${error.message}`);
+  }
+};
+exports.uploadCategoryImage = async (categoryId, imagePath) => {
+  try {
+    const category = await Category.findByIdAndUpdate(
+      categoryId,
+      { image: imagePath },
+      { new: true }
+    );
+
+    if (!category) {
+      throw new Error(`Category with ID ${categoryId} not found.`);
+    }
+
+    return category;
+  } catch (error) {
+    throw new Error(`Failed to upload category image: ${error.message}`);
   }
 };

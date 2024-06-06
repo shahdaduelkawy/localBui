@@ -1,4 +1,5 @@
 const multer = require("multer")
+const path = require('path');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -50,9 +51,34 @@ const uploadProfilePic = multer({
         }
     }
 });
+const categorystorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, "img/categorypics/");
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      const newName = `category_${req.params.categoryId}_${Date.now()}${ext}`;
+      cb(null, newName);
+    }
+  });
+  
+  const categoryupload = multer({
+    storage: categorystorage,
+    limits: { fileSize: 2000000 }, // 2MB limit
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") {
+        cb(null, true);
+      } else {
+        cb(null, false);
+        return cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+      }
+    }
+  });
+  
 module.exports = {
     upload,
-    uploadProfilePic
+    uploadProfilePic,
+    categoryupload
 };
 
 
