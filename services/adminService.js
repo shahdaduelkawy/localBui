@@ -220,6 +220,6 @@ exports.uploadIconImage = async (categoryId, iconPath) => {
 
     return category;
   } catch (error) {
-    throw new Error(`Failed to upload category icon: ${error.message}`);
+    throw new Error(`Failed to upload Category icon: ${error.message}`);
   }
 };
