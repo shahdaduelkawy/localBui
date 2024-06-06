@@ -158,9 +158,8 @@ exports.addCategory = async (categoryName) => {
       await category.save();
     }
 
-    // Return the updated list of categories
-    const categories = await Category.find();
-    return categories.map(cat => cat.name);
+    // Return the added or existing category
+    return category;
   } catch (error) {
     throw new Error(`Failed to add category: ${error.message}`);
   }
