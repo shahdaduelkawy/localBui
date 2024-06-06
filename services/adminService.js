@@ -208,3 +208,20 @@ exports.uploadCategoryImage = async (categoryId, imagePath) => {
     throw new Error(`Failed to upload category image: ${error.message}`);
   }
 };
+exports.uploadIconeImage = async (categoryId, iconePath) => {
+  try {
+    const category = await Category.findByIdAndUpdate(
+      categoryId,
+      { icone: iconePath },
+      { new: true }
+    );
+
+    if (!category) {
+      throw new Error(`Category with ID ${categoryId} not found.`);
+    }
+
+    return category;
+  } catch (error) {
+    throw new Error(`Failed to upload category icone: ${error.message}`);
+  }
+};

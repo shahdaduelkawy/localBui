@@ -1,8 +1,9 @@
 const express = require("express");
 
-const { categoryupload } = require("../middleware/fileUpload.middleware");
+const { categoryupload ,iconeUpload} = require("../middleware/fileUpload.middleware");
 
 const {
+  uploadIconeImage,
   uploadCategoryImage,
   deleteCategory,
   listCategories,
@@ -177,7 +178,23 @@ router.post("/uploadCategoryImage/:categoryId", categoryupload.single('image'), 
     res.status(400).json({ success: false, error: error.message });
   }
 });
+router.post("/uploadIconeImage/:categoryId", iconeUpload.single('icone'), async (req, res) => {
+  const { categoryId } = req.params;
 
+  try {
+    if (!req.file) {
+      throw new Error('File upload failed or no file provided');
+    }
+
+    const iconePath = req.file.path; // The path of the uploaded image
+    console.log('Image Path:', iconePath);
+
+    const updatedIcone = await uploadIconeImage(categoryId, iconePath);
+    res.status(200).json({ success: true, category: updatedIcone });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
 
 
 module.exports = router;
