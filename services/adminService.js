@@ -183,9 +183,9 @@ exports.deleteCategory = async (categoryId) => {
 exports.listCategories = async () => {
   try {
     // Find all categories from the Category collection
-    const allCategories = await Category.find();
+    const allCategories = await Category.find({}, 'name image');
 
-    // Return the list of categories
+    // Return the list of categories with only the name and image fields
     return allCategories;
   } catch (error) {
     throw new Error(`Failed to list categories: ${error.message}`);

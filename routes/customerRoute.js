@@ -234,7 +234,7 @@ router.post(
 router.get(
   "/countRatings/:businessId",
   authService.protect,
-  authService.allowedTo("customer"),
+  authService.allowedTo("customer","businessOwner" ),
   async (req, res) => {
     const { businessId } = req.params;
 
