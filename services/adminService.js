@@ -112,40 +112,48 @@ exports.getbusinesses = asyncHandler(async (req, res, next) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
-exports.updateBusinessOwnerStatus = asyncHandler(async (businessId, newStatus, rejectionReason) => {
-    try {
-        // Find the business owner document by ID
-        const BusinessOwner = await businessOwner.findById(businessId);
+exports.updateBusinessOwnerStatus = asyncHandler(async (businessId, newStatus, reasonMessage) => {
+  try {
+      // Find the business owner document by ID
+      const BusinessOwner = await businessOwner.findById(businessId);
 
-        if (!BusinessOwner) {
-            throw new Error('Business owner not found');
-        }
+      if (!BusinessOwner) {
+          throw new Error('Business owner not found');
+      }
 
-        // Update the status
-        BusinessOwner.status = newStatus;
+      // Update the status
+      BusinessOwner.status = newStatus;
 
-        // Save the updated document
-        await BusinessOwner.save();
+      // Save the updated document
+      await BusinessOwner.save();
 
-        if (newStatus === 'rejected') {
-            // If status is rejected, send rejection email
-            const user = await User.findById(BusinessOwner.userId); // Assuming BusinessOwner has userId field
-            if (!user) {
-                throw new Error('User not found');
-            }
+      // Find the user associated with the business owner
+      const user = await User.findById(BusinessOwner.userId); // Assuming BusinessOwner has userId field
+      if (!user) {
+          throw new Error('User not found');
+      }
 
-            const rejectionMessage = `Your business has been rejected because: ${rejectionReason}`;
-            await sendEmail({
-                email: user.email,
-                subject: 'Business Rejection Notification',
-                message: rejectionMessage,
-            });
-        }
+      let message;
+      if (newStatus === 'rejected') {
+          // If status is rejected, send rejection email
+          message = `Your business has been rejected because: ${reasonMessage}`;
+      } else if (newStatus === 'accepted') {
+          // If status is accepted, send acceptance email
+          message = `Congratulations! ${user.name} Your business has been accepted.`;
+      }
 
-        return BusinessOwner; // Return the updated business owner document
-    } catch (error) {
-        throw new Error(`Failed to update business owner status: ${error.message}`);
-    }
+      if (message) {
+          await sendEmail({
+              email: user.email,
+              subject: `Business ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)} Notification`,
+              message: message,
+          });
+      }
+
+      return BusinessOwner; // Return the updated business owner document
+  } catch (error) {
+      throw new Error(`Failed to update business owner status: ${error.message}`);
+  }
 });
 exports.addCategory = async (categoryName) => {
   try {

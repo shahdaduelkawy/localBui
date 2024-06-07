@@ -17,7 +17,7 @@ const sendEmail = async (options) => {
 
   // Email content/options
   const mailOptions = {
-    from: 'local App <localbusiness318@gmail.com>',
+    from: 'Local Linker <localbusiness318@gmail.com>',
     to: options.email,
     subject: options.subject,
     text: options.message,

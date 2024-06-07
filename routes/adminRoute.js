@@ -72,8 +72,11 @@ router.get("/searchUserByName", searchUserByName);
 router.get("/searchReviewsByContent", searchReviewsByContent);
 router.get("/searchbusinessByName/:businessName", searchbusinessByName);
 router.get("/searchbusinessByName", searchbusinessByName);
-// Define the route to accept or decline business owner requests
-router.put("/managebusinesses/:businessId", async (req, res) => {
+
+router.put("/managebusinesses/:businessId",
+  authService.protect,
+  authService.allowedTo("admin", "subAdmin"),
+   async (req, res) => {
   const { businessId } = req.params;
   const { status, rejectionMessage } = req.body;
 
