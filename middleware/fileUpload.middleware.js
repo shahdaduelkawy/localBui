@@ -66,11 +66,11 @@ const categorystorage = multer.diskStorage({
     storage: categorystorage,
     limits: { fileSize: 2000000 }, // 2MB limit
     fileFilter: (req, file, cb) => {
-      if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") {
+      if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg" || file.mimetype === "image/svg") {
         cb(null, true);
       } else {
         cb(null, false);
-        return cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+        return cb(new Error('Only .png, .jpg, .svg and .jpeg format allowed!'));
       }
     }
   });
@@ -89,11 +89,11 @@ const categorystorage = multer.diskStorage({
     storage: iconStorage,
     limits: { fileSize: 2000000 }, // 2MB limit
     fileFilter: (req, file, cb) => {
-      if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") {
+      if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg" || file.mimetype === "image/svg") {
         cb(null, true);
       } else {
         cb(null, false);
-        return cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+        return cb(new Error('Only .png, .jpg, svg and .jpeg format allowed!'));
       }
     }
   });
