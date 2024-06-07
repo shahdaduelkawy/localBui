@@ -15,11 +15,11 @@ const serviceRequestSchema = new mongoose.Schema({
       type: String,
       required: true
     },
-    name: String, // Make name optional
-    phone: String, // Make phone optional
+    name: String, 
+    phone: String, 
     
     coordinates: {
-      type: [Number], // Assuming coordinates are stored as [longitude, latitude]
+      type: [Number], 
       required: true
     },
     status: {

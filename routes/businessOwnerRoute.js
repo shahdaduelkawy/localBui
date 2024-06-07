@@ -429,26 +429,6 @@ router.get("/businessReviews/:businessId",
     }
   }
 );
-router.put("/updateStatus/:serviceRequestId",
-  authService.protect,
-  authService.allowedTo("businessOwner", "admin", "subAdmin"),
-  async (req, res) => {
-    const { serviceRequestId } = req.params;
-    const { newStatus, approvalStatus } = req.body;
-
-    const result = await BusinessOwnerService.updateServiceRequestStatus(
-      serviceRequestId,
-      newStatus,
-      approvalStatus
-    );
-
-    if (result.success) {
-      res.status(200).json({ message: result.message });
-    } else {
-      res.status(500).json({ message: result.message });
-    }
-  }
-);
 router.get("/getAllService/:businessId",
   authService.protect,
   authService.allowedTo("businessOwner"),
@@ -518,6 +498,26 @@ router.get("/getAllUserBusinesses/:ownerID",
         message: "Internal Server Error",
         error: error.message,
       });
+    }
+  }
+);
+router.put("/updateStatus/:serviceRequestId",
+  authService.protect,
+  authService.allowedTo("businessOwner", "admin", "subAdmin"),
+  async (req, res) => {
+    const { serviceRequestId } = req.params;
+    const { newStatus, approvalStatus } = req.body;
+
+    const result = await BusinessOwnerService.updateServiceRequestStatus(
+      serviceRequestId,
+      newStatus,
+      approvalStatus
+    );
+
+    if (result.success) {
+      res.status(200).json({ message: result.message });
+    } else {
+      res.status(500).json({ message: result.message });
     }
   }
 );

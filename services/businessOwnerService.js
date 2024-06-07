@@ -14,6 +14,7 @@ const User = require("../models/userModel");
 const ApiError = require("../utils/apiError");
 const service = require("../models/serviceRequestModel");
 const { logActivity } = require("./activityLogService");
+const sendEmail = require('../utils/sendEmail');
 
 const BusinessOwnerService = {
   async sendMessageToCustomer(businessId, customerId, message) {
@@ -271,9 +272,8 @@ const BusinessOwnerService = {
         console.error("Error adding businesses:", error);
         return null;
     }
-},
-
-async updateUserBusiness(businessId, updateCriteria) {
+  },
+  async updateUserBusiness(businessId, updateCriteria) {
     try {
         const updateCategory = updateCriteria.category;
         const existingBusiness = await BusinessOwner.findOne({ _id: businessId });
@@ -309,8 +309,7 @@ async updateUserBusiness(businessId, updateCriteria) {
         console.error("Error updating user business:", error);
         throw new Error(error.message);
     }
-},
-
+  },
   async deleteBusinessById(businessId) {
     try {
       const deletionResult = await BusinessOwner.deleteOne({ _id: businessId });
@@ -457,54 +456,6 @@ async updateUserBusiness(businessId, updateCriteria) {
       return error.message;
     }
   },
-
-  async updateServiceRequestStatus(
-    serviceRequestId,
-    newStatus,
-    approvalStatus
-  ) {
-    try {
-      // Validate newStatus
-      if (!["Pending", "In Progress", "Completed"].includes(newStatus)) {
-        return { success: false, message: "Invalid status value" };
-      }
-
-      // Validate approvalStatus
-      if (!["Pending", "Accepted", "Declined"].includes(approvalStatus)) {
-        return { success: false, message: "Invalid approval status value" };
-      }
-
-      // Find the service request by ID
-      const serviceRequest = await service.findById(serviceRequestId);
-
-      // Check if the service request exists
-      if (!serviceRequest) {
-        return { success: false, message: "Service request not found" };
-      }
-
-      // Update the approval status
-      serviceRequest.approvalStatus = approvalStatus;
-      console.log(`New approval status set: ${serviceRequest.approvalStatus}`);
-
-      // If approvalStatus is 'Accepted', then update the status
-      if (approvalStatus === "Accepted") {
-        serviceRequest.status = newStatus;
-        console.log(`New status set: ${serviceRequest.status}`);
-      }
-
-      // Save the updated service request
-      await serviceRequest.save();
-      console.log(`Service request updated: ${serviceRequest}`);
-
-      return {
-        success: true,
-        message: "Service request status updated successfully",
-      };
-    } catch (error) {
-      console.error(error);
-      return { success: false, message: "Internal Server Error" };
-    }
-  },
   async listServicesByBusinessId(businessId) {
     try {
       const services = await service
@@ -552,7 +503,6 @@ async updateUserBusiness(businessId, updateCriteria) {
       throw new Error("Error fetching services for the business");
     }
   },
-
   async getTotalRate(businessId) {
     try {
       // Find the business by ID
@@ -617,7 +567,6 @@ async updateUserBusiness(businessId, updateCriteria) {
       console.error("Error handling business expiration:", error);
     }
   },
-
   async getAllUserBusinesses(ownerID) {
     try {
       const businesses = await BusinessOwner.find({ userId: ownerID });
@@ -642,5 +591,72 @@ async updateUserBusiness(businessId, updateCriteria) {
       return null;
     }
   },
+  async updateServiceRequestStatus  (
+    serviceRequestId,
+    newStatus,
+    approvalStatus
+  ){
+    try {
+      if (!["Pending", "In Progress", "Completed"].includes(newStatus)) {
+        return { success: false, message: "Invalid status value" };
+      }
+  
+      if (!["Pending", "Accepted", "Declined"].includes(approvalStatus)) {
+        return { success: false, message: "Invalid approval status value" };
+      }
+  
+      const serviceRequest = await service.findById(serviceRequestId);
+  
+      if (!serviceRequest) {
+        return { success: false, message: "Service request not found" };
+      }
+  
+      // Find the business owner associated with the businessId
+      const businessOwner = await BusinessOwner.findById(serviceRequest.businessId);
+      if (!businessOwner) {
+        console.error(`Business owner with ID ${serviceRequest.businessId} not found`);
+        return { success: false, message: 'Business owner not found' };
+      }
+  
+      // Find the user associated with the customerId
+      const customer = await User.findById(serviceRequest.customerId);
+      if (!customer) {
+        console.error(`Customer with ID ${serviceRequest.customerId} not found`);
+        return { success: false, message: 'Customer not found' };
+      }
+  
+      serviceRequest.approvalStatus = approvalStatus;
+      console.log(`New approval status set: ${serviceRequest.approvalStatus}`);
+  
+      if (approvalStatus === "Accepted") {
+        serviceRequest.status = newStatus;
+        console.log(`New status set: ${serviceRequest.status}`);
+  
+        await sendEmail({
+          email: customer.email,
+          subject: 'Service Request Accepted',
+          message: `Hello ${customer.name},\n\nYour service request to ${businessOwner.businessName} is now in progress. You can chat with the business now.`
+        });
+      } else if (approvalStatus === "Declined") {
+        await sendEmail({
+          email: customer.email,
+          subject: 'Service Request Declined',
+          message: `Hello ${customer.name},\n\nSorry, your service request to ${businessOwner.businessName} has been declined.`
+        });
+      }
+  
+      await serviceRequest.save();
+      console.log(`Service request updated: ${serviceRequest}`);
+  
+      return {
+        success: true,
+        message: "Service request status updated successfully",
+      };
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: "Internal Server Error" };
+    }
+  },
+  
 };
 module.exports = BusinessOwnerService;
