@@ -591,11 +591,7 @@ const BusinessOwnerService = {
       return null;
     }
   },
-  async updateServiceRequestStatus  (
-    serviceRequestId,
-    newStatus,
-    approvalStatus
-  ){
+  async updateServiceRequestStatus(serviceRequestId, newStatus, approvalStatus) {
     try {
       if (!["Pending", "In Progress", "Completed"].includes(newStatus)) {
         return { success: false, message: "Invalid status value" };
@@ -625,18 +621,30 @@ const BusinessOwnerService = {
         return { success: false, message: 'Customer not found' };
       }
   
+      // Update approvalStatus and status
       serviceRequest.approvalStatus = approvalStatus;
       console.log(`New approval status set: ${serviceRequest.approvalStatus}`);
   
       if (approvalStatus === "Accepted") {
-        serviceRequest.status = newStatus;
-        console.log(`New status set: ${serviceRequest.status}`);
+        if (newStatus === "Completed") {
+          serviceRequest.status = newStatus;
+          console.log(`New status set: ${serviceRequest.status}`);
   
-        await sendEmail({
-          email: customer.email,
-          subject: 'Service Request Accepted',
-          message: `Hello ${customer.name},\n\nYour service request to ${businessOwner.businessName} is now in progress. You can chat with the business now.`
-        });
+          await sendEmail({
+            email: customer.email,
+            subject: 'Service is Done',
+            message: `Hello ${customer.name},\n\nThe service you requested from ${businessOwner.businessName} is finished. We hope you are happy and await your feedback.`
+          });
+        } else {
+          serviceRequest.status = newStatus;
+          console.log(`New status set: ${serviceRequest.status}`);
+  
+          await sendEmail({
+            email: customer.email,
+            subject: 'Service Request Accepted',
+            message: `Hello ${customer.name},\n\nYour service request to ${businessOwner.businessName} is now in progress. You can chat with the business now.`
+          });
+        }
       } else if (approvalStatus === "Declined") {
         await sendEmail({
           email: customer.email,
@@ -656,7 +664,7 @@ const BusinessOwnerService = {
       console.error(error);
       return { success: false, message: "Internal Server Error" };
     }
-  },
+  }
   
 };
 module.exports = BusinessOwnerService;

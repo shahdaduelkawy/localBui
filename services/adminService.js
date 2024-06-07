@@ -28,9 +28,8 @@ exports.searchUserByName = asyncHandler(async (req, res, next) => {
   
     // Return the number of users found along with the list of users
     res.status(200).json({ success: true, count: users.length, users });
-  });
-
-  exports.searchReviewsByContent = asyncHandler(async (req, res, next) => {
+});
+exports.searchReviewsByContent = asyncHandler(async (req, res, next) => {
     const { content } = req.query;
   
     try {
