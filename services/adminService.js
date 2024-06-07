@@ -136,10 +136,10 @@ exports.updateBusinessOwnerStatus = asyncHandler(async (businessId, newStatus, r
       let message;
       if (newStatus === 'rejected') {
           // If status is rejected, send rejection email
-          message = `Your business has been rejected because: ${reasonMessage}`;
+          message = `${user.name} Your business ${BusinessOwner.businessName} has been rejected because: ${reasonMessage}`;
       } else if (newStatus === 'accepted') {
           // If status is accepted, send acceptance email
-          message = `Congratulations! ${user.name} Your business has been accepted.`;
+          message = `Congratulations! ${user.name} Your business ${BusinessOwner.businessName}  has been accepted.`;
       }
 
       if (message) {
