@@ -123,6 +123,10 @@ const businessOwnerSchema = new mongoose.Schema(
         },
         timestamp: Date,
         userName: String,
+        Reported: {
+          type: String,
+          enum: ["yes", "no"], 
+        }
       },
     ],
     expirationDate: {

@@ -1,8 +1,10 @@
+/* eslint-disable no-undef */
 const express = require("express");
 
 const { categoryupload ,iconUpload} = require("../middleware/fileUpload.middleware");
 
 const {
+  updateReportedStatus,
   uploadIconImage,
   uploadCategoryImage,
   deleteCategory,
@@ -72,6 +74,24 @@ router.get("/searchUserByName", searchUserByName);
 router.get("/searchReviewsByContent", searchReviewsByContent);
 router.get("/searchbusinessByName/:businessName", searchbusinessByName);
 router.get("/searchbusinessByName", searchbusinessByName);
+
+
+router.post("/updateReportedStatus/:businessOwnerId/:reviewId",
+  authService.protect,
+  authService.allowedTo("admin", "subAdmin"), 
+  async (req, res) => {
+    const { businessOwnerId, reviewId } = req.params;
+    const { Reported } = req.body;
+
+    const result = await updateReportedStatus(businessOwnerId, reviewId, Reported);
+
+    if (result.success) {
+      res.status(200).json(result);
+    } else {
+      res.status(500).json(result);
+    }
+  }
+);
 
 router.put("/managebusinesses/:businessId",
   authService.protect,

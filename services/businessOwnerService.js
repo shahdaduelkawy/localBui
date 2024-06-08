@@ -420,25 +420,24 @@ const BusinessOwnerService = {
     try {
       // Find the business owner by ID
       const business = await BusinessOwner.findOne({ _id: businessId });
-
+  
       if (!business) {
         throw new Error("Business not found");
       }
-
+  
       // Get the reviews associated with the business
-      const { reviews } = business;
-
+      const reviews = business.reviews.filter(review => review.Reported === "no");
+  
       // Count the reviews
       const reviewCount = reviews.length;
-
+  
       // Return an object containing reviews and their count
-      return { reviews, reviewCount };
+      return { reviewCount,reviews };
     } catch (error) {
-      throw new Error(
-        `Error retrieving reviews for business: ${error.message}`
-      );
+      throw new Error(`Error retrieving reviews for business: ${error.message}`);
     }
   },
+  
   async addLogo(businessId, file) {
     try {
       const updateResult = await BusinessOwner.updateOne(

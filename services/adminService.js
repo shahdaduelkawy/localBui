@@ -229,3 +229,30 @@ exports.uploadIconImage = async (categoryId, iconPath) => {
     throw new Error(`Failed to upload Category icon: ${error.message}`);
   }
 };
+exports.updateReportedStatus = async (ownerID, reviewID, Reported) => {
+  try {
+    // Find the business owner by ID
+    const BusinessOwner = await businessOwner.findById(ownerID);
+    
+    if (!BusinessOwner) {
+      throw new Error("Business owner not found");
+    }
+
+    // Find the specific review by ID
+    const review = BusinessOwner.reviews.id(reviewID);
+    if (!review) {
+      throw new Error("Review not found");
+    }
+
+    // Update the Reported status to the provided value
+    review.Reported = Reported;
+
+    // Save the updated business owner document
+    await BusinessOwner.save();
+
+    // Return the updated review object
+    return { success: true, message: "Reported status updated successfully", review };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
