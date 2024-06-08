@@ -49,7 +49,7 @@ async function reportReview(reviewId, ownerID, customerId, status, reason) {
         const existingReport = await reportReviewModel.findOne({ reviewId, ownerID });
 
         if (existingReport) {
-            return { message: 'Report already submitted for this review.', existingReport };
+            return { message: 'Report already submitted for this review.', existingReport, businessId: businessOwner._id };
         }
 
         // If no existing report, create a new one
@@ -57,6 +57,7 @@ async function reportReview(reviewId, ownerID, customerId, status, reason) {
             reviewId,
             ownerID,
             customerId,
+            businessId: businessOwner._id, // Include the businessId
             businessName: businessOwner.businessName,
             customerName: user.name, // Use the name field from the User schema
             review: review.content,
@@ -65,7 +66,7 @@ async function reportReview(reviewId, ownerID, customerId, status, reason) {
         });
 
         await newReport.save();
-        return { message: 'Report submitted successfully.', newReport };
+        return { message: 'Report submitted successfully.', newReport, businessId: businessOwner._id };
     } catch (error) {
         console.error(`Error reporting review: ${error.message}`);
         return { success: false, message: `Error reporting review: ${error.message}` };

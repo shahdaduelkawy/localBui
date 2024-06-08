@@ -10,27 +10,27 @@ router.post("/:reviewId/:ownerID/:customerId", authService.protect, authService.
   const { status, reason } = req.body; // Extract reason from request body
 
   try {
-    const result = await reportReviewService.reportReview(
-      reviewId,
-      ownerID,
-      customerId,
-      status,
-      reason 
-    );
+      const result = await reportReviewService.reportReview(
+          reviewId,
+          ownerID,
+          customerId,
+          status,
+          reason 
+      );
 
-    // Check the result and send appropriate response
-    if (!result.success) {
-      return res.status(200).json({ msg: result.message });
-    }
+      // Check the result and send appropriate response
+      if (!result.success) {
+          return res.status(200).json({ msg: result.message });
+      }
 
-    if (result.message === "Report already submitted for this review.") {
-      return res.status(400).json({ error: result.message, existingReport: result.existingReport });
-    }
+      if (result.message === "Report already submitted for this review.") {
+          return res.status(400).json({ error: result.message, existingReport: result.existingReport, businessId: result.businessId });
+      }
 
-    res.status(201).json({ message: result.message, newReport: result.newReport });
+      res.status(201).json({ message: result.message, newReport: result.newReport, businessId: result.businessId });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: "Internal Server Error" });
+      console.error(error.message);
+      res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

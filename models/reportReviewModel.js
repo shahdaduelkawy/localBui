@@ -17,6 +17,11 @@ const reportReviewSchema = new mongoose.Schema({
         ref: 'Customer',
         required: true,
     },
+    businessId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "BusinessOwner", // Correct the reference model
+        required: true,
+    },
     businessName: {
         type: String,
         required: false,
@@ -34,13 +39,14 @@ const reportReviewSchema = new mongoose.Schema({
         enum: ['pending', 'approved', 'rejected'],
         default: 'pending',
     },
-    reason: { // Add the reason field
+    reason: {
         type: String,
         required: false,
     },
 }, {
     timestamps: true,
 });
+
 
 const ReportReview = mongoose.model('ReportReview', reportReviewSchema);
 
